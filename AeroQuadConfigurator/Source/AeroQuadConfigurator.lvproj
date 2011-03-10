@@ -149,8 +149,8 @@
 				<Item Name="3DMathPlot Action String.vi" Type="VI" URL="/&lt;vilib&gt;/Math Plots/3D Math Plots/3D Plot/Action String/3DMathPlot Action String.vi"/>
 				<Item Name="Version To Dotted String.vi" Type="VI" URL="/&lt;vilib&gt;/_xctls/Version To Dotted String.vi"/>
 				<Item Name="TDMSFileViewer_LaunchHelp.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tdmsutil.llb/TDMSFileViewer_LaunchHelp.vi"/>
-				<Item Name="ex_CorrectErrorChain.vi" Type="VI" URL="/&lt;vilib&gt;/express/express shared/ex_CorrectErrorChain.vi"/>
 				<Item Name="subFile Dialog.vi" Type="VI" URL="/&lt;vilib&gt;/express/express input/FileDialogBlock.llb/subFile Dialog.vi"/>
+				<Item Name="ex_CorrectErrorChain.vi" Type="VI" URL="/&lt;vilib&gt;/express/express shared/ex_CorrectErrorChain.vi"/>
 			</Item>
 			<Item Name="Advapi32.dll" Type="Document" URL="Advapi32.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
@@ -158,7 +158,7 @@
 			<Item Name="kernel32.dll" Type="Document" URL="kernel32.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
-			<Item Name="lvanlys.dll" Type="Document" URL="../../../../../../../../Program Files (x86)/National Instruments/LabVIEW 2010/resource/lvanlys.dll"/>
+			<Item Name="lvanlys.dll" Type="Document" URL="../../../../../../../Program Files/National Instruments/LabVIEW 2010/resource/lvanlys.dll"/>
 			<Item Name="_LaunchHelp.vi" Type="VI" URL="/&lt;helpdir&gt;/_LaunchHelp.vi"/>
 		</Item>
 		<Item Name="Build Specifications" Type="Build">
@@ -221,8 +221,8 @@ Copyright 2010 AeroQuad</Property>
 				<Property Name="Destination[1].type" Type="Str">userFolder</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
 				<Property Name="DistPart[0].flavorID" Type="Str">DefaultFull</Property>
-				<Property Name="DistPart[0].productID" Type="Str">{6E0A9556-A848-4738-B4DB-468DF8F5EF37}</Property>
-				<Property Name="DistPart[0].productName" Type="Str">NI LabVIEW Run-Time Engine 2010</Property>
+				<Property Name="DistPart[0].productID" Type="Str">{4C1F4C94-7160-4A79-8BE3-4BACCFDE93DF}</Property>
+				<Property Name="DistPart[0].productName" Type="Str">NI LabVIEW Run-Time Engine 2010 SP1</Property>
 				<Property Name="DistPart[0].SoftDep[0].dependencyKey" Type="Str">CKBAAA.0F43CCE4_740B_4105_AC08_F3BD68B9A8BE</Property>
 				<Property Name="DistPart[0].SoftDep[0].productName" Type="Str">NI System Web Server 1.0.1</Property>
 				<Property Name="DistPart[0].SoftDep[1].dependencyKey" Type="Str">EKBAAA.0F43CCE4_740B_4105_AC08_F3BD68B9A8BE</Property>
@@ -251,7 +251,7 @@ Copyright 2010 AeroQuad</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
 				<Property Name="INST_productVersion" Type="Str">2.6.11</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
-				<Property Name="InstSpecVersion" Type="Str">9018011</Property>
+				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
 				<Property Name="MSI_arpContact" Type="Str">Ted Carancho</Property>
 				<Property Name="MSI_arpURL" Type="Str">http://www.AeroQuad.com</Property>
@@ -317,7 +317,7 @@ Copyright 2010 AeroQuad</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
 				<Property Name="INST_productVersion" Type="Str">2.6.9</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
-				<Property Name="InstSpecVersion" Type="Str">9018011</Property>
+				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
 				<Property Name="MSI_arpContact" Type="Str">Ted Carancho</Property>
 				<Property Name="MSI_arpURL" Type="Str">http://www.AeroQuad.com</Property>
