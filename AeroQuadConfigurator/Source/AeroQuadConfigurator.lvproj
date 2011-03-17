@@ -158,7 +158,7 @@
 			<Item Name="kernel32.dll" Type="Document" URL="kernel32.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
-			<Item Name="lvanlys.dll" Type="Document" URL="../../../../../../../../Program Files (x86)/National Instruments/LabVIEW 2010/resource/lvanlys.dll"/>
+			<Item Name="lvanlys.dll" Type="Document" URL="../../../../../../../Program Files/National Instruments/LabVIEW 2010/resource/lvanlys.dll"/>
 			<Item Name="_LaunchHelp.vi" Type="VI" URL="/&lt;helpdir&gt;/_LaunchHelp.vi"/>
 		</Item>
 		<Item Name="Build Specifications" Type="Build">
@@ -175,7 +175,6 @@
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_supportedLanguage[0]" Type="Str">English</Property>
 				<Property Name="Bld_supportedLanguageCount" Type="Int">1</Property>
-				<Property Name="Bld_targetDestDir" Type="Path"></Property>
 				<Property Name="Destination[0].destName" Type="Str">AeroQuadConfigurator.app</Property>
 				<Property Name="Destination[0].path" Type="Path">../Executable/NI_AB_PROJECTNAME.exe</Property>
 				<Property Name="Destination[0].type" Type="Str">App</Property>
@@ -185,7 +184,7 @@
 				<Property Name="Destination[2].path" Type="Path">../Executable</Property>
 				<Property Name="DestinationCount" Type="Int">3</Property>
 				<Property Name="Exe_iconItemID" Type="Ref">/My Computer/Icon/transparent icon.ico</Property>
-				<Property Name="Source[0].itemID" Type="Str">{AE3B1FEE-C0D9-4713-958B-2F2FB7F4E866}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{84AE75A8-FECB-4599-B2E0-F5C8A6A83D3A}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/AeroQuadConfigurator.ini</Property>
 				<Property Name="Source[1].sourceInclusion" Type="Str">Include</Property>
