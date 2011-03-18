@@ -232,7 +232,7 @@
 				<Property Name="TgtF_fileDescription" Type="Str">Executable
 2.7.0.0
 Copyright 2011 AeroQuad</Property>
-				<Property Name="TgtF_fileVersion.build" Type="Int">2</Property>
+				<Property Name="TgtF_fileVersion.build" Type="Int">3</Property>
 				<Property Name="TgtF_fileVersion.major" Type="Int">2</Property>
 				<Property Name="TgtF_fileVersion.minor" Type="Int">7</Property>
 				<Property Name="TgtF_internalName" Type="Str">Executable</Property>
@@ -284,7 +284,7 @@ Copyright 2011 AeroQuad</Property>
 				<Property Name="INST_buildSpecName" Type="Str">Installer</Property>
 				<Property Name="INST_defaultDir" Type="Str">{911FD540-AAC1-4ACE-952C-14E573DC1E9B}</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="INST_productVersion" Type="Str">2.7.2</Property>
+				<Property Name="INST_productVersion" Type="Str">2.7.4</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
 				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
@@ -293,7 +293,8 @@ Copyright 2011 AeroQuad</Property>
 				<Property Name="MSI_distID" Type="Str">{AC943C01-8EA8-4BFF-A46F-CC5E452DF24E}</Property>
 				<Property Name="MSI_osCheck" Type="Int">0</Property>
 				<Property Name="MSI_upgradeCode" Type="Str">{24029CB6-D54A-4D61-8023-884E5516E281}</Property>
-				<Property Name="MSI_windowMessage" Type="Str">Thanks for using the AeroQuad Configurator.  The Configurator is used to setup your AeroQuad.  If you have any questions or suggestions for improvement for the Configurator, please post them at http://AeroQuad.com</Property>
+				<Property Name="MSI_windowMessage" Type="Str">Thanks for using the AeroQuad Configurator.  The Configurator is used to setup your AeroQuad.  If you have any questions or suggestions for improvement for the Configurator, please post them at:
+http://AeroQuad.com</Property>
 				<Property Name="MSI_windowTitle" Type="Str">AeroQuad Configurator</Property>
 				<Property Name="RegDest[0].dirName" Type="Str">Software</Property>
 				<Property Name="RegDest[0].dirTag" Type="Str">{DDFAFC8B-E728-4AC8-96DE-B920EBB97A86}</Property>
