@@ -232,7 +232,7 @@
 				<Property Name="TgtF_fileDescription" Type="Str">Executable
 2.7.0.0
 Copyright 2011 AeroQuad</Property>
-				<Property Name="TgtF_fileVersion.build" Type="Int">3</Property>
+				<Property Name="TgtF_fileVersion.build" Type="Int">4</Property>
 				<Property Name="TgtF_fileVersion.major" Type="Int">2</Property>
 				<Property Name="TgtF_fileVersion.minor" Type="Int">7</Property>
 				<Property Name="TgtF_internalName" Type="Str">Executable</Property>
@@ -256,21 +256,17 @@ Copyright 2011 AeroQuad</Property>
 				<Property Name="DistPart[0].productName" Type="Str">NI LabVIEW Run-Time Engine 2010 SP1</Property>
 				<Property Name="DistPart[0].SoftDep[0].dependencyKey" Type="Str">CKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
 				<Property Name="DistPart[0].SoftDep[0].productName" Type="Str">NI System Web Server 1.1</Property>
-				<Property Name="DistPart[0].SoftDep[1].dependencyKey" Type="Str">DKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[1].productName" Type="Str">Math Kernel Libraries</Property>
-				<Property Name="DistPart[0].SoftDep[2].dependencyKey" Type="Str">EKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[2].productName" Type="Str">NI_Logos_5.2.1</Property>
-				<Property Name="DistPart[0].SoftDep[3].dependencyKey" Type="Str">FKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[3].productName" Type="Str">NI TDM Streaming 2.2</Property>
-				<Property Name="DistPart[0].SoftDep[4].dependencyKey" Type="Str">GKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[4].productName" Type="Str">NI LabVIEW 2010 Run-Time Engine Web Server</Property>
-				<Property Name="DistPart[0].SoftDep[5].dependencyKey" Type="Str">HKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[5].productName" Type="Str">NI LabVIEW 2010 Real-Time NBFifo</Property>
-				<Property Name="DistPart[0].SoftDep[6].dependencyKey" Type="Str">JKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[6].productName" Type="Str">NI SSL Support</Property>
-				<Property Name="DistPart[0].SoftDep[7].dependencyKey" Type="Str">KKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[7].productName" Type="Str">NI Web Application Server 1.1</Property>
-				<Property Name="DistPart[0].SoftDepCount" Type="Int">8</Property>
+				<Property Name="DistPart[0].SoftDep[1].dependencyKey" Type="Str">EKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
+				<Property Name="DistPart[0].SoftDep[1].productName" Type="Str">NI_Logos_5.2.1</Property>
+				<Property Name="DistPart[0].SoftDep[2].dependencyKey" Type="Str">GKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
+				<Property Name="DistPart[0].SoftDep[2].productName" Type="Str">NI LabVIEW 2010 Run-Time Engine Web Server</Property>
+				<Property Name="DistPart[0].SoftDep[3].dependencyKey" Type="Str">HKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
+				<Property Name="DistPart[0].SoftDep[3].productName" Type="Str">NI LabVIEW 2010 Real-Time NBFifo</Property>
+				<Property Name="DistPart[0].SoftDep[4].dependencyKey" Type="Str">JKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
+				<Property Name="DistPart[0].SoftDep[4].productName" Type="Str">NI SSL Support</Property>
+				<Property Name="DistPart[0].SoftDep[5].dependencyKey" Type="Str">KKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
+				<Property Name="DistPart[0].SoftDep[5].productName" Type="Str">NI Web Application Server 1.1</Property>
+				<Property Name="DistPart[0].SoftDepCount" Type="Int">6</Property>
 				<Property Name="DistPart[0].upgradeCode" Type="Str">{9F6EADB1-707C-41AF-8F3D-FB856FA8BD1C}</Property>
 				<Property Name="DistPart[1].flavorID" Type="Str">_deployment_</Property>
 				<Property Name="DistPart[1].productID" Type="Str">{85BA3FCF-AA00-4151-B97D-84A221E8198A}</Property>
@@ -284,7 +280,7 @@ Copyright 2011 AeroQuad</Property>
 				<Property Name="INST_buildSpecName" Type="Str">Installer</Property>
 				<Property Name="INST_defaultDir" Type="Str">{911FD540-AAC1-4ACE-952C-14E573DC1E9B}</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="INST_productVersion" Type="Str">2.7.4</Property>
+				<Property Name="INST_productVersion" Type="Str">2.7.6</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
 				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
@@ -351,7 +347,7 @@ http://AeroQuad.com</Property>
 				<Property Name="INST_buildSpecName" Type="Str">Updater</Property>
 				<Property Name="INST_defaultDir" Type="Str">{911FD540-AAC1-4ACE-952C-14E573DC1E9B}</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="INST_productVersion" Type="Str">2.6.9</Property>
+				<Property Name="INST_productVersion" Type="Str">2.7.6</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
 				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
@@ -360,7 +356,8 @@ http://AeroQuad.com</Property>
 				<Property Name="MSI_distID" Type="Str">{C4477131-6271-4257-B5A0-868DA892ED61}</Property>
 				<Property Name="MSI_osCheck" Type="Int">0</Property>
 				<Property Name="MSI_upgradeCode" Type="Str">{70753F99-9091-4EE6-9377-3EF9476BEA88}</Property>
-				<Property Name="MSI_windowMessage" Type="Str">Thanks for using the AeroQuad Configurator.  The Configurator is used to setup your AeroQuad.  If you have any questions or suggestions for improvement for the Configurator, please post them at http://AeroQuad.com/forum.php</Property>
+				<Property Name="MSI_windowMessage" Type="Str">Thanks for using the AeroQuad Configurator.  The Configurator is used to setup your AeroQuad.  If you have any questions or suggestions for improvement for the Configurator, please post them at:
+http://AeroQuad.com/forum.php</Property>
 				<Property Name="MSI_windowTitle" Type="Str">AeroQuad Configurator</Property>
 				<Property Name="RegDest[0].dirName" Type="Str">Software</Property>
 				<Property Name="RegDest[0].dirTag" Type="Str">{DDFAFC8B-E728-4AC8-96DE-B920EBB97A86}</Property>
