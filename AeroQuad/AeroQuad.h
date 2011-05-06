@@ -24,10 +24,10 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.4
+#define VERSION 3.0
 
-//#define BAUD 115200
-#define BAUD 111111 // use this to be compatible with USB and XBee connections
+#define BAUD 115200
+//#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
@@ -51,28 +51,6 @@
   #define LED2PIN 12
   #define LED3PIN 12
 #endif
-
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
 
 // PID Variables
 struct PIDdata {
@@ -111,27 +89,27 @@ float smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-#define AZPIN 12 // Auto zero pin for IDG500 gyros
+
 
 // Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-#if defined(plusConfig) || defined(XConfig)
-  #define LASTMOTOR 4
-#endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#endif
+//#define FRONT 0
+//#define REAR 1
+//#define RIGHT 2
+//#define LEFT 3
+//#define MOTORID1 0		
+//#define MOTORID2 1		
+//#define MOTORID3 2		
+//#define MOTORID4 3		
+//#define MOTORID5 4		
+//#define MOTORID6 5
+//#define MINCOMMAND 1000
+//#define MAXCOMMAND 2000
+//#if defined(plusConfig) || defined(XConfig)
+//  #define LASTMOTOR 4
+//#endif
+//#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
+//  #define LASTMOTOR 6
+//#endif
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -148,7 +126,7 @@ float aref; // Read in from EEPROM
 byte flightMode;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-#define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
+
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
@@ -197,25 +175,8 @@ float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
-#define LASTCHANNEL 6
+//// Receiver variables
 int delta;
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float timeConstant;
@@ -322,9 +283,9 @@ byte testSignal = LOW;
 #define XMITFACTOR_ADR 48
 #define GYROSMOOTH_ADR 52
 #define ACCSMOOTH_ADR 56
-#define LEVELPITCHCAL_ADR 60
-#define LEVELROLLCAL_ADR 64
-#define LEVELZCAL_ADR 68
+#define ACCEL_XAXIS_ZERO_ADR 60
+#define ACCEL_YAXIS_ZERO_ADR 64
+#define ACCEL_ZAXIS_ZERO_ADR 68
 #define FILTERTERM_ADR 72
 #define NVM_TRANSMITTER_SCALE_OFFSET_SMOOTH 76  // needs 8 channel with 3 entries of float (4 byte) -> 96 byte
 #define PITCH_PID_GAIN_ADR 172
@@ -337,7 +298,7 @@ byte testSignal = LOW;
 #define LEVEL_GYRO_PITCH_PID_GAIN_ADR 236
 #define HEADINGHOLD_ADR 248
 #define MINACRO_ADR 252
-#define ACCEL1G_ADR 256
+#define ACCEL_ONE_G_ADR 256
 #define ALTITUDE_PGAIN_ADR 260
 #define ALTITUDE_IGAIN_ADR 264
 #define ALTITUDE_DGAIN_ADR 268
@@ -370,39 +331,63 @@ byte testSignal = LOW;
 #define GYRO_PITCH_ZERO_ADR 376
 #define GYRO_YAW_ZERO_ADR 380
 
-float arctan2(float y, float x); // defined in Sensors.pde
-float readFloat(int address); // defined in DataStorage.h
-void writeFloat(float value, int address); // defined in DataStorage.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-//void calibrateESC(void); // defined in FlightControl.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
-void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void sendBinaryFloat(float); // defined in SerialCom.pde
-void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
-void fastTelemetry(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
+// defined in DataStorage.h
+float readFloat(int address); 
+void writeFloat(float value, int address); 
+void readEEPROM(void); 
+void initSensorsZeroFromEEPROM(void);
+void storeSensorsZeroToEEPROM(void);
+void initReceiverFromEEPROM(void);
+//////////////////////////////////////////////////////
+
+// defined in FlightCommand.pde
+void readPilotCommands(void); 
+//////////////////////////////////////////////////////
+
+// defined in FlightControl.pde Flight control needed
+int motorAxisCommandRoll = 0;
+int motorAxisCommandPitch = 0;
+int motorAxisCommandYaw = 0;
+
+#if defined XConfig || defined plusConfig 
+  int motorMinCommand[4];
+  int motorMaxCommand[4];
+#endif  
+
+
+void calculateFlightError();
+void processHeading();
+void processAltitudeHold();
+void processMinMaxMotorCommand();
+void processCalibrateESC();
+//////////////////////////////////////////////////////
+
+//defined in SerialCom.pde
+void readSerialCommand(void);
+void sendSerialTelemetry(void);
+void printInt(int data);
+float readFloatSerial(void);
+void sendBinaryFloat(float);
+void sendBinaryuslong(unsigned long);
+void fastTelemetry(void);
+void comma(void);
+//////////////////////////////////////////////////////
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
+  float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
+ int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
-extern int  __bss_end; // used by freemem 
-extern int  *__brkval; // used by freemem
-int freemem(){
-    int free_memory;
-    if((int)__brkval == 0)
-        free_memory = ((int)&free_memory) - ((int)&__bss_end);
-    else
-        free_memory = ((int)&free_memory) - ((int)__brkval);
-    return free_memory;
-}
+//extern int  __bss_end; // used by freemem 
+//extern int  *__brkval; // used by freemem
+//int freemem(){
+//    int free_memory;
+//    if((int)__brkval == 0)
+//        free_memory = ((int)&free_memory) - ((int)&__bss_end);
+//    else
+//        free_memory = ((int)&free_memory) - ((int)__brkval);
+//    return free_memory;
+//}
 
