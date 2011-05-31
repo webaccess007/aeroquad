@@ -40,7 +40,10 @@ void readPilotCommands() {
     if ((receiver->getData(YAW) < MINCHECK) && (receiver->getData(ROLL) > MAXCHECK) && (receiver->getData(PITCH) < MINCHECK)) {
       gyro->calibrate(); // defined in Gyro.h
       accel->calibrate(); // defined in Accel.h
-      storeSensorsZeroToEEPROM();
+      //accel.setOneG(accel.getFlightData(ZAXIS));
+      #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
+        _flightAngle->calibrate();
+      #endif
       zeroIntegralError();
       motors->pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
@@ -55,8 +58,9 @@ void readPilotCommands() {
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
       digitalWrite(LED_Red, HIGH);
       #endif
-      for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+      for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorMinCommand[motor] = MINTHROTTLE;
+      }
       //   delay(100);
       //altitude.measureGround();
     }
@@ -107,10 +111,11 @@ void readPilotCommands() {
    if (receiver->getData(AUX) < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
-         holdAltitude = altitude.getData();
+         holdAltitude = barometricSensor->getAltitude();
          holdThrottle = receiver->getData(THROTTLE);
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
+         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
          storeAltitude = OFF;
        }
        altitudeHold = ON;

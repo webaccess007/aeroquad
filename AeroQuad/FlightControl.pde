@@ -28,47 +28,21 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
-
-
-float previousRollError = 0;
-float previousPitchError = 0;
-boolean isErrorSwitched(float previousError, float currentError) {
-  if ( (previousError > 0 &&  currentError < 0) ||
-       (previousError < 0 &&  currentError > 0)) {
-    return true;
-  }
-  return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// calculateFlightError /////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), flightAngle->getGyroUnbias(ROLL), &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -flightAngle->getGyroUnbias(PITCH), &PID[PITCH]);
+    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]);
   }
   else {
     
-    // Roll error correction
-    float receiverRoll = (receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING;
-    float rollError = receiverRoll - flightAngle->getData(ROLL);
-    float rollAttitudeCmd = updatePID(receiverRoll, flightAngle->getData(ROLL), &PID[LEVELROLL]);
-    if (isErrorSwitched(previousRollError,rollError)) {
-      PID[LEVELROLL].integratedError = 0.0;  // reset the integrated error to prevent overshooting
-    }
-    previousRollError = rollError;
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]);    
-    
-    // Pitch error correction
-    float pitchError = (receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING;
-    float pitchAttitudeCmd = updatePID(pitchError, -flightAngle->getData(PITCH), &PID[LEVELPITCH]);
-    if (isErrorSwitched(previousPitchError,pitchError)) {
-      PID[LEVELPITCH].integratedError = 0.0;  // reset the integrated error to prevent overshooting
-    }
-    previousPitchError = pitchError;
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]);
+  float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, kinematics->getData(ROLL), &PID[LEVELROLL]);
+  float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -kinematics->getData(PITCH), &PID[LEVELPITCH]);
+  motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
+  motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
+//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
+//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
+
   }
 }
 
@@ -79,20 +53,20 @@ void processCalibrateESC(void)
 {
   switch (calibrateESC) { // used for calibrating ESC's
   case 1:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, MAXCOMMAND);
     break;
   case 3:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, constrain(testCommand, 1000, 1200));
     break;
   case 5:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), 1000, 1200));
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
+      motors->setMotorCommand(motor, constrain(motorConfiguratorCommand[motor], 1000, 1200));
     safetyCheck = ON;
     break;
   default:
-    for (byte motor = FRONT; motor < LASTMOTOR; motor++)
+    for (byte motor = 0; motor < LASTMOTOR; motor++)
       motors->setMotorCommand(motor, MINCOMMAND);
   }
   // Send calibration commands to motors
@@ -107,7 +81,7 @@ void processHeading(void)
   if (headingHoldConfig == ON) {
 
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      heading = degrees(flightAngle->getHeading(YAW));
+      heading = degrees(kinematics->getHeading(YAW));
     #else
       heading = degrees(gyro->getHeading());
     #endif
@@ -178,7 +152,7 @@ void processAltitudeHold(void)
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
   if (altitudeHold == ON) {
-    throttleAdjust = updatePID(holdAltitude, altitude.getData(), &PID[ALTITUDE]);
+    throttleAdjust = updatePID(holdAltitude, barometricSensor->getAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
     if (abs(holdThrottle - receiver->getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
@@ -203,48 +177,6 @@ void processAltitudeHold(void)
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
   throttle = receiver->getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processMinMaxMotorCommand ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processMinMaxMotorCommand(void)
-{
-  // Prevents too little power applied to motors during hard manuevers
-  // Also provides even motor power on both sides if limit encountered
-  if ((motors->getMotorCommand(FRONT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR) <= MINTHROTTLE)){
-    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[RIGHT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[LEFT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if ((motors->getMotorCommand(FRONT) >= MAXCOMMAND) || (motors->getMotorCommand(REAR) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[RIGHT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[LEFT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[RIGHT] = MAXCOMMAND;
-    motorMaxCommand[LEFT] = MAXCOMMAND;
-    motorMinCommand[RIGHT] = MINTHROTTLE;
-    motorMinCommand[LEFT] = MINTHROTTLE;
-  }
-
-  if ((motors->getMotorCommand(LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(RIGHT) <= MINTHROTTLE)){
-    delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[FRONT] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[REAR] = constrain(receiver->getData(THROTTLE) + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if ((motors->getMotorCommand(LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(RIGHT) >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[FRONT] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[REAR] = constrain(receiver->getData(THROTTLE) - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[FRONT] = MAXCOMMAND;
-    motorMaxCommand[REAR] = MAXCOMMAND;
-    motorMinCommand[FRONT] = MINTHROTTLE;
-    motorMinCommand[REAR] = MINTHROTTLE;
-  }
 }
 
 #endif //#define _AQ_PROCESS_FLIGHT_CONTROL_H_
