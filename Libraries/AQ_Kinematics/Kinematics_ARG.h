@@ -49,6 +49,8 @@
 
 #include "Kinematics.h"
 
+#include <AQMath.h>
+
 class Kinematics_ARG : public Kinematics {
 private:
   float Kp;                   // proportional gain governs rate of convergence to accelerometer/magnetometer
@@ -56,19 +58,10 @@ private:
   float halfT;                // half the sample period
   float q0, q1, q2, q3;       // quaternion elements representing the estimated orientation
   float exInt, eyInt, ezInt;  // scaled integral error
-
-  
   
   float previousEx;
   float previousEy;
   float previousEz;
-  boolean isErrorSwitched(float previousError, float currentError) {
-    if ( (previousError > 0 &&  currentError < 0) ||
-         (previousError < 0 &&  currentError > 0)) {
-      return true;
-    }
-    return false;
-  }
   
   ////////////////////////////////////////////////////////////////////////////////
   // argUpdate
@@ -105,18 +98,20 @@ private:
     // integral error scaled integral gain
 	
     exInt = exInt + ex*Ki;
-    eyInt = eyInt + ey*Ki;
-    ezInt = ezInt + ez*Ki;
-	if (isErrorSwitched(previousEx,ex)) {
+	if (isSwitched(previousEx,ex)) {
 	  exInt = 0;
 	}
-	previousEx = ey;
-	if (isErrorSwitched(previousEx,ey)) {
-	  exInt = 0;
+	previousEx = ex;
+	
+	eyInt = eyInt + ey*Ki;
+	if (isSwitched(previousEy,ey)) {
+	  eyInt = 0;
 	}
 	previousEy = ey;
-	if (isErrorSwitched(previousEx,ez)) {
-	  exInt = 0;
+	
+	ezInt = ezInt + ez*Ki;
+	if (isSwitched(previousEz,ez)) {
+	  ezInt = 0;
 	}
 	previousEz = ez;
 	
@@ -184,7 +179,6 @@ public:
     previousEx = 0;
     previousEy = 0;
     previousEz = 0;
-
 
     Kp = 0.2; // 2.0;
     Ki = 0.0005; //0.005;
