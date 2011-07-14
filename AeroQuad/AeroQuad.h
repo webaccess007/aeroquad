@@ -363,6 +363,13 @@ void processAltitudeHold();
 void processCalibrateESC();
 void processFlightControl();
 void processAltitudeHold();
+
+
+unsigned long lastSampleTime;
+float accelSample[3];
+float gyroSample[3];
+float sampleCount;
+
 //////////////////////////////////////////////////////
 
 //defined in SerialCom.pde

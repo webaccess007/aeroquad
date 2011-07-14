@@ -31,12 +31,12 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -60,8 +60,8 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 
@@ -266,8 +266,16 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+    if ((currentTime - lastSampleTime) > 2000){
+      lastSampleTime = currentTime;
+      gyro->measure();
+      accel->measure();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += accel->getMeterPerSec(i);
+        gyroSample[i] += gyro->getRadPerSec(i);
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -319,8 +327,16 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+        if ((currentTime - lastSampleTime) > 2000){
+      lastSampleTime = currentTime;
+      gyro->measure();
+      accel->measure();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += accel->getMeterPerSec(i);
+        gyroSample[i] += gyro->getRadPerSec(i);
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -439,8 +455,16 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+        if ((currentTime - lastSampleTime) > 2000){
+      lastSampleTime = currentTime;
+      gyro->measure();
+      accel->measure();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += accel->getMeterPerSec(i);
+        gyroSample[i] += gyro->getRadPerSec(i);
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -1081,10 +1105,13 @@ void setup() {
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
-  
+
+  if (sensorLoop == ON) {
+    measureCriticalSensors();
+  }
+
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
-
     #ifdef DEBUG_LOOP
       testSignal ^= HIGH;
       digitalWrite(LEDPIN, testSignal);
@@ -1104,16 +1131,14 @@ void loop () {
       hundredHZpreviousTime = currentTime;
       
       if (sensorLoop == ON) {
-        measureCriticalSensors();
-        
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          kinematics->calculate(gyro->getRadPerSec(ROLL),                       
-                                 gyro->getRadPerSec(PITCH),                      
-                                 gyro->getRadPerSec(YAW),                        
-                                 accel->getMeterPerSec(XAXIS),                   
-                                 accel->getMeterPerSec(YAXIS),                   
-                                 accel->getMeterPerSec(ZAXIS),                   
+          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
+                                 gyroSample[YAXIS]/sampleCount,                   
+                                 gyroSample[ZAXIS]/sampleCount,                        
+                                 accelSample[XAXIS]/sampleCount,                   
+                                 accelSample[YAXIS]/sampleCount,                   
+                                 accelSample[ZAXIS]/sampleCount,                   
                                  compass->getRawData(XAXIS),                      
                                  compass->getRawData(YAXIS),                     
                                  compass->getRawData(ZAXIS),
@@ -1121,12 +1146,12 @@ void loop () {
         #endif
       
         #if defined FlightAngleARG
-          kinematics->calculate(gyro->getRadPerSec(ROLL),                       
-                                 gyro->getRadPerSec(PITCH),                      
-                                 gyro->getRadPerSec(YAW),                        
-                                 accel->getMeterPerSec(XAXIS),                   
-                                 accel->getMeterPerSec(YAXIS),                   
-                                 accel->getMeterPerSec(ZAXIS),                   
+          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
+                                 gyroSample[YAXIS]/sampleCount,                   
+                                 gyroSample[ZAXIS]/sampleCount,                   
+                                 accelSample[XAXIS]/sampleCount,                   
+                                 accelSample[YAXIS]/sampleCount,                   
+                                 accelSample[ZAXIS]/sampleCount,                   
                                  0.0,                                            
                                  0.0,                                            
                                  0.0,
@@ -1134,12 +1159,12 @@ void loop () {
         #endif
 
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyro->getRadPerSec(ROLL),                       
-                                 gyro->getRadPerSec(PITCH),                      
-                                 gyro->getRadPerSec(YAW),                        
-                                 accel->getMeterPerSec(XAXIS),                   
-                                 accel->getMeterPerSec(YAXIS),                   
-                                 accel->getMeterPerSec(ZAXIS),                   
+          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
+                                 gyroSample[YAXIS]/sampleCount,                   
+                                 gyroSample[ZAXIS]/sampleCount,                   
+                                 accelSample[XAXIS]/sampleCount,                   
+                                 accelSample[YAXIS]/sampleCount,                   
+                                 accelSample[ZAXIS]/sampleCount,                   
                                  accel->getOneG(),                              
                                  compass->getHdgXY(XAXIS),                        
                                  compass->getHdgXY(YAXIS),
@@ -1147,17 +1172,22 @@ void loop () {
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyro->getRadPerSec(ROLL),                        
-                                 gyro->getRadPerSec(PITCH),                       
-                                 gyro->getRadPerSec(YAW),                         
-                                 accel->getMeterPerSec(XAXIS),                    
-                                 accel->getMeterPerSec(YAXIS),                    
-                                 accel->getMeterPerSec(ZAXIS),                    
+          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
+                                 gyroSample[YAXIS]/sampleCount,                   
+                                 gyroSample[ZAXIS]/sampleCount,                        
+                                 accelSample[XAXIS]/sampleCount,                   
+                                 accelSample[YAXIS]/sampleCount,                   
+                                 accelSample[ZAXIS]/sampleCount,                   
                                  accel->getOneG(),                               
                                  0.0,                                             
                                  0.0,
                                  G_Dt);
         #endif
+        for (int i = 0; i < LASTAXIS;i++) {
+          accelSample[i] = 0.0;
+          gyroSample[i] = 0.0;
+        }
+        sampleCount = 0.0;
       }
       
       // Combines external pilot commands and measured sensor data to generate motor commands
