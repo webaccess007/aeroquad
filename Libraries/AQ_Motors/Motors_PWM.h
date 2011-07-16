@@ -38,23 +38,32 @@
   #define MOTORPIN1    9
   #define MOTORPIN2   10
   #define MOTORPIN3   11
+  #define MOTORPIN4   10  // @todo Kenny : fix this for 328 with PPM encorer as receiver
+  #define MOTORPIN5   11  // @todo Kenny : fix this for 328 with PPM encorer as receiver 
 #endif
 
 class Motors_PWM : public Motors {
+private:
+  NB_Motors numbersOfMotors;
 public:
 
   Motors_PWM() {
   }
 
   void initialize(NB_Motors numbers) {
+    numbersOfMotors = numbers;
     commandAllMotors(1000);
   }
 
   void write() {
     analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
-    analogWrite(MOTORPIN1, motorCommand[MOTOR2]  / 8);
+    analogWrite(MOTORPIN1, motorCommand[MOTOR2] / 8);
     analogWrite(MOTORPIN2, motorCommand[MOTOR3] / 8);
-    analogWrite(MOTORPIN3, motorCommand[MOTOR4]  / 8); 
+    analogWrite(MOTORPIN3, motorCommand[MOTOR4] / 8); 
+	if (numbersOfMotors == SIX_Motors) {
+	  analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
+      analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
+    }
   }
 
   void commandAllMotors(int command) {
@@ -62,6 +71,10 @@ public:
     analogWrite(MOTORPIN1, command / 8);
     analogWrite(MOTORPIN2, command / 8);
     analogWrite(MOTORPIN3, command / 8);
+	if (numbersOfMotors == SIX_Motors) {
+	  analogWrite(MOTORPIN4, command / 8);
+      analogWrite(MOTORPIN5, command / 8);
+    }
   }  
 };
 

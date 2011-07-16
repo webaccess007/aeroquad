@@ -46,12 +46,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
 //#define triConfig
 //#define quadY4
+#define hexY6Config
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -60,8 +61,8 @@
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 
@@ -455,7 +456,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-        if ((currentTime - lastSampleTime) > 2000){
+    if ((currentTime - lastSampleTime) > 2000){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -527,8 +528,16 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+    if ((currentTime - lastSampleTime) > 10000){
+      lastSampleTime = currentTime;
+      gyro->measure();
+      accel->measure();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += accel->getMeterPerSec(i);
+        gyroSample[i] += gyro->getRadPerSec(i);
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -871,7 +880,12 @@ Kinematics *kinematics = &tempKinematics;
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined triConfig// || defined quadY4
+#if defined hexY6Config
+  #include <Motors.h>        // @todo Kenny : remove this and use PWM_timer
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#elif defined triConfig// || defined quadY4
   #include <Motors.h>
   #include <Motors_PWM_Tri.h>
   Motors_PWM_Tri motorsSpecific;
@@ -968,6 +982,8 @@ Kinematics *kinematics = &tempKinematics;
   #include "FlightControlTriMode.h"
 #elif defined quadY4
   #include "FlightControlQuadY4.h"
+#elif defined hexY6Config
+  #include "FlightControlHexY6.h"  
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -1002,7 +1018,7 @@ void setup() {
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4)
      motors->initialize(); 
-  #elif defined(hexPlusConfig) || defined(hexXConfig)
+  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      motors->initialize(SIX_Motors); 
   #endif
 
@@ -1193,8 +1209,8 @@ void loop () {
       // Combines external pilot commands and measured sensor data to generate motor commands
       if (controlLoop == ON) {
         processFlightControl();
-      } 
-
+      }
+  
       #ifdef BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog

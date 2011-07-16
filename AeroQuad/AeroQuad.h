@@ -350,7 +350,7 @@ int motorAxisCommandYaw = 0;
   int motorMaxCommand[4];
   int motorMinCommand[4];
   int motorConfiguratorCommand[4];
-#elif defined hexXConfig || defined hexPlusConfig
+#elif defined hexXConfig || defined hexPlusConfig || defined hexY6Config
   int motorMaxCommand[6];
   int motorMinCommand[6];
   int motorConfiguratorCommand[6];

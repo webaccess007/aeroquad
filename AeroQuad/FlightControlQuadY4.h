@@ -22,9 +22,9 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_Y4_MODE_H_
 
 #define FRONT_LEFT  MOTOR1
-#define REAR_1      MOTOR2
+#define REAR_2      MOTOR2
 #define FRONT_RIGHT MOTOR3
-#define REAR_2      MOTOR4
+#define REAR_1      MOTOR4
 #define LASTMOTOR   MOTOR4+1
 
 //#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
