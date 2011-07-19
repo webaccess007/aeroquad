@@ -31,12 +31,12 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -46,13 +46,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
 //#define triConfig
 //#define quadY4
-#define hexY6Config
+//#define hexY6Config
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -267,7 +267,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 2000){
+    if ((currentTime - lastSampleTime) > 1000){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -1127,7 +1127,7 @@ void loop () {
   }
 
   // Main scheduler loop set for 100hz
-  if (deltaTime >= 10000) {
+  if (deltaTime >= 5000) {
     #ifdef DEBUG_LOOP
       testSignal ^= HIGH;
       digitalWrite(LEDPIN, testSignal);
@@ -1226,7 +1226,7 @@ void loop () {
     // ================================================================
     // 50hz task loop
     // ================================================================
-    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+    if (frameCounter %   4 == 0) {  //  50 Hz tasks
       #ifdef DEBUG_LOOP
         digitalWrite(10, HIGH);
       #endif
@@ -1253,7 +1253,7 @@ void loop () {
     // ================================================================
     // 25hz task loop
     // ================================================================
-    if (frameCounter %   4 == 0) {  //  25 Hz tasks
+    if (frameCounter %   8 == 0) {  //  25 Hz tasks
       #ifdef DEBUG_LOOP    
         digitalWrite(9, HIGH);
       #endif
@@ -1275,7 +1275,7 @@ void loop () {
     // ================================================================
     // 10hz task loop
     // ================================================================
-    if (frameCounter %  10 == 0) {  //   10 Hz tasks
+    if (frameCounter %  20 == 0) {  //   10 Hz tasks
       #ifdef DEBUG_LOOP
         digitalWrite(8, HIGH);
       #endif

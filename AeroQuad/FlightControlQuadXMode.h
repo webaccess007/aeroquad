@@ -29,45 +29,47 @@
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  motors->setMotorCommand(FRONT_LEFT,  throttle - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
-  motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
-  motors->setMotorCommand(REAR_LEFT,   throttle + motorAxisCommandPitch + motorAxisCommandRoll + motorAxisCommandYaw);
-  motors->setMotorCommand(REAR_RIGHT,  throttle + motorAxisCommandPitch - motorAxisCommandRoll - motorAxisCommandYaw);
+  const int throttleCorrection = abs(motorAxisCommandYaw*1/4);
+//  const int throttleCorrection = 0;
+  motors->setMotorCommand(FRONT_LEFT,  (throttle-throttleCorrection) - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
+  motors->setMotorCommand(FRONT_RIGHT, (throttle-throttleCorrection) - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
+  motors->setMotorCommand(REAR_LEFT,   (throttle-throttleCorrection) + motorAxisCommandPitch + motorAxisCommandRoll + motorAxisCommandYaw);
+  motors->setMotorCommand(REAR_RIGHT,  (throttle-throttleCorrection) + motorAxisCommandPitch - motorAxisCommandRoll - motorAxisCommandYaw);
 }
 
 void processMinMaxCommand() {
   if ((motors->getMotorCommand(FRONT_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR_RIGHT) <= MINTHROTTLE)){
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAccro, MAXCHECK);
-    motorMaxCommand[REAR_LEFT] =   constrain(receiver->getData(THROTTLE) + delta, minAccro, MAXCHECK);
+    motorMaxCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
+    motorMaxCommand[REAR_LEFT] =   constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
   }
   else if ((motors->getMotorCommand(FRONT_LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(REAR_RIGHT) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAccro, MAXCOMMAND);
-    motorMinCommand[REAR_LEFT]   = constrain(receiver->getData(THROTTLE) - delta, minAccro, MAXCOMMAND);
+    motorMinCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
+    motorMinCommand[REAR_LEFT]   = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
   }     
   else {
     motorMaxCommand[FRONT_RIGHT] = MAXCOMMAND;
     motorMaxCommand[REAR_LEFT]   = MAXCOMMAND; 
-    motorMinCommand[FRONT_RIGHT] = minAccro;
-    motorMinCommand[REAR_LEFT]   = minAccro;
+    motorMinCommand[FRONT_RIGHT] = minAcro;
+    motorMinCommand[REAR_LEFT]   = minAcro;
   }
 
   if ((motors->getMotorCommand(REAR_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(FRONT_RIGHT) <= MINTHROTTLE)){
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
-    motorMaxCommand[FRONT_LEFT] = constrain(receiver->getData(THROTTLE) + delta, minAccro, MAXCHECK);
-    motorMaxCommand[REAR_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAccro, MAXCHECK);
+    motorMaxCommand[FRONT_LEFT] = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
+    motorMaxCommand[REAR_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
   }
   else if ((motors->getMotorCommand(REAR_LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(FRONT_RIGHT) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver->getData(THROTTLE);
-    motorMinCommand[FRONT_LEFT] = constrain(receiver->getData(THROTTLE) - delta, minAccro, MAXCOMMAND);
-    motorMinCommand[REAR_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAccro, MAXCOMMAND);
+    motorMinCommand[FRONT_LEFT] = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
+    motorMinCommand[REAR_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
   }     
   else {
     motorMaxCommand[FRONT_LEFT] = MAXCOMMAND;
     motorMaxCommand[REAR_RIGHT] = MAXCOMMAND;
-    motorMinCommand[FRONT_LEFT] = minAccro;
-    motorMinCommand[REAR_RIGHT] = minAccro;
+    motorMinCommand[FRONT_LEFT] = minAcro;
+    motorMinCommand[REAR_RIGHT] = minAcro;
   }
 }
 
