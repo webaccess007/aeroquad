@@ -38,7 +38,7 @@
 void applyMotorCommand() {
   motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3);
   motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3);
-  motors->setMotorCommand(REAR,   throttle + motorAxisCommandPitch*4/3);
+  motors->setMotorCommand(REAR,        throttle + motorAxisCommandPitch*4/3);
   motors->setMotorCommand(SERVO,  constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX));
 //  motors->setMotorCommand(SERVO,  filterSmooth(constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * motorAxisCommandYaw, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX),motors->getMotorCommand(SERVO),0.5));
 }

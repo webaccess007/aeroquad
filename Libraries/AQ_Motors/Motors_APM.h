@@ -35,14 +35,14 @@ public:
 
   void initialize(NB_Motors numbers) {
     // Init PWM Timer 1
-    //pinMode(11,OUTPUT); //     (PB5/OC1A)
+    pinMode(11,OUTPUT); //     (PB5/OC1A)
     pinMode(12,OUTPUT); //OUT2 (PB6/OC1B)
     pinMode(13,OUTPUT); //OUT3 (PB7/OC1C)
 
     //Remember the registers not declared here remains zero by default...
     TCCR1A =((1<<WGM11)|(1<<COM1B1)|(1<<COM1C1)); //Please read page 131 of DataSheet, we are changing the registers settings of WGM11,COM1B1,COM1A1 to 1 thats all...
     TCCR1B = (1<<WGM13)|(1<<WGM12)|(1<<CS11); //Prescaler set to 8, that give us a resolution of 0.5us, read page 134 of data sheet
-    //OCR1A = 3000; //PB5, none
+    OCR1A = 3000; //PB5, none
     OCR1B = 2000; //PB6, OUT2
     OCR1C = 2000; //PB7  OUT3
     ICR1 = 6600; //300hz freq...
@@ -50,10 +50,10 @@ public:
     // Init PWM Timer 3
     pinMode(2,OUTPUT); //OUT7 (PE4/OC3B)
     pinMode(3,OUTPUT); //OUT6 (PE5/OC3C)
-    //pinMode(5,OUTPUT); //     (PE3/OC3A)
+    pinMode(5,OUTPUT); //     (PE3/OC3A)
     TCCR3A =((1<<WGM31)|(1<<COM3B1)|(1<<COM3C1));
     TCCR3B = (1<<WGM33)|(1<<WGM32)|(1<<CS31);
-    //OCR3A = 3000; //PE3, NONE
+    OCR3A = 3000; //PE3, NONE
     OCR3B = 2000; //PE4, OUT7
     OCR3C = 2000; //PE5, OUT6
     ICR3 = 40000; //50hz freq (standard servos)
@@ -61,11 +61,11 @@ public:
     // Init PWM Timer 5
     pinMode(44,OUTPUT);  //OUT1 (PL5/OC5C)
     pinMode(45,OUTPUT);  //OUT0 (PL4/OC5B)
-    //pinMode(46,OUTPUT);  //     (PL3/OC5A)
+    pinMode(46,OUTPUT);  //     (PL3/OC5A)
 
     TCCR5A =((1<<WGM51)|(1<<COM5B1)|(1<<COM5C1));
     TCCR5B = (1<<WGM53)|(1<<WGM52)|(1<<CS51);
-    //OCR5A = 3000; //PL3,
+    OCR5A = 3000; //PL3,
     OCR5B = 2000; //PL4, OUT0
     OCR5C = 2000; //PL5, OUT1
     ICR5 = 6600; //300hz freq
@@ -84,8 +84,8 @@ public:
     OCR4B = 2000; //PH4, OUT5
     OCR4C = 2000; //PH5, OUT4
 
-    //TCCR4B |=(1<<ICES4); //Changing edge detector (rising edge).
-    //TCCR4B &=(~(1<<ICES4)); //Changing edge detector. (falling edge)
+    TCCR4B |=(1<<ICES4); //Changing edge detector (rising edge).
+    TCCR4B &=(~(1<<ICES4)); //Changing edge detector. (falling edge)
     TIMSK4 |= (1<<ICIE4); // Enable Input Capture interrupt. Timer interrupt mask
     
     commandAllMotors(1000);
@@ -96,6 +96,10 @@ public:
     OCR1C = motorCommand[MOTOR2] * 2;
     OCR5B = motorCommand[MOTOR3] * 2;
     OCR5C = motorCommand[MOTOR4] * 2;
+	if (numbersOfMotors == SIX_Motors) {
+	  OCR4C = motorCommand[MOTOR5] * 2;
+	  OCR4B = motorCommand[MOTOR6] * 2;	
+	}
   }
 
   void commandAllMotors(int command) {
@@ -103,6 +107,10 @@ public:
     OCR1C = command * 2;
     OCR5B = command * 2;
     OCR5C = command * 2;
+	if (numbersOfMotors == SIX_Motors) {
+	  OCR4C = command * 2;
+      OCR4B = command * 2;
+	}
   }
   
 };
