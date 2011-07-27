@@ -75,10 +75,14 @@ public:
     #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
       DDRE = DDRE | B00111000;                                  // Set ports to output PE3-5
       if (numberOfMotors == FOUR_Motors) { 
-        DDRH = DDRH | B00001000;                                  // Set port to output PH3
+        DDRH = DDRH | B00001000;                                // Set port to output PH3
 	  } 
-      else {  // for 6 or 8 motors
-        DDRH = DDRH | B00111000;                                  // Set ports to output PH3-5
+      else if (numberOfMotors == SIX_Motors) {                  // for 6 
+        DDRH = DDRH | B00111000;                                // Set ports to output PH3-5
+      }
+	  else if (numberOfMotors == HEIGHT_Motors) {               // for 8 motor
+        DDRH = DDRH | B00111000;                                // Set ports to output PH3-5
+		DDRB = DDRB | B01100000;
       }
     #else
       DDRB = DDRB | B00001110;                                  // Set ports to output PB1-3
@@ -126,6 +130,10 @@ public:
         OCR4B = motorCommand[MOTOR5] * 2 ;
         OCR4C = motorCommand[MOTOR6]  * 2 ;
       }
+	  if (numberOfMotors == HEIGHT_Motors) {
+	    OCR1A = motorCommand[MOTOR7] * 2 ;
+        OCR1B = motorCommand[MOTOR8]  * 2 ;
+	  }
     #else
       OCR2B = motorCommand[MOTOR1] / 16 ;                       // 1000-2000 to 128-256
       OCR1A = motorCommand[MOTOR2]  * 2 ;
@@ -144,6 +152,10 @@ public:
       OCR4B = command * 2 ;
       OCR4C = command * 2 ;
     }
+	if (numberOfMotors == HEIGHT_Motors) {
+	  OCR1A = command * 2 ;
+      OCR1B = command * 2 ;
+	}
     #else
       OCR2B = command / 16 ;
       OCR1A = command * 2 ;

@@ -346,7 +346,7 @@ int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
 
-#if defined quadXConfig || defined quadPlusConfig || defined triConfig || defined quadY4
+#if defined quadXConfig || defined quadPlusConfig || defined triConfig || defined quadY4Config
   int motorMaxCommand[4];
   int motorMinCommand[4];
   int motorConfiguratorCommand[4];
@@ -354,6 +354,10 @@ int motorAxisCommandYaw = 0;
   int motorMaxCommand[6];
   int motorMinCommand[6];
   int motorConfiguratorCommand[6];
+#elif defined (octoX8Congig)  
+  int motorMaxCommand[8];
+  int motorMinCommand[8];
+  int motorConfiguratorCommand[8];
 #endif
 
 
