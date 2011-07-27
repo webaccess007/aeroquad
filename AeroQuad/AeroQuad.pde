@@ -32,9 +32,9 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
-//#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-//#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
+#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
+#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -50,8 +50,8 @@
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
-//#define triConfig
-#define quadY4
+#define triConfig
+//#define quadY4
 //#define hexY6Config
 
 // *******************************************************************************************************************************
@@ -65,7 +65,7 @@
 //#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
-#define ReceiverPPM // EXPERIMENTAL Use ppm encoder with a normal receiver, and save baord pins!
+//#define ReceiverPPM // EXPERIMENTAL Use ppm encoder with a normal receiver, and save baord pins!
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
@@ -264,11 +264,13 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 2000){
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -325,11 +327,13 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 2000){
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -453,11 +457,13 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 2000){
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -525,11 +531,13 @@
     Wire.begin();
   }
   
+  #define DELAY_BETWEEN_READING 2500
+
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 2500){
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       gyro->measure();
       accel->measure();
@@ -603,11 +611,13 @@
      accelSpecific.setPlatformWii(&platformWii);
   }
   
+  #define DELAY_BETWEEN_READING 3000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > 1000){
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       platformWii.measure();
       gyro->measure();
@@ -618,7 +628,6 @@
       }
       sampleCount++;
     }
-    
   }
 #endif
 
@@ -1143,6 +1152,7 @@ void loop () {
 
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
+    
     #ifdef DEBUG_LOOP
       testSignal ^= HIGH;
       digitalWrite(LEDPIN, testSignal);
