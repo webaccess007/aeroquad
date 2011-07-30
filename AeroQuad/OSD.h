@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v2.4.1 - June 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -34,6 +34,10 @@
    It's a good idea to use an external 5V linear regulator, such as an LM7805/LM317 or similar to power to the MAX7456. The MAX7456 can draw up to 100mA @ 5V
     - this would result in an extra ~0.7W being dissipated across the Arduino onboard regulator (for a 3S battery). That's a lot of power for a little regulator with minimal heatsinking!
 */
+
+#ifndef _AEROQUAD_OSD_MAX7456_H_
+#define _AEROQUAD_OSD_MAX7456_H_
+
 
 /*********************** User configuration section ***************************************/
 #define ShowReticle            //Displays a reticle in the centre of the screen. 
@@ -129,7 +133,7 @@
 #define AI_TOP_PIXEL ((RETICLE_ROW - AI_DISPLAY_RECT_HEIGHT/2)*18)
 #define AI_BOTTOM_PIXEL ((RETICLE_ROW + AI_DISPLAY_RECT_HEIGHT/2)*18)
 
-#ifdef MAX7456_OSD
+
 
 byte clear;
 
@@ -322,7 +326,7 @@ private:
 #ifdef BattMonitor
   float currentVoltage;
   void updateVoltage(void) {
-    currentVoltage = batteryMonitor.getData();
+    currentVoltage = batteryMonitor->getBatteryVoltage();
     unsigned voltPrint = (unsigned)(currentVoltage*10); //1 decimal place
     char voltAscii[6]; //max 65536, plus null terminator
     utoa( voltPrint, voltAscii, 10 );
@@ -347,7 +351,7 @@ private:
 #ifdef AltitudeHold
   float currentAltitude;
   void updateAltitude(void) {
-    currentAltitude = altitude.getData();
+    currentAltitude = barometricSensor->getAltitude();
     #ifdef feet
     currentAltitude = currentAltitude/0.3048;
     #endif
@@ -369,7 +373,7 @@ private:
 #ifdef HeadingMagHold
   float currentHdg;
   void updateHdg(void) {
-    currentHdg = flightAngle->getDegreesHeading(YAW);
+    currentHdg = kinematics->getDegreesHeading(YAW);
     unsigned hdgPrint = (unsigned)currentHdg;
     char hdgAscii[6]; //max 65536, plus null terminator
     utoa( hdgPrint, hdgAscii, 10 );
@@ -422,8 +426,8 @@ void updateTimer(void) {
 
 #ifdef ShowAttitudeIndicator
 void updateAI( void ) {
-  float roll = flightAngle->getData(ROLL);
-  float pitch = flightAngle->getData(PITCH);
+  float roll = kinematics->getData(ROLL);
+  float pitch = kinematics->getData(PITCH);
 
   unsigned centreRow = RETICLE_ROW*18 + 10;  //pixel row which corresponds to an angle of zero pitch - same row as centre reticle
   int pitchPixelRow = constrain( (int)centreRow + (int)( (pitch/AI_MAX_PITCH_ANGLE)*(centreRow-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
@@ -468,19 +472,19 @@ public:
   //updates to display memory can make text flicker - we want to minimise # updates
   void update(void) {
     #ifdef BattMonitor
-      if( (unsigned)(batteryMonitor.getData()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
+      if( (unsigned)(batteryMonitor->getBatteryVoltage()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
         updateVoltage();
       }
     #endif
     
     #ifdef AltitudeHold
-      if( (unsigned)(altitude.getData()) != (unsigned)(currentAltitude) ) {
+      if( (unsigned)(barometricSensor->getAltitude()) != (unsigned)(currentAltitude) ) {
         updateAltitude();
       }
     #endif
     
     #ifdef HeadingMagHold
-      if( (unsigned)(flightAngle->getDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
+      if( (unsigned)(kinematics->getDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
         updateHdg();
       }
     #endif
@@ -503,5 +507,5 @@ public:
 
 };
 
-#endif
+#endif  //#define _AEROQUAD_OSD_MAX7456_H_
 

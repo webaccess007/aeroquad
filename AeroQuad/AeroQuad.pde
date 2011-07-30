@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.3 - July 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com 
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -18,6 +18,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+
 /****************************************************************************
    Before flight, select the different user options for your AeroQuad below
    If you need additional assitance go to http://AeroQuad.com/forum
@@ -28,18 +29,16 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-//#define DEBUG_LOOP
-
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield V1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
-//#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
+//#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-//#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -47,10 +46,14 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define XConfig
-//#define plusConfig
-//#define HEXACOAXIAL
-//#define HEXARADIAL
+#define quadXConfig
+//#define quadPlusConfig
+//#define hexPlusConfig
+//#define hexXConfig
+//#define triConfig
+//#define quadY4Config
+//#define hexY6Config
+//#define octoX8Congig
 
 // *******************************************************************************************************************************
 // Optional Sensors
@@ -58,30 +61,23 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
+//#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
 // if you only want DCM, then don't define either of the below
 // flightAngle recommendations: use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Define how many channels have have connected from your R/C receiver
-// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
-// Additionally 8 receiver channels are only available when not using the Arduino Uno
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define LASTCHANNEL 6
-// #define LASTCHANNEL 8
-
 
 // *******************************************************************************************************************************
 // Camera Stabilization
@@ -97,345 +93,860 @@
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
 //#define MAX7456_OSD
 
+
 /****************************************************************************
  ********************* End of User Definition Section ***********************
  ****************************************************************************/
 // Checks to make sure we have the right combinations defined
 #if defined(FlightAngleMARG) && !defined(HeadingMagHold)
-#undef FlightAngleMARG
+  #undef FlightAngleMARG
 #endif
 #if defined(HeadingMagHold) && defined(FlightAngleMARG) && defined(FlightAngleARG)
-#undef FlightAngleARG
+  #undef FlightAngleARG
 #endif
 #if defined(MAX7456_OSD) && !defined(AeroQuadMega_v2) && !defined(AeroQuadMega_Wii) && !defined(AeroQuadMega_CHR6DM)
-#undef MAX7456_OSD
-#endif
+  #undef MAX7456_OSD
+#endif  
 
+//#define DEBUG_LOOP
+
+
+/**
+ * Kenny todo.
+ * @todo : UNIT TEST
+ * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
+ *
+ * @TODO : REMOVE DRIFT CORRECTION TEST FROM AGR WHEN ALAN AND JOHN HAVE FIX IT!
+ */
+ 
 #include <EEPROM.h>
 #include <Wire.h>
 #include "AeroQuad.h"
-#include "I2C.h"
+#include <Axis.h>
 #include "PID.h"
-#include "AQMath.h"
-#include "Receiver.h"
-#include "DataAcquisition.h"
-#include "Accel.h"
-#include "Gyro.h"
-#include "Motors.h"
+#include <AQMath.h>
 
-// Create objects defined from Configuration Section above
+
+//********************************************************
+//********************************************************
+//********* PLATFORM SPECIFIC SECTION ********************
+//********************************************************
+//********************************************************
 #ifdef AeroQuad_v1
-  Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
-  Receiver_AeroQuad receiver;
-  Motors_PWM motors;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_ADXL500.h>
+  Accelerometer_ADXL500 accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+  
+  // Receiver declaration
+  #define RECEIVER_328P
+
+  // Motor declaration
+  #define MOTOR_PWM
+  
+  // unsuported in v1
+  #undef AltitudeHold
+  #undef HeadingMagHold
+  #undef BattMonitor
+  
+  /**
+   * Put AeroQuad_v1 specific intialization need here
+   */
+  void initPlatform() {
+    gyroSpecific.setAref(aref);
+    accelSpecific.setAref(aref);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuad_v1_IDG
-  Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
-  Receiver_AeroQuad receiver;
-  Motors_PWM motors;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_ADXL500.h>
+  Accelerometer_ADXL500 accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+  
+  // Receiver declaration
+  #define RECEIVER_328P
+
+  // Motor declaration
+  #define MOTOR_PWM  
+  
+  // unsuported in v1
+  #undef AltitudeHold
+  #undef HeadingMagHold
+  #undef BattMonitor
+  
+  /**
+   * Put AeroQuad_v1_IDG specific intialization need here
+   */
+  void initPlatform() {
+    gyroSpecific.setAref(aref);
+    accelSpecific.setAref(aref);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuad_v18
-  Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
-  Receiver_AeroQuad receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <Device_I2C.h>
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+  
+  // Accelerometer declaraion
+  #include <Accelerometer.h>
+  #include <Accelerometer_BMA180.h>
+  
+  // Receiver declaration
+  #define RECEIVER_328P
+  
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+  
+  // heading mag hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define HMC5843
   #endif
+  
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery Monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #define BATTERY_MONITOR_AQ
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+  
+  /**
+   * Put AeroQuad_v18 specific intialization need here
+   */
+  void initPlatform() {
+
+    pinMode(LED2PIN, OUTPUT);
+    digitalWrite(LED2PIN, LOW);
+    pinMode(LED3PIN, OUTPUT);
+    digitalWrite(LED3PIN, LOW);
+    
+    Wire.begin();
+    TWBR = 12;
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyro();
+    measureAccel();
+  }
 #endif
 
 #ifdef AeroQuad_Mini
-  Accel_AeroQuadMini accel;
-  Gyro_AeroQuadMega_v2 gyro;
-  Receiver_AeroQuad receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <Device_I2C.h>
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_ADXL345.h>
+  
+  // Receiver declaration
+  #define RECEIVER_328P
+
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+  
+  // Battery Monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #define BATTERY_MONITOR_AQ
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+  
+  // unsuported in mini
+  #undef AltitudeHold
+  #undef HeadingMagHold
+  
+  /**
+   * Put AeroQuad_Mini specific intialization need here
+   */
+  void initPlatform() {
+    
+    gyroAddress = ITG3200_ADDRESS-1;
+    
+    pinMode(LED2PIN, OUTPUT);
+    digitalWrite(LED2PIN, LOW);
+    pinMode(LED3PIN, OUTPUT);
+    digitalWrite(LED3PIN, LOW);
+
+    Wire.begin();
+    TWBR = 12;
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyro();
+    measureAccel();
+  }
 #endif
 
 #ifdef AeroQuadMega_v1
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
-  Receiver_AeroQuadMega receiver;
-  Accel_AeroQuad_v1 accel;
-  Gyro_AeroQuad_v1 gyro;
-  Motors_PWM motors;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_IDG_IDZ500.h>
+  Gyroscope_IDG_IDZ500 gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_ADXL500.h>
+  Accelerometer_ADXL500 accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+
+  // Reveiver declaration
+  #define RECEIVER_MEGA
+  
+  // Motor declaration
+  #define MOTOR_PWM  
+
+  // unsuported on mega v1  
+  #undef AltitudeHold
+  #undef HeadingMagHold
+  #undef BattMonitor
+  
+  /**
+   * Put AeroQuadMega_v1 specific intialization need here
+   */
+  void initPlatform() {
+    gyroSpecific.setAref(aref);
+    accelSpecific.setAref(aref);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuadMega_v2
-  Receiver_AeroQuadMega receiver;
-  Motors_PWMtimer motors;
-  //Motors_AeroQuadI2C motors; // Use for I2C based ESC's
-  Accel_AeroQuadMega_v2 accel;
-  Gyro_AeroQuadMega_v2 gyro;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <Device_I2C.h>
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_ITG3200.h>
+  
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_BMA180.h>
+
+  // Receiver Declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM_Timer
+  
+  // heading mag hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define HMC5843
   #endif
+
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+
+  // Battery Monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #define BATTERY_MONITOR_AQ
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
+
   #ifdef MAX7456_OSD
     #include "OSD.h"
     OSD osd;
   #endif
+
+  /**
+   * Put AeroQuadMega_v2 specific intialization need here
+   */
+  void initPlatform() {
+    
+    pinMode(LED2PIN, OUTPUT);
+    digitalWrite(LED2PIN, LOW);
+    pinMode(LED3PIN, OUTPUT);
+    digitalWrite(LED3PIN, LOW);
+
+    // pins set to INPUT for camera stabilization so won't interfere with new camera class
+    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
+    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
+    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
+    pinMode(43, OUTPUT); // LED 1
+    pinMode(44, OUTPUT); // LED 2
+    pinMode(45, OUTPUT); // LED 3
+    pinMode(46, OUTPUT); // LED 4
+    digitalWrite(43, HIGH); // LED 1 on
+    digitalWrite(44, HIGH); // LED 2 on
+    digitalWrite(45, HIGH); // LED 3 on
+    digitalWrite(46, HIGH); // LED 4 on  
+
+    Wire.begin();
+    TWBR = 12;
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    measureGyro();
+    measureAccel();
+  }
 #endif
 
 #ifdef ArduCopter
-  Gyro_ArduCopter gyro;
-  Accel_ArduCopter accel;
-  Receiver_ArduCopter receiver;
-  Motors_ArduCopter motors;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <APM_ADC.h>
+  #include <Device_I2C.h>
+
+  // Gyroscope declaration 
+  #include <Gyroscope.h>
+  #include <Gyroscope_APM.h>
+  Gyroscope_APM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+  
+  // Accelerometer Declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_APM.h>
+  Accelerometer_APM accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+
+  // Receiver Declaration
+  #define RECEIVER_APM
+  
+  // Motor Declaration
+  #define MOTOR_APM
+  
+  // heading mag hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define HMC5843
   #endif
+ 
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #define BATTERY_MONITOR_APM
   #endif
+  
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
+  #endif
+
+  /**
+   * Put ArduCopter specific intialization need here
+   */
+  void initPlatform() {
+    pinMode(LED_Red, OUTPUT);
+    pinMode(LED_Yellow, OUTPUT);
+    pinMode(LED_Green, OUTPUT);
+
+    initializeADC();
+    
+    Wire.begin();
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuad_Wii
-  Accel_Wii accel;
-  Gyro_Wii gyro;
-  Receiver_AeroQuad receiver;
-  Motors_PWMtimer motors;
-  #include "FlightAngle.h"
-//  FlightAngle_CompFilter tempFlightAngle;
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <Device_I2C.h>
+  
+  // Platform Wii declaration
+  #include <Platform_Wii.h>
+  Platform_Wii platformWii;
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_Wii.h>
+  Gyroscope_Wii gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_WII.h>
+  Accelerometer_WII accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+  
+  // Receiver declaration
+  #define RECEIVER_328P
+
+  // Motor declaration
+  #define MOTOR_PWM  
+  
+  // heading mag hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define HMC5843
   #endif
+  
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #define BATTERY_MONITOR_AQ
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+  
+  #ifdef MAX7456_OSD
+    #include "OSD.h"
+    OSD osd;
   #endif
+  
+  /**
+   * Put AeroQuad_Wii specific intialization need here
+   */
+  void initPlatform() {
+     Wire.begin();
+     
+     #if defined(AeroQuad_Paris_v3)
+       platformWii.initialize(true);
+     #else
+       platformWii.initialize();
+     #endif  
+     
+     gyroSpecific.setPlatformWii(&platformWii);
+     accelSpecific.setPlatformWii(&platformWii);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    platformWii.measure();
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuadMega_Wii
-  Accel_Wii accel;
-  Gyro_Wii gyro;
-  Receiver_AeroQuadMega receiver;
-  Motors_PWMtimer motors;
-  #include "FlightAngle.h"
-  #ifdef FlightAngleARG
-    FlightAngle_ARG tempFlightAngle;
-  #elif defined FlightAngleMARG
-    FlightAngle_MARG tempFlightAngle;
-  #else
-    FlightAngle_DCM tempFlightAngle;
-  #endif
-  FlightAngle *flightAngle = &tempFlightAngle;
+  #include <Device_I2C.h>
+  
+  // Platform Wii declaration
+  #include <Platform_Wii.h>
+  Platform_Wii platformWii;
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_Wii.h>
+  Gyroscope_Wii gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_WII.h>
+  Accelerometer_WII accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+
+  // Receiver declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM
+  
+  // heading mag hold declaration
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #define HMC5843
   #endif
+  
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_AeroQuad batteryMonitor;
+    #define BATTERY_MONITOR_AQ
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
-  #endif
+
+  /**
+   * Put AeroQuadMega_Wii specific intialization need here
+   */
+  void initPlatform() {
+    Wire.begin();
+    
+    platformWii.initialize();
+    gyroSpecific.setPlatformWii(&platformWii);
+    accelSpecific.setPlatformWii(&platformWii);    
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    platformWii.measure();
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
-  Accel_CHR6DM accel;
-  Gyro_CHR6DM gyro;
-  Receiver_AeroQuadMega receiver;
-  Motors_PWM motors;
-  #include "FlightAngle.h"
-  FlightAngle_CHR6DM tempFlightAngle;
-  FlightAngle *flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #include <Device_I2C.h>
+  #include <Platform_CHR6DM.h>
+  CHR6DM chr6dm;
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_CHR6DM.h>
+  Gyroscope_CHR6DM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_CHR6DM.h>
+  Accelerometer_CHR6DM accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+
+  // Receiver declaration
+  #define RECEIVER_MEGA
+
+  // Motor declaration
+  #define MOTOR_PWM
+  
+  // Kinematics declaration
+  #include "Kinematics_CHR6DM.h"
+  Kinematics_CHR6DM tempKinematics;
+  
+  // Compas declaration
+  #define HeadingMagHold
+  #define COMPASS_CHR6DM
+  #include <Magnetometer_CHR6DM.h>
+  Magnetometer_CHR6DM compassSpecific;
+
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #define BATTERY_MONITOR_APM
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
-  #endif
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
-  #endif
+  
+  /**
+   * Put AeroQuadMega_CHR6DM specific intialization need here
+   */
+  void initPlatform() {
+    Serial1.begin(BAUD);
+    PORTD = B00000100;
+
+    Wire.begin();
+    
+    chr6dm.resetToFactory();
+    chr6dm.setListenMode();
+    chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
+    chr6dm.requestPacket();
+    
+    gyroSpecific.setChr6dm(&chr6dm);
+    accelSpecific.setChr6dm(&chr6dm);
+    tempKinematics.setChr6dm(&chr6dm);
+    tempKinematics.setGyroscope(&gyroSpecific);
+    compassSpecific.setChr6dm(&chr6dm);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    
+    chr6dm.read();
+    gyro->measure();
+    accel->measure();
+  }
 #endif
 
 #ifdef APM_OP_CHR6DM
-  Accel_CHR6DM accel;
-  Gyro_CHR6DM gyro;
-  Receiver_ArduCopter receiver;
-  Motors_ArduCopter motors;
-  #include "FlightAngle.h"
-  FlightAngle_CHR6DM tempFlightAngle;
-  FlightAngle *flightAngle = &tempFlightAngle;
-  #include "Compass.h"
-  Compass_CHR6DM compass;
+  #include <Device_I2C.h>
+  #include <Platform_CHR6DM.h>
+  CHR6DM chr6dm;
+  
+  // Gyroscope declaration
+  #include <Gyroscope.h>
+  #include <Gyroscope_CHR6DM.h>
+  Gyroscope_CHR6DM gyroSpecific;
+  Gyroscope *gyro = &gyroSpecific;
+  
+  // Accelerometer declaration
+  #include <Accelerometer.h>
+  #include <Accelerometer_CHR6DM.h>
+  Accelerometer_CHR6DM accelSpecific;
+  Accelerometer *accel = &accelSpecific;
+
+  // Receiver declaration
+  #define RECEIVER_APM
+
+  // Motor declaration
+  #define MOTOR_APM
+  
+  // Kinematics declaration
+  #include "Kinematics_CHR6DM.h"
+  Kinematics_CHR6DM tempKinematics;
+  
+  // Compas declaration
+  #define HeadingMagHold
+  #define COMPASS_CHR6DM
+  #include <Magnetometer_CHR6DM.h>
+  Magnetometer_CHR6DM compassSpecific;
+
+  // Altitude declaration
   #ifdef AltitudeHold
-    #include "Altitude.h"
-    Altitude_AeroQuad_v2 altitude;
+    #define BMP085
   #endif
+  
+  // Battery monitor declaration
   #ifdef BattMonitor
-    #include "BatteryMonitor.h"
-    BatteryMonitor_APM batteryMonitor;
+    #define BATTERY_MONITOR_APM
   #endif
-  #ifdef CameraControl
-    #include "Camera.h"
-    Camera_AeroQuad camera;
+  
+  /**
+   * Put APM_OP_CHR6DM specific intialization need here
+   */
+  void initPlatform() {
+    pinMode(LED_Red, OUTPUT);
+    pinMode(LED_Yellow, OUTPUT);
+    pinMode(LED_Green, OUTPUT);
+
+    Serial1.begin(BAUD);
+    PORTD = B00000100;
+    
+    Wire.begin();
+
+    chr6dm.resetToFactory();
+    chr6dm.setListenMode();
+    chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
+    chr6dm.requestPacket();
+    
+    gyroSpecific.setChr6dm(&chr6dm);
+    accelSpecific.setChr6dm(&chr6dm);
+    tempKinematics.setChr6dm(&chr6dm);
+    tempKinematics.setGyroscope(&gyroSpecific);
+    compassSpecific.setChr6dm(&chr6dm);
+  }
+  
+  /**
+   * Measure critical sensors
+   */
+  void measureCriticalSensors() {
+    
+    chr6dm.read();
+    gyro->measure();
+    accel->measure();
+  }
+#endif
+
+//********************************************************
+//********************************************************
+//********* HARDWARE GENERALIZATION SECTION **************
+//********************************************************
+//********************************************************
+
+//********************************************************
+//****************** KINEMATICS DECLARATION **************
+//********************************************************
+#include "Kinematics.h"
+#if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
+  // CHR6DM have it's own kinematics, so, initialize in it's scope
+#elif defined FlightAngleARG
+  #include "Kinematics_ARG.h"
+  Kinematics_ARG tempKinematics;
+#elif defined FlightAngleMARG
+  #include "Kinematics_MARG.h"
+  Kinematics_MARG tempKinematics;
+#else
+  #include "Kinematics_DCM.h"
+  Kinematics_DCM tempKinematics;
+#endif
+Kinematics *kinematics = &tempKinematics;
+
+//********************************************************
+//******************** RECEIVER DECLARATION **************
+//********************************************************
+#if defined (AeroQuad_Mini) && defined (hexY6Config)
+  #include <Receiver.h>
+  #include <Receiver_PPM.h>
+  Receiver_PPM receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+#elif defined RemotePCReceiver
+  #include <Receiver.h>
+  #include <Receiver_RemotePC.h>
+  Receiver_RemotePC receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+#elif defined RECEIVER_328P
+  #include <Receiver.h>
+  #include <Receiver_328p.h>
+  Receiver_328p receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+#elif defined RECEIVER_MEGA
+  #include <Receiver.h>
+  #include <Receiver_MEGA.h>
+  Receiver_MEGA receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+#elif defined RECEIVER_APM
+  #include <Receiver.h>
+  #include <Receiver_APM.h>
+  Receiver_APM receiverSpecific;
+  Receiver *receiver = &receiverSpecific;
+#endif
+
+
+//********************************************************
+//********************** MOTORS DECLARATION **************
+//********************************************************
+#if defined triConfig 
+  #include <Motors.h>
+  #include <Motors_PWM_Tri.h>
+  Motors_PWM_Tri motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#elif defined MOTOR_PWM
+  #include <Motors.h>
+  #include <Motors_PWM.h>
+  Motors_PWM motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#elif defined MOTOR_PWM_Timer
+  #include <Motors.h>
+  #include <Motors_PWM_Timer.h>
+  Motors_PWM_Timer motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#elif defined MOTOR_APM
+  #include <Motors.h>
+  #include <Motors_APM.h>
+  Motors_APM motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#elif defined MOTOR_I2C
+  #include <Motors.h>
+  #include <Motors_I2C.h>
+  Motors_I2C motorsSpecific;
+  Motors *motors = &motorsSpecific;
+#endif
+
+//********************************************************
+//******* HEADING HOLD MAGNETOMETER DECLARATION **********
+//********************************************************
+#if defined (HMC5843)
+  #include <Compass.h>
+  #include <Magnetometer_HMC5843.h>
+  Magnetometer_HMC5843 compassSpecific;
+  Compass *compass = &compassSpecific;
+#elif defined (COMPASS_CHR6DM)
+  #include <Compass.h>
+  Compass *compass = &compassSpecific;
+#endif
+
+//********************************************************
+//******* ALTITUDE HOLD BAROMETER DECLARATION ************
+//********************************************************
+#if defined (BMP085)
+  #include <BarometricSensor.h>
+  #include <BarometricSensor_BMP085.h>
+  BarometricSensor_BMP085 barometricSensorSpecific;
+  BarometricSensor *barometricSensor = &barometricSensorSpecific;
+#endif
+
+//********************************************************
+//*************** BATTERY MONITOR DECLARATION ************
+//********************************************************
+#if defined (BATTERY_MONITOR_AQ)
+  #include <BatteryMonitor.h>
+  #include <BatteryMonitor_AQ.h>
+  BatteryMonitor_AQ batteryMonitorSpecific;
+  BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
+#elif defined (BATTERY_MONITOR_APM)
+  #include <BatteryMonitor.h>
+  #include <BatteryMonitor_APM.h>
+  BatteryMonitor_APM batteryMonitorSpecific;
+  BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
+#endif  
+
+
+//********************************************************
+//************** CAMERA CONTROL DECLARATION **************
+//********************************************************
+// used only on mega for now
+#ifdef CameraControl
+  #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
+    #include <CameraStabilizer.h>
+    #include <CameraStabilizer_Aeroquad.h>
+    CameraStabilizer_AeroQuad tempCameraStabilizer;
+    CameraStabilizer *camera = &tempCameraStabilizer;
+  #else
+    #undef CameraControl
   #endif
 #endif
 
-#ifdef XConfig
-  void (*processFlightControl)() = &processFlightControlXMode;
+
+//********************************************************
+//******** FLIGHT CONFIGURATION DECLARATION **************
+//********************************************************
+#if defined quadXConfig
+  #include "FlightControlQuadXMode.h"
+#elif defined quadPlusConfig
+  #include "FlightControlQuadPlusMode.h"
+#elif defined hexPlusConfig  
+  #include "FlightControlHexPlusMode.h"
+#elif defined hexXConfig
+  #include "FlightControlHexXMode.h"
+#elif defined triConfig
+  #include "FlightControlTriMode.h"
+#elif defined quadY4Config
+  #include "FlightControlQuadY4.h"
+#elif defined hexY6Config
+  #include "FlightControlHexY6.h"  
+#elif defined octoX8Congig
+  #include "FlightControlOctoX8.h"
 #endif
-#ifdef plusConfig
-  void (*processFlightControl)() = &processFlightControlPlusMode;
-#endif
+
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
@@ -461,73 +972,47 @@ void setup() {
   digitalWrite(8, LOW);
 #endif    
 
-  #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    Serial1.begin(BAUD);
-    PORTD = B00000100;
-  #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
-  #endif
-  #ifdef AeroQuadMega_v2
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
-    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
-    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
-    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
-    pinMode(43, OUTPUT); // LED 1
-    pinMode(44, OUTPUT); // LED 2
-    pinMode(45, OUTPUT); // LED 3
-    pinMode(46, OUTPUT); // LED 4
-    digitalWrite(43, HIGH); // LED 1 on
-    digitalWrite(44, HIGH); // LED 2 on
-    digitalWrite(45, HIGH); // LED 3 on
-    digitalWrite(46, HIGH); // LED 4 on  
-  #endif
-  #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-    pinMode(LED_Red, OUTPUT);
-    pinMode(LED_Yellow, OUTPUT);
-    pinMode(LED_Green, OUTPUT);
-  #endif
-  
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini) || defined(AeroQuad_Wii) || defined(AeroQuadMega_Wii) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM) || defined(ArduCopter)
-    Wire.begin();
-  #endif
-  #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuad_Mini)
-    // Recommendation from Mgros to increase I2C speed to 400kHz
-    // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11262&viewfull=1#post11262
-    TWBR = 12;
-  #endif
-
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
   
+  initPlatform();
+  
   // Configure motors
-  motors.initialize(); // defined in Motors.h
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
+     motors->initialize(); 
+  #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
+     motors->initialize(SIX_Motors); 
+  #elif defined (octoX8Congig)
+     motors->initialize(HEIGHT_Motors); 
+  #endif
+
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON) receiver.initialize(); // defined in Received.h
+  if (receiverLoop == ON) {
+    receiver->initialize();
+    initReceiverFromEEPROM();
+  }
        
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
-  gyro.initialize(); // defined in Gyro.h
-  accel.initialize(); // defined in Accel.h
+  initSensorsZeroFromEEPROM();
+  initializeGyro(); // defined in Gyro.h
+  initializeAccel(); // defined in Accel.h
   
   // Calibrate sensors
-  gyro.autoZero(); // defined in Gyro.h
+  calibrateGyro(); // defined in Gyro.h
   zeroIntegralError();
- // levelAdjust[ROLL] = 0;
- // levelAdjust[PITCH] = 0;
+  levelAdjust[ROLL] = 0;
+  levelAdjust[PITCH] = 0;
   
   // Flight angle estimation
   #ifdef HeadingMagHold
-    compass.initialize();
-    //setHeading = compass.getHeading();
-    flightAngle->initialize(compass.getHdgXY(XAXIS), compass.getHdgXY(YAXIS));
+    compass->initialize();
+    //setHeading = compass->getHeading();
+    kinematics->initialize(compass->getHdgXY(XAXIS), compass->getHdgXY(YAXIS));
   #else
-    flightAngle->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
+    kinematics->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -538,27 +1023,27 @@ void setup() {
 
   // Optional Sensors
   #ifdef AltitudeHold
-    altitude.initialize();
+    barometricSensor->initialize();
   #endif
   
   // Battery Monitor
   #ifdef BattMonitor
-    batteryMonitor.initialize();
+    batteryMonitor->initialize();
   #endif
   
   // Camera stabilization setup
-  #ifdef CameraControl
-    camera.initialize();
-    camera.setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    camera.setCenterRoll(1500); // Need to figure out nice way to set center position
-    camera.setmCameraPitch(11.11);
-    camera.setCenterPitch(1300);
+  #if defined (CameraControl)
+    camera->initialize();
+    camera->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    camera->setCenterRoll(1500); // Need to figure out nice way to set center position
+    camera->setmCameraPitch(11.11);
+    camera->setCenterPitch(1300);
   #endif
   
-  //initialising OSD
   #if defined(MAX7456_OSD)
     osd.initialize();
   #endif
+
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
     #ifdef OpenlogBinaryWrite
@@ -624,69 +1109,59 @@ void loop () {
       hundredHZpreviousTime = currentTime;
       
       if (sensorLoop == ON) {
-        // measure critical sensors
-        gyro.measure();
-        accel.measure();
+        measureCriticalSensors();
         
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
-                                 accel.getData(XAXIS),                     \
-                                 accel.getData(YAXIS),                     \
-                                 accel.getData(ZAXIS),                     \
-                                 compass.getRawData(XAXIS),                \
-                                 compass.getRawData(YAXIS),                \
-                                 compass.getRawData(ZAXIS));
+          kinematics->calculate(radPerSec[ROLL],                       
+                                 radPerSec[PITCH],                      
+                                 radPerSec[YAW],                        
+                                 meterPerSec[XAXIS],                   
+                                 meterPerSec[YAXIS],                   
+                                 meterPerSec[ZAXIS],                   
+                                 compass->getRawData(XAXIS),                      
+                                 compass->getRawData(YAXIS),                     
+                                 compass->getRawData(ZAXIS),
+                                 G_Dt);
         #endif
       
-        #if defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
-                                 accel.getData(XAXIS),                     \
-                                 accel.getData(YAXIS),                     \
-                                 accel.getData(ZAXIS),                     \
-                                 0.0,                                      \
-                                 0.0,                                      \
-                                 0.0);
+        #if defined FlightAngleARG
+          kinematics->calculate(radPerSec[ROLL],                       
+                                 radPerSec[PITCH],                      
+                                 radPerSec[YAW],                        
+                                 meterPerSec[XAXIS],                   
+                                 meterPerSec[YAXIS],                   
+                                 meterPerSec[ZAXIS],                   
+                                 0.0,                                            
+                                 0.0,                                            
+                                 0.0,
+                                 G_Dt);
         #endif
 
-        #if !defined HeadingMagHold && defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
-                                 accel.getData(XAXIS),                     \
-                                 accel.getData(YAXIS),                     \
-                                 accel.getData(ZAXIS),                     \
-                                 0.0,                                      \
-                                 0.0,                                      \
-                                 0.0);
-        #endif
-      
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),                       \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
-                                 accel.getData(XAXIS),                     \
-                                 accel.getData(YAXIS),                     \
-                                 accel.getData(ZAXIS),                     \
-                                 accel.getOneG(),                          \
-                                 compass.getHdgXY(XAXIS),                  \
-                                 compass.getHdgXY(YAXIS));
+          kinematics->calculate(radPerSec[ROLL],                       
+                                 radPerSec[PITCH],                      
+                                 radPerSec[YAW],                        
+                                 meterPerSec[XAXIS],                   
+                                 meterPerSec[YAXIS],                   
+                                 meterPerSec[ZAXIS],                   
+                                 accel->getOneG(),                              
+                                 compass->getHdgXY(XAXIS),                        
+                                 compass->getHdgXY(YAXIS),
+                                 G_Dt);
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          flightAngle->calculate(gyro.getData(ROLL),  \
-                                 gyro.getData(PITCH),                      \
-                                 gyro.getData(YAW),                        \
-                                 accel.getData(XAXIS),                     \
-                                 accel.getData(YAXIS),                     \
-                                 accel.getData(ZAXIS),                     \
-                                 accel.getOneG(),                          \
-                                 0.0,                                      \
-                                 0.0);
+          kinematics->calculate(radPerSec[ROLL],                        
+                                 radPerSec[PITCH],                       
+                                 radPerSec[YAW],                         
+                                 meterPerSec[XAXIS],                    
+                                 meterPerSec[YAXIS],                    
+                                 meterPerSec[ZAXIS],                    
+                                 accel->getOneG(),                               
+                                 0.0,                                             
+                                 0.0,
+                                 G_Dt);
         #endif
       }
       
@@ -722,19 +1197,12 @@ void loop () {
       if (receiverLoop == ON) { 
         readPilotCommands(); // defined in FlightCommand.pde
       }
-
-      if (sensorLoop == ON) {
-        #ifdef AltitudeHold
-          altitude.measure(); // defined in altitude.h
-        #endif
-      }
-
-      #if defined(CameraControl)
-        camera.setPitch(degrees(flightAngle->getData(PITCH)));
-        camera.setRoll(degrees(flightAngle->getData(ROLL)));
-        camera.setYaw(degrees(flightAngle->getData(YAW)));
-        camera.move();
-      #endif 
+      
+      #ifdef AltitudeHold
+        if (sensorLoop == ON) {
+          barometricSensor->measure(); // defined in altitude.h
+        }
+      #endif
 
       #ifdef DEBUG_LOOP
         digitalWrite(10, LOW);
@@ -751,6 +1219,12 @@ void loop () {
       
       G_Dt = (currentTime - twentyFiveHZpreviousTime) / 1000000.0;
       twentyFiveHZpreviousTime = currentTime;
+      
+      if (sensorLoop == ON) {
+        #if defined(AltitudeHold)
+          barometricSensor->measure(); // defined in altitude.h
+        #endif
+      }
       
       #ifdef DEBUG_LOOP
         digitalWrite(9, LOW);
@@ -769,11 +1243,11 @@ void loop () {
       tenHZpreviousTime = currentTime;
 
       if (sensorLoop == ON) {
-        #ifdef HeadingMagHold
-          compass.measure(flightAngle->getData(ROLL), flightAngle->getData(PITCH)); // defined in compass.h
+        #if defined(HeadingMagHold)
+          compass->measure(kinematics->getData(ROLL), kinematics->getData(PITCH));
         #endif
-        #ifdef BattMonitor
-          batteryMonitor.measure(armed);
+        #if defined(BattMonitor)
+          batteryMonitor->measure(armed);
         #endif
         processAltitudeHold();
       }
@@ -787,15 +1261,17 @@ void loop () {
         osd.update();
       #endif
 
+      
       #ifdef DEBUG_LOOP
         digitalWrite(8, LOW);
-      #endif      
-	}
+      #endif
+    }
 
     previousTime = currentTime;
   }
-  if (frameCounter >= 100) 
+  if (frameCounter >= 100) {
       frameCounter = 0;
+  }
 }
 
 
