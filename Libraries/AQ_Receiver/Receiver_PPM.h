@@ -88,12 +88,23 @@ public:
   }
 
   void read(void) {
-
+  
+    
 	for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+	  uint8_t oldSREG;
+      oldSREG = SREG;
+      cli(); // Let's disable interrupts
+
 	  receiverData[channel] = (mTransmitter[channel] * rcValue[rcChannel[channel]]) + bTransmitter[channel];
+	  
+	  SREG = oldSREG;
+      sei();// Let's enable the interrupts	
+	
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
 	}
+	
+	
 	
     // Reduce transmitter commands using xmitFactor and center around 1500
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
@@ -102,6 +113,8 @@ public:
       else
         // No xmitFactor reduction applied for throttle, mode and
         transmitterCommand[channel] = transmitterCommandSmooth[channel];
+		
+	
   }
 };
 
