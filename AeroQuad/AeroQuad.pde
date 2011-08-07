@@ -48,9 +48,9 @@
 // Use only one of the following definitions
 //#define quadXConfig
 //#define quadPlusConfig
-#define hexPlusConfig
+//#define hexPlusConfig
 //#define hexXConfig
-//#define triConfig
+#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Congig
@@ -63,10 +63,10 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
-#define ReceiverPPM // EXPERIMENTAL Use ppm encoder with a normal receiver, and save baord pins!
+//#define ReceiverPPM // EXPERIMENTAL Use ppm encoder with a normal receiver, and save baord pins!
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // You must define *only* one of the following 2 flightAngle calculations
@@ -92,7 +92,7 @@
 //#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
-//#define MAX7456_OSD
+#define MAX7456_OSD
 
 
 /****************************************************************************
@@ -329,7 +329,7 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 2000
+  #define DELAY_BETWEEN_READING 4000
   
   /**
    * Measure critical sensors
@@ -427,11 +427,6 @@
     #define BATTERY_MONITOR_AQ
   #endif
 
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
-  #endif
-
   /**
    * Put AeroQuadMega_v2 specific intialization need here
    */
@@ -515,11 +510,6 @@
     #define BATTERY_MONITOR_APM
   #endif
   
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
-  #endif
-
   /**
    * Put ArduCopter specific intialization need here
    */
@@ -590,11 +580,6 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     #define BATTERY_MONITOR_AQ
-  #endif
-  
-  #ifdef MAX7456_OSD
-    #include "OSD.h"
-    OSD osd;
   #endif
   
   /**
@@ -1008,6 +993,12 @@ Kinematics *kinematics = &tempKinematics;
 #elif defined octoX8Congig
   #include "FlightControlOctoX8.h"
 #endif
+
+#ifdef MAX7456_OSD
+  #include "OSD.h"
+  OSD osd;
+#endif
+
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
