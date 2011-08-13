@@ -26,14 +26,14 @@
 #define FRONT_RIGHT   MOTOR3
 #define REAR_LEFT     MOTOR4
 #define FRONT_LEFT_2  MOTOR5
-#define REAR_RIGHT_2  MOTOR6
-#define FRONT_RIGHT_2 MOTOR7
+#define FRONT_RIGHT_2 MOTOR6
+#define REAR_RIGHT_2  MOTOR7
 #define REAR_LEFT_2   MOTOR8
 #define LASTMOTOR     MOTOR8+1
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  const int throttleCorrection = abs(motorAxisCommandYaw*1/8);
+  const int throttleCorrection = abs(motorAxisCommandYaw*4/8);
   motors->setMotorCommand(FRONT_LEFT,    (throttle-throttleCorrection) - motorAxisCommandPitch + motorAxisCommandRoll - motorAxisCommandYaw);
   motors->setMotorCommand(FRONT_RIGHT,   (throttle-throttleCorrection) - motorAxisCommandPitch - motorAxisCommandRoll + motorAxisCommandYaw);
   motors->setMotorCommand(REAR_LEFT,     (throttle-throttleCorrection) + motorAxisCommandPitch + motorAxisCommandRoll + motorAxisCommandYaw);
