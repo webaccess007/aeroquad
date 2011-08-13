@@ -21,6 +21,20 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_TRI_MODE_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_TRI_MODE_H_
 
+
+/*
+       CW                  CCW
+            
+           0....Front....0  
+           ......***......    
+           ......***......
+           ......***......    
+           0....Back.....0  
+      
+                  CW           
+*/
+
+
 #define SERVO       MOTOR1
 #define REAR        MOTOR2
 #define FRONT_RIGHT MOTOR3
@@ -30,8 +44,6 @@
 #define TRI_YAW_CONSTRAINT_MIN 1200
 #define TRI_YAW_CONSTRAINT_MAX 1800
 #define TRI_YAW_MIDDLE 1500
-//#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-#define YAW_DIRECTION -1
 
 #define MAX_RECEIVER_OFFSET 10
 

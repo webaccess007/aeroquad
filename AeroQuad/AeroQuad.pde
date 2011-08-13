@@ -49,7 +49,7 @@
 //#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-//#define hexXConfig
+//#define hexXConfig        // @todo Kenny NOT FLIGHT TESTED
 //#define triConfig
 //#define quadY4Config
 #define hexY6Config
@@ -104,6 +104,11 @@
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
 #define MAX7456_OSD
+
+
+#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
+//#define YAW_DIRECTION -1
+
 
 /****************************************************************************
  ********************* End of User Definition Section ***********************
