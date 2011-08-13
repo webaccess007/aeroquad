@@ -48,10 +48,10 @@
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   const int throttleCorrection = abs(motorAxisCommandYaw*3/6);
-  motors->setMotorCommand(REAR,        (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR,        (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) - (YAW_DIRECTION * motorAxisCommandYaw));
   motors->setMotorCommand(RIGHT,       (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw));  
   motors->setMotorCommand(LEFT,        (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(REAR_UNDER,  (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR_UNDER,  (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) + (YAW_DIRECTION * motorAxisCommandYaw));
   motors->setMotorCommand(RIGHT_UNDER, (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw));
   motors->setMotorCommand(LEFT_UNDER,  (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw));
 }
