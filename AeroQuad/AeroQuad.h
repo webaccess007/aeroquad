@@ -250,6 +250,8 @@ byte testSignal = LOW;
 // *************************** EEPROM ***************************
 // **************************************************************
 // EEPROM storage addresses
+
+
 typedef struct {
   float p;
   float i;
@@ -257,7 +259,12 @@ typedef struct {
 } t_NVR_PID;
 
 typedef struct {
-    
+  float slope;
+  float offset;
+  float smooth_factor;
+} t_NVR_Receiver;
+
+typedef struct {    
   t_NVR_PID ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVELROLL_PID_GAIN_ADR;
   t_NVR_PID YAW_PID_GAIN_ADR;
@@ -266,8 +273,9 @@ typedef struct {
   t_NVR_PID HEADING_PID_GAIN_ADR;
   t_NVR_PID LEVEL_GYRO_ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVEL_GYRO_PITCH_PID_GAIN_ADR;
-  t_NVR_PID ALTITUDE_PGAIN_ADR;
-  t_NVR_PID ZDAMP_PGAIN_ADR;
+  t_NVR_PID ALTITUDE_PID_GAIN_ADR;
+  t_NVR_PID ZDAMP_PID_GAIN_ADR;
+  t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
@@ -276,16 +284,18 @@ typedef struct {
   float ACCEL_XAXIS_ZERO_ADR;
   float ACCEL_YAXIS_ZERO_ADR;
   float ACCEL_ZAXIS_ZERO_ADR;
-  float ACCEL_1G_ADR;
   float FILTERTERM_ADR;
   float HEADINGSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
   float MINACRO_ADR;
+  float ACCEL_1G_ADR;
+//  float ALTITUDE_PGAIN_ADR;
   float ALTITUDE_MAX_THROTTLE_ADR;
   float ALTITUDE_MIN_THROTTLE_ADR;
   float ALTITUDE_SMOOTH_ADR;
+//  float ZDAMP_PGAIN_ADR;
   float ALTITUDE_WINDUP_ADR;
   float MAGXMAX_ADR;
   float MAGXMIN_ADR;
@@ -298,26 +308,8 @@ typedef struct {
   float GYRO_ROLL_ZERO_ADR;
   float GYRO_PITCH_ZERO_ADR;
   float GYRO_YAW_ZERO_ADR;
-
-  float RECEIVER_CHANNEL_0_SLOPE_ADR;
-  float RECEIVER_CHANNEL_0_OFFSET_ADR;
-  float RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_1_SLOPE_ADR;
-  float RECEIVER_CHANNEL_1_OFFSET_ADR;
-  float RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_2_SLOPE_ADR;
-  float RECEIVER_CHANNEL_2_OFFSET_ADR;
-  float RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_3_SLOPE_ADR;
-  float RECEIVER_CHANNEL_3_OFFSET_ADR;
-  float RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_4_SLOPE_ADR;
-  float RECEIVER_CHANNEL_4_OFFSET_ADR;
-  float RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR;
-  float RECEIVER_CHANNEL_5_SLOPE_ADR;
-  float RECEIVER_CHANNEL_5_OFFSET_ADR;
-  float RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR;
 } t_NVR_Data;  
+
 
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
@@ -342,6 +334,11 @@ void readPilotCommands(void);
 //////////////////////////////////////////////////////
 
 // defined in FlightControl.pde Flight control needs
+unsigned long lastSampleTime;
+float accelSample[3];
+float gyroSample[3];
+byte sampleCount;
+
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
@@ -361,19 +358,13 @@ int motorAxisCommandYaw = 0;
 #endif
 
 
+
 void calculateFlightError();
 void processHeading();
 void processAltitudeHold();
 void processCalibrateESC();
 void processFlightControl();
 void processAltitudeHold();
-
-
-unsigned long lastSampleTime;
-float accelSample[3];
-float gyroSample[3];
-float sampleCount;
-
 //////////////////////////////////////////////////////
 
 //defined in SerialCom.pde

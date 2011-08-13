@@ -33,9 +33,7 @@
 //#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
 #define YAW_DIRECTION -1
 
-#define MAX_RECEIVER_OFFSET 50
-
-//unsigned long previousServoTime = 0;
+#define MAX_RECEIVER_OFFSET 10
 
 void applyMotorCommand() {
   motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3);

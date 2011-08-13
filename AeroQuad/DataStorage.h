@@ -126,8 +126,6 @@ void initializeEEPROM(void) {
   }
     
   receiver->setXmitFactor(1.0);
-//  levelLimit = 500.0;
-//  levelOff = 150.0;
   gyro->setSmoothFactor(1.0);
   accel->setSmoothFactor(1.0);
   // AKA - old setOneG not in SI - accel->setOneG(500);
@@ -174,14 +172,14 @@ void readEEPROM(void) {
 
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
-  readPID(ALTITUDE, ALTITUDE_PGAIN_ADR);
+  readPID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
   PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
   minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
     barometricSensor->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
   #endif
-  readPID(ZDAMPENING, ZDAMP_PGAIN_ADR);
+  readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
 
   #ifdef HeadingMagHold
     compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
@@ -197,8 +195,6 @@ void readEEPROM(void) {
         PID[i].windupGuard = windupGuard;
   }
     
-//  levelLimit = readFloat(LEVELLIMIT_ADR);
-//  levelOff = readFloat(LEVELOFF_ADR);
   timeConstant = readFloat(FILTERTERM_ADR);
   smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
@@ -233,7 +229,7 @@ void writeEEPROM(void){
   writePID(HEADING, HEADING_PID_GAIN_ADR);
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  writePID(ALTITUDE, ALTITUDE_PGAIN_ADR);
+  writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
   writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
@@ -242,7 +238,7 @@ void writeEEPROM(void){
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
-  writePID(ZDAMPENING, ZDAMP_PGAIN_ADR);
+  writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
   #ifdef HeadingMagHold
     writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
     writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
@@ -259,32 +255,16 @@ void writeEEPROM(void){
     writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-//  writeFloat(levelLimit, LEVELLIMIT_ADR);
-//  writeFloat(levelOff, LEVELOFF_ADR);
   writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
   writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
   writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-
-  writeFloat(receiver->getTransmitterSlope(0),  RECEIVER_CHANNEL_0_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(0), RECEIVER_CHANNEL_0_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(0),      RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver->getTransmitterSlope(1),  RECEIVER_CHANNEL_1_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(1), RECEIVER_CHANNEL_1_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(1),      RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver->getTransmitterSlope(2),  RECEIVER_CHANNEL_2_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(2), RECEIVER_CHANNEL_2_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(2),      RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver->getTransmitterSlope(3),  RECEIVER_CHANNEL_3_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(3), RECEIVER_CHANNEL_3_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(3),      RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver->getTransmitterSlope(4),  RECEIVER_CHANNEL_4_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(4), RECEIVER_CHANNEL_4_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(4),      RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR);
-  writeFloat(receiver->getTransmitterSlope(5),  RECEIVER_CHANNEL_5_SLOPE_ADR);
-  writeFloat(receiver->getTransmitterOffset(5), RECEIVER_CHANNEL_5_OFFSET_ADR);
-  writeFloat(receiver->getSmoothFactor(5),      RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR);
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    writeFloat(receiver->getTransmitterSlope(channel),  RECEIVER_DATA[channel].slope);
+    writeFloat(receiver->getTransmitterOffset(channel), RECEIVER_DATA[channel].offset);
+    writeFloat(receiver->getSmoothFactor(channel),      RECEIVER_DATA[channel].smooth_factor);
+  }
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
@@ -320,7 +300,6 @@ void initSensorsZeroFromEEPROM(void) {
   
   // Accel initialization from EEPROM
   accel->setOneG(readFloat(ACCEL_1G_ADR));
-//  Serial.print("read zero : ");  Serial.println(readFloat(ACCEL_XAXIS_ZERO_ADR));
   accel->setZero(XAXIS,readFloat(ACCEL_XAXIS_ZERO_ADR));
   accel->setZero(YAXIS,readFloat(ACCEL_YAXIS_ZERO_ADR));
   accel->setZero(ZAXIS,readFloat(ACCEL_ZAXIS_ZERO_ADR));
@@ -336,7 +315,6 @@ void storeSensorsZeroToEEPROM(void) {
   
   // Store accel data to EEPROM
   writeFloat(accel->getOneG(), ACCEL_1G_ADR);
-//  Serial.print("write zero : ");  Serial.println(readFloat(ACCEL_XAXIS_ZERO_ADR));
   writeFloat(accel->getZero(XAXIS), ACCEL_XAXIS_ZERO_ADR);
   writeFloat(accel->getZero(YAXIS), ACCEL_YAXIS_ZERO_ADR);
   writeFloat(accel->getZero(ZAXIS), ACCEL_ZAXIS_ZERO_ADR);
@@ -345,24 +323,11 @@ void storeSensorsZeroToEEPROM(void) {
 
 void initReceiverFromEEPROM(void) {
   receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
-
-  receiver->setTransmitterSlope(0,readFloat(RECEIVER_CHANNEL_0_SLOPE_ADR));
-  receiver->setTransmitterOffset(0,readFloat(RECEIVER_CHANNEL_0_OFFSET_ADR));
-  receiver->setSmoothFactor(0,readFloat(RECEIVER_CHANNEL_0_SMOOTH_FACTOR_ADR));
-  receiver->setTransmitterSlope(1,readFloat(RECEIVER_CHANNEL_1_SLOPE_ADR));
-  receiver->setTransmitterOffset(1,readFloat(RECEIVER_CHANNEL_1_OFFSET_ADR));
-  receiver->setSmoothFactor(1,readFloat(RECEIVER_CHANNEL_1_SMOOTH_FACTOR_ADR));
-  receiver->setTransmitterSlope(2,readFloat(RECEIVER_CHANNEL_2_SLOPE_ADR));
-  receiver->setTransmitterOffset(2,readFloat(RECEIVER_CHANNEL_2_OFFSET_ADR));
-  receiver->setSmoothFactor(2,readFloat(RECEIVER_CHANNEL_2_SMOOTH_FACTOR_ADR));
-  receiver->setTransmitterSlope(3,readFloat(RECEIVER_CHANNEL_3_SLOPE_ADR));
-  receiver->setTransmitterOffset(3,readFloat(RECEIVER_CHANNEL_3_OFFSET_ADR));
-  receiver->setSmoothFactor(3,readFloat(RECEIVER_CHANNEL_3_SMOOTH_FACTOR_ADR));
-  receiver->setTransmitterSlope(4,readFloat(RECEIVER_CHANNEL_4_SLOPE_ADR));
-  receiver->setTransmitterOffset(4,readFloat(RECEIVER_CHANNEL_4_OFFSET_ADR));
-  receiver->setSmoothFactor(4,readFloat(RECEIVER_CHANNEL_4_SMOOTH_FACTOR_ADR));
-  receiver->setTransmitterSlope(5,readFloat(RECEIVER_CHANNEL_5_SLOPE_ADR));
-  receiver->setTransmitterOffset(5,readFloat(RECEIVER_CHANNEL_5_OFFSET_ADR));
-  receiver->setSmoothFactor(5,readFloat(RECEIVER_CHANNEL_5_SMOOTH_FACTOR_ADR));
+  
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    receiver->setTransmitterSlope(channel,readFloat(RECEIVER_DATA[channel].slope));
+    receiver->setTransmitterOffset(channel,readFloat(RECEIVER_DATA[channel].offset));
+    receiver->setSmoothFactor(channel,readFloat(RECEIVER_DATA[channel].smooth_factor));
+  }
 }
 
