@@ -189,9 +189,6 @@ void processFlightControl() {
   // ********************** Update Yaw ***************************************
   processHeading();
 
-  // ********************** Altitude Adjust **********************************
-//  processAltitudeHold();     // move in the main loop executive
-
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
     applyMotorCommand();
