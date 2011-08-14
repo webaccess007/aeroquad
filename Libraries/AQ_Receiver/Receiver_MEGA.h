@@ -21,9 +21,11 @@
 #ifndef _AEROQUAD_RECEIVER_MEGA_H_
 #define _AEROQUAD_RECEIVER_MEGA_H_
 
+
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 #include <WProgram.h>
 #include "Receiver.h"
-
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
@@ -32,9 +34,6 @@
 #define MINOFFWIDTH 12000
 #define MAXOFFWIDTH 24000
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-
-#include "Receiver_MEGA.h"
 #include "pins_arduino.h"
 #include <AQMath.h>
 #include <Axis.h>
@@ -112,50 +111,45 @@ SIGNAL(PCINT2_vect) {
   static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #endif
 
-
-
-
-class Receiver_MEGA : public Receiver {
-public:  
-  Receiver_MEGA() {
-  }
-
-  void initialize(int nbChannel = 6) {
-    DDRK = 0;
-    PORTK = 0;
-    PCMSK2 |= 0xFF;
-    PCICR |= 0x1 << 2;
-	
-	Receiver::initialize(nbChannel);
-
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      pinData[receiverPin[channel]].edge = FALLING_EDGE;
-  }
-
-  void read(void) {
-    for(byte channel = ROLL; channel < lastChannel; channel++) {
-      byte pin = receiverPin[channel];
-      uint8_t oldSREG = SREG;
-      cli();
-      // Get receiver value read by pin change interrupt handler
-      uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-      SREG = oldSREG;
-
-      // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
-      // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-    }
-
-    // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    // No xmitFactor reduction applied for throttle, mode and AUX
-    for (byte channel = THROTTLE; channel < lastChannel; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
-  }
+void initializeReceiver(int nbChannel = 6) {
   
-};
+  DDRK = 0;
+  PORTK = 0;
+  PCMSK2 |= 0xFF;
+  PCICR |= 0x1 << 2;
+	
+  initializeReceiverParam(nbChannel);
+
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    pinData[receiverPin[channel]].edge = FALLING_EDGE;
+}
+
+void readReceiver() {
+  for(byte channel = ROLL; channel < lastChannel; channel++) {
+    byte pin = receiverPin[channel];
+    uint8_t oldSREG = SREG;
+    cli();
+    // Get receiver value read by pin change interrupt handler
+    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+    SREG = oldSREG;
+
+    // Apply receiver calibration adjustment
+    receiverData[channel] = (receiverSlope[channel] * lastGoodWidth) + receiverOffset[channel];
+    // Smooth the flight control receiver inputs
+    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
+  }
+
+  // Reduce receiver commands using receiverXmitFactor and center around 1500
+  for (byte channel = ROLL; channel < THROTTLE; channel++)
+    receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+  // No xmitFactor reduction applied for throttle, mode and AUX
+  for (byte channel = THROTTLE; channel < lastChannel; channel++)
+    receiverCommand[channel] = receiverCommandSmooth[channel];
+}
+  
+void setChannelValue(byte channel,int value) {
+}  
+
 #endif
 
 #endif

@@ -125,18 +125,18 @@ void initializeEEPROM(void) {
         PID[i].typePID = NOTYPE;
   }
     
-  receiver->setXmitFactor(1.0);
+  receiverXmitFactor = 1.0;
   gyroSmoothFactor = 1.0;
   accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = 9.80665; // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver->setTransmitterSlope(channel, 1.0);
-    receiver->setTransmitterOffset(channel, 0.0);
-    receiver->setSmoothFactor(channel, 1.0);
+    receiverSlope[channel] = 1.0;
+    receiverOffset[channel] = 0.0;
+    receiverSmoothFactor[channel] = 1.0;
   }
-  receiver->setSmoothFactor(YAW, 0.5);
+  receiverSmoothFactor[YAW] = 0.5;
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -255,15 +255,15 @@ void writeEEPROM(void){
     writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
+  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
   writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    writeFloat(receiver->getTransmitterSlope(channel),  RECEIVER_DATA[channel].slope);
-    writeFloat(receiver->getTransmitterOffset(channel), RECEIVER_DATA[channel].offset);
-    writeFloat(receiver->getSmoothFactor(channel),      RECEIVER_DATA[channel].smooth_factor);
+    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
+    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
+    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
@@ -322,12 +322,12 @@ void storeSensorsZeroToEEPROM(void) {
 }
 
 void initReceiverFromEEPROM(void) {
-  receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
+  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver->setTransmitterSlope(channel,readFloat(RECEIVER_DATA[channel].slope));
-    receiver->setTransmitterOffset(channel,readFloat(RECEIVER_DATA[channel].offset));
-    receiver->setSmoothFactor(channel,readFloat(RECEIVER_DATA[channel].smooth_factor));
+    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
+    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
+    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
   }
 }
 

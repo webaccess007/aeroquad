@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Org   -> accel -> gyro
-// 38182 -> 38124 -> 37992
+// Org   -> accel -> gyro  -> rec
+// 38182 -> 38124 -> 37992 -> 37568
 
 
 /****************************************************************************
@@ -153,7 +153,6 @@
 //********************************************************
 #ifdef AeroQuad_v1
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
@@ -190,7 +189,6 @@
 
 #ifdef AeroQuad_v1_IDG
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
@@ -229,7 +227,6 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
   
   // Accelerometer declaraion
@@ -284,7 +281,6 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
@@ -334,7 +330,6 @@
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
@@ -373,11 +368,9 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
   
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_BMA180.h>
 
   // Receiver Declaration
@@ -444,7 +437,6 @@
   #include <Device_I2C.h>
 
   // Gyroscope declaration 
-  #include <Gyroscope.h>
   #include <Gyroscope_APM.h>
   
   // Accelerometer Declaration
@@ -503,7 +495,6 @@
   Platform_Wii platformWii;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
 
   // Accelerometer declaration
@@ -565,7 +556,6 @@
   Platform_Wii platformWii;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
 
   // Accelerometer declaration
@@ -620,7 +610,6 @@
   CHR6DM chr6dm;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_CHR6DM.h>
 
   // Accelerometer declaration
@@ -691,7 +680,6 @@
   CHR6DM chr6dm;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_CHR6DM.h>
   
   // Accelerometer declaration
@@ -788,61 +776,31 @@ Kinematics *kinematics = &tempKinematics;
 //******************** RECEIVER DECLARATION **************
 //********************************************************
 #if defined (AeroQuad_Mini) && defined (hexY6Config)
-  #include <Receiver.h>
   #include <Receiver_PPM.h>
-  Receiver_PPM receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RemotePCReceiver
-  #include <Receiver.h>
   #include <Receiver_RemotePC.h>
-  Receiver_RemotePC receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_328P
-  #include <Receiver.h>
   #include <Receiver_328p.h>
-  Receiver_328p receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_MEGA
-  #include <Receiver.h>
   #include <Receiver_MEGA.h>
-  Receiver_MEGA receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_APM
-  #include <Receiver.h>
   #include <Receiver_APM.h>
-  Receiver_APM receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #endif
 
 
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined triConfig 
-  #include <Motors.h>
-  #include <Motors_PWM_Tri.h>
-  Motors_PWM_Tri motorsSpecific;
-  Motors *motors = &motorsSpecific;
-#elif defined MOTOR_PWM
-  #include <Motors.h>
+//#if defined triConfig 
+//  #include <Motors_PWM_Tri.h>
+#if defined MOTOR_PWM
   #include <Motors_PWM.h>
-  Motors_PWM motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_PWM_Timer
-  #include <Motors.h>
   #include <Motors_PWM_Timer.h>
-  Motors_PWM_Timer motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_APM
-  #include <Motors.h>
   #include <Motors_APM.h>
-  Motors_APM motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_I2C
-  #include <Motors.h>
   #include <Motors_I2C.h>
-  Motors_I2C motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #endif
 
 //********************************************************
@@ -959,17 +917,17 @@ void setup() {
   
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
-     motors->initialize(); 
+     initializeMotors(); 
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
-     motors->initialize(SIX_Motors); 
+     initializeMotors(SIX_Motors); 
   #elif defined (octoX8Congig)
-     motors->initialize(HEIGHT_Motors); 
+     initializeMotors(HEIGHT_Motors); 
   #endif
 
 
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON) {
-    receiver->initialize(LASTCHANNEL);
+    initializeReceiver(LASTCHANNEL);
     initReceiverFromEEPROM();
   }
        

@@ -21,6 +21,8 @@
 #ifndef _AEROQUAD_RECEIVER_PPM_H_
 #define _AEROQUAD_RECEIVER_PPM_H_
 
+#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
+
 #include <WProgram.h>
 #include "Receiver.h"
 
@@ -30,9 +32,6 @@
 #define MAXONWIDTH 2075
 #define MINOFFWIDTH 12000
 #define MAXOFFWIDTH 24000
-
-#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
-
 
 #include "pins_arduino.h"
 #include <AQMath.h>
@@ -75,49 +74,36 @@ static void rxInt() {
 
 
 
-class Receiver_PPM : public Receiver {
-private:
-  
-  
-public:  
-  Receiver_PPM() {
-  }
+void initializeReceiver(int nbChannel = 6) {
+  initializeReceiverParam(nbChannel);
+  attachInterrupt(0, rxInt, RISING);
+}
 
-  void initialize(int nbChannel = 6) {
-    Receiver::initialize(nbChannel);
-    attachInterrupt(0, rxInt, RISING);
-  }
-
-  void read(void) {
+void readReceiver(void) {
   
-    
-	for(byte channel = ROLL; channel < lastChannel; channel++) {
-	  uint8_t oldSREG;
-      oldSREG = SREG;
-      cli(); // Let's disable interrupts
+  for(byte channel = ROLL; channel < lastChannel; channel++) {
+    uint8_t oldSREG;
+    oldSREG = SREG;
+    cli(); // Let's disable interrupts
 
-	  receiverData[channel] = (mTransmitter[channel] * rcValue[rcChannel[channel]]) + bTransmitter[channel];
+    receiverData[channel] = (receiverSlope[channel] * rcValue[rcChannel[channel]]) + receiverOffset[channel];
 	  
-	  SREG = oldSREG;
-      sei();// Let's enable the interrupts	
+	SREG = oldSREG;
+    sei();// Let's enable the interrupts	
 	
-      // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-	}
-	
-	
-	
-    // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      if (channel < THROTTLE)
-        transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-      else
-        // No xmitFactor reduction applied for throttle, mode and
-        transmitterCommand[channel] = transmitterCommandSmooth[channel];
-		
-	
+    // Smooth the flight control receiver inputs
+    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }
-};
+	
+  // Reduce receiver commands using xmitFactor and center around 1500
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    if (channel < THROTTLE)
+      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+    else
+      // No xmitFactor reduction applied for throttle, mode and
+      receiverCommand[channel] = receiverCommandSmooth[channel];
+}
+
 
 #endif
 

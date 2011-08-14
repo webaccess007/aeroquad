@@ -41,38 +41,21 @@ enum NB_Motors{
   HEIGHT_Motors = 8
 };
 
-
-class Motors {
-protected:
-  int motorCommand[8];  // LASTMOTOR not know here, so, default at 8 @todo : Kenny, find a better way
+NB_Motors numberOfMotors;
+int motorCommand[8];  // LASTMOTOR not know here, so, default at 8 @todo : Kenny, find a better way
   
-public:
+void initializeMotors(NB_Motors numbers = FOUR_Motors);
+void writeMotors();
+void commandAllMotors(int command);
 
-  Motors() {
+void pulseMotors(byte nbPulse) {
+  for (byte i = 0; i < nbPulse; i++) {
+    commandAllMotors(MINCOMMAND + 100);
+    delay(250);
+    commandAllMotors(MINCOMMAND);
+    delay(250);
   }
-	
-  virtual void initialize(NB_Motors numbers = FOUR_Motors) {}
-  virtual void write() {}
-  virtual void commandAllMotors(int command) {}
-
-  void pulseMotors(byte nbPulse) {
-    for (byte i = 0; i < nbPulse; i++) {
-      commandAllMotors(MINCOMMAND + 100);
-      delay(250);
-      commandAllMotors(MINCOMMAND);
-      delay(250);
-    }
-  }
-
-  void setMotorCommand(byte motor, int command) {
-    motorCommand[motor] = command;
-  }
-
-  int getMotorCommand(byte motor) {
-    return motorCommand[motor];
-  }
-};
-
+}
 
 
 #endif

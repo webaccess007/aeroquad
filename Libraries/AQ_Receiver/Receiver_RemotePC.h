@@ -24,32 +24,28 @@
 #include <WProgram.h>
 #include "Receiver.h"
 
-class Receiver_RemotePC : public Receiver {
-public:  
-  Receiver_RemotePC() {
+void initializeReceiver(int nbChannel = 6) {
+  initializeReceiverParam(nbChannel)
+  for (byte channel = ROLL; channel < THROTTLE; channel++) {
+    receiverCommand[channel] = 1500;
+    receiverZero[channel] = 1500;
   }
+  receiverCommand[THROTTLE] = 0;
+  receiverZero[THROTTLE] = 0;
+  receiverCommand[MODE] = 2000;
+  receiverZero[MODE] = 0;
+  receiverCommand[AUX] = 2000;
+  receiverZero[AUX] = 0;
+}
 
-  void initialize(void) {
-	for (byte channel = ROLL; channel < THROTTLE; channel++) {
-	  transmitterCommand[channel] = 1500;
-      transmitterZero[channel] = 1500;
-	}
-    transmitterCommand[THROTTLE] = 0;
-    transmitterZero[THROTTLE] = 0;
-	transmitterCommand[MODE] = 2000;
-	transmitterZero[MODE] = 0;
-	transmitterCommand[AUX] = 2000;
-	transmitterZero[AUX] = 0;
-  }
-
-  void read(void) {
-    // do nothing here
-  }
+void readReceiver() {
+  // do nothing here
+}
   
-  void setChannelValue(byte channel,int value) {
-	transmitterCommand[channel] = value;
-  }
-};
+void setChannelValue(byte channel,int value) {
+  receiverCommand[channel] = value;
+}
+
 
 #endif
 

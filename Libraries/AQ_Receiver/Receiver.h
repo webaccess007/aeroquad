@@ -37,116 +37,51 @@
 #define LEVELOFF 100
 #define MAX_NB_CHANNEL 8
 
-//int delta;
+int lastChannel;
 
-
-class Receiver {
-protected:
+float receiverXmitFactor;
+int receiverData[MAX_NB_CHANNEL];
+int receiverTrim[3];
+int receiverZero[3];
+int receiverCommand[MAX_NB_CHANNEL];
+int receiverCommandSmooth[MAX_NB_CHANNEL];
+float receiverSlope[MAX_NB_CHANNEL];
+float receiverOffset[MAX_NB_CHANNEL];
+float receiverSmoothFactor[MAX_NB_CHANNEL];
   
-  int lastChannel;
 
-  float xmitFactor;
-  int receiverData[MAX_NB_CHANNEL];
-  int transmitterTrim[3];
-  int transmitterZero[3];
-  int transmitterCommand[MAX_NB_CHANNEL];
-  int transmitterCommandSmooth[MAX_NB_CHANNEL];
-  float mTransmitter[MAX_NB_CHANNEL];
-  float bTransmitter[MAX_NB_CHANNEL];
-  float transmitterSmooth[MAX_NB_CHANNEL];
+void initializeReceiverParam(int nbChannel = 6) {
   
-public:  
-  Receiver() {
-
-    transmitterCommand[ROLL] = 1500;
-    transmitterCommand[PITCH] = 1500;
-    transmitterCommand[YAW] = 1500;
-    transmitterCommand[THROTTLE] = 1000;
-    transmitterCommand[MODE] = 1000;
-    transmitterCommand[AUX] = 1000;
-  }
-
-
-  virtual void initialize(int nbChannel = 6) {
-    lastChannel = nbChannel;
+  receiverCommand[ROLL] = 1500;
+  receiverCommand[PITCH] = 1500;
+  receiverCommand[YAW] = 1500;
+  receiverCommand[THROTTLE] = 1000;
+  receiverCommand[MODE] = 1000;
+  receiverCommand[AUX] = 1000;
 	
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      transmitterCommandSmooth[channel] = 1.0;
-    for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterZero[channel] = 1500;
+  lastChannel = nbChannel;
 	
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      mTransmitter[channel] = 1;
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      bTransmitter[channel] = 1;
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      transmitterSmooth[channel] = 1; 
-  }
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    receiverCommandSmooth[channel] = 1.0;
+  for (byte channel = ROLL; channel < THROTTLE; channel++)
+    receiverZero[channel] = 1500;
+	
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    receiverSlope[channel] = 1;
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    receiverOffset[channel] = 1;
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    receiverSmoothFactor[channel] = 1; 
+}
   
-  virtual void read(void) {}
-  virtual void setChannelValue(byte channel,int value) {}
+void readReceiver();
+void setChannelValue(byte channel,int value);
   
+// return the smoothed & scaled number of radians/sec in stick movement - zero centered
+const float getReceiverSIData(byte channel) {
+  return ((receiverCommand[channel] - receiverZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
+}
 
-  const float getXmitFactor(void) {
-    return xmitFactor;
-  }
-
-  void setXmitFactor(float value) {
-    xmitFactor = value;
-  }
-
-  const float getTransmitterSlope(byte channel) {
-    return mTransmitter[channel];
-  }
-
-  void setTransmitterSlope(byte channel, float value) {
-    mTransmitter[channel] = value;
-  }
-
-  const float getTransmitterOffset(byte channel) {
-    return bTransmitter[channel];
-  }
-
-  void setTransmitterOffset(byte channel, float value) {
-    bTransmitter[channel] = value;
-  }
-
-  const float getSmoothFactor(byte channel) {
-    return transmitterSmooth[channel];
-  }
-
-  void setSmoothFactor(byte channel, float value) {
-    transmitterSmooth[channel] = value;
-  }
-
-  const int getTransmitterTrim(byte channel) {
-    return transmitterTrim[channel];
-  }
-
-  void setTransmitterTrim(byte channel, int value) {
-    transmitterTrim[channel] = value;
-  }
-
-  // return the smoothed & scaled number of radians/sec in stick movement - zero centered
-  const float getSIData(byte channel) {
-    return ((transmitterCommand[channel] - transmitterZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
-  }
-
-  // returns Zero value of channel in PWM
-  const int getZero(byte channel) {
-    return transmitterZero[channel];
-  }
-  
-  // sets zero value of channel in PWM  
-  void setZero(byte channel, int value) {
-    transmitterZero[channel] = value;
-  }
-
-  // returns smoothed & scaled receiver(channel) in PWM values, zero centered
-  const int getData(byte channel) {
-    return transmitterCommand[channel];
-  }
-};
 #endif
 
 

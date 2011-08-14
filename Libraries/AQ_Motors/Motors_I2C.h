@@ -35,38 +35,29 @@
 #define MOTOR_ADDR_5  MOTORBASE + 6
 
 
-class Motors_I2C : public Motors {
-private:
-  byte motorAddress[6];
-  byte lastMotor;
+byte motorAddress[6];
   
-public:
+void initializeMotors(NB_Motors numbers) {
+  motorAddress[MOTOR1] = MOTOR_ADDR_0;
+  motorAddress[MOTOR2] = MOTOR_ADDR_1;
+  motorAddress[MOTOR3] = MOTOR_ADDR_2;
+  motorAddress[MOTOR4] = MOTOR_ADDR_3;
+  motorAddress[MOTOR5] = MOTOR_ADDR_4;
+  motorAddress[MOTOR6] = MOTOR_ADDR_5;
 
-  Motors_I2C() {
-    motorAddress[MOTOR1] = MOTOR_ADDR_0;
-    motorAddress[MOTOR2] = MOTOR_ADDR_1;
-    motorAddress[MOTOR3] = MOTOR_ADDR_2;
-    motorAddress[MOTOR4] = MOTOR_ADDR_3;
-    motorAddress[MOTOR5] = MOTOR_ADDR_4;
-    motorAddress[MOTOR6] = MOTOR_ADDR_5;
-  }
+  numberOfMotors = numbers;
+  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
+    sendByteI2C(motorAddress[motor], 0);
+}
 
-  void initialize(NB_Motors numbers) {
-    lastMotor = numbers;
-    for (byte motor = MOTOR1; motor < lastMotor; motor++)
-      sendByteI2C(motorAddress[motor], 0);
-  }
+void writeMotors() {
+  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
+    sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
+}
 
-  void write() {
-    for (byte motor = MOTOR1; motor < lastMotor; motor++)
-      sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
-  }
-
-  void commandAllMotors(int command) {
-    for (byte motor = MOTOR1; motor < lastMotor; motor++)
-      sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
-  }
+void commandAllMotors(int command) {
+  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
+    sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
+}
   
-};
-
 #endif
