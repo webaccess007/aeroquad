@@ -24,14 +24,16 @@
 #include "WProgram.h"
 
 class BarometricSensor {
-public:
+protected:
   double altitude, rawAltitude;
   float groundTemperature; // remove later
   float groundPressure; // remove later
   float groundAltitude;
   float smoothFactor;
   
-  BarometricSensor (void) { 
+public:
+  
+  BarometricSensor() { 
     altitude = 0;
     smoothFactor = 0.02;
   }
@@ -39,25 +41,25 @@ public:
   // **********************************************************************
   // The following function calls must be defined inside any new subclasses
   // **********************************************************************
-  virtual void initialize(void); 
-  virtual void measure(void);
+  virtual void initialize(); 
+  virtual void measure();
   
   // *********************************************************
   // The following functions are common between all subclasses
   // *********************************************************
-  const float getAltitude(void) {
+  const float getAltitude() {
     return altitude - groundAltitude;
   }
-  
-  const float getRawData(void) {
-    return rawAltitude;
+ 
+  void setSmoothFactor(float value) {
+    smoothFactor = value;
   }
   
-  void setStartAltitude(float value) {
-    altitude = value;
+  const float getSmoothFactor() {
+    return smoothFactor;
   }
   
-  void measureGround(void) {
+  void measureGround() {
     // measure initial ground pressure (multiple samples)
     groundAltitude = 0;
     for (int i=0; i < 25; i++) {
@@ -67,21 +69,17 @@ public:
     }
     groundAltitude = groundAltitude / 25.0;
   }
-  
-  void setGroundAltitude(float value) {
-    groundAltitude = value;
+
+  const float getRawData() {
+    return rawAltitude;
   }
   
-  const float getGroundAltitude(void) {
+  const float getGroundAltitude() {
     return groundAltitude;
   }
-  
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
-  }
-  
-  const float getSmoothFactor(void) {
-    return smoothFactor;
+
+  void setStartAltitude(float value) {
+    altitude = value;
   }
 };
 

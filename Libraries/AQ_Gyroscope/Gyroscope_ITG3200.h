@@ -34,11 +34,15 @@
 #define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
 #define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
 
-int gyroAddress;
+int gyroAddress = ITG3200_ADDRESS;
+  
+//    gyroAddress = ITG3200_ADDRESS;
+//    if (useSeccondAddress)
+//	  gyroAddress = ITG3200_ADDRESS-1;
+  
 
 void initializeGyro() {
   gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
-  gyroAddress = ITG3200_ADDRESS;
   gyroSmoothFactor = 1.0;
   updateRegisterI2C(gyroAddress, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
   updateRegisterI2C(gyroAddress, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_MEMORY_ADDRESS); // 10Hz low pass filter
@@ -59,20 +63,20 @@ void measureGyro() {
   gyroADC[YAW]   = gyroZero[YAW] - ((Wire.receive() << 8) | Wire.receive());
 
   for (byte axis = 0; axis <= YAW; axis++) {
-    radPerSec[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, radPerSec[axis], gyroSmoothFactor);
+    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
   }
  
   // Measure gyro heading
   long int currentTime = micros();
-  if (radPerSec[YAW] > radians(1.0) || radPerSec[YAW] < radians(-1.0)) {
-    gyroHeading += radPerSec[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    heading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }
 
 void calibrateGyro() {
   int findZero[FINDZERO];
-   
+    
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
       sendByteI2C(gyroAddress, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
@@ -82,4 +86,5 @@ void calibrateGyro() {
     gyroZero[axis] = findMedianInt(findZero, FINDZERO);
   }
 }
+
 #endif

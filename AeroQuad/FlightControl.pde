@@ -31,18 +31,15 @@
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), radPerSec[ROLL], &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -radPerSec[PITCH], &PID[PITCH]);
+    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), gyroRate[ROLL], &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
   }
   else {
     
     float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, kinematics->getData(ROLL), &PID[LEVELROLL]);
     float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -kinematics->getData(PITCH), &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, radPerSec[ROLL], &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -radPerSec[PITCH], &PID[LEVELGYROPITCH]);
-//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
-
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyroRate[PITCH], &PID[LEVELGYROPITCH]);
   }
 }
 
@@ -135,7 +132,7 @@ void processHeading(void)
   }
   // NEW SI Version
   commandedYaw = constrain(receiver->getSIData(YAW) + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, radPerSec[YAW], &PID[YAW]);
+  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[YAW], &PID[YAW]);
   // uses flightAngle unbias rate
   //motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }
@@ -188,9 +185,6 @@ void processFlightControl() {
   
   // ********************** Update Yaw ***************************************
   processHeading();
-
-  // ********************** Altitude Adjust **********************************
-//  processAltitudeHold();     // move in the main loop executive
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {

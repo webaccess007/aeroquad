@@ -30,7 +30,6 @@ private:
   float zeroRoll;
   float zeroPitch;
   CHR6DM *chr6dm;
-  Gyroscope* gyroscope;
 
 public:
   Kinematics_CHR6DM() : Kinematics() {}
@@ -39,10 +38,6 @@ public:
     this->chr6dm = chr6dm;
   }
   
-  void setGyroscope(Gyroscope *gyroscope) {
-    this->gyroscope = gyroscope;
-  }
-
   void initialize(float hdgX, float hdgY) {
     calibrate();
   }
@@ -64,7 +59,7 @@ public:
   }
   
   float getGyroUnbias(byte axis) {
-    return gyroscope->getRadPerSec(axis);
+    return gyroRate[axis];
   }
 
 };

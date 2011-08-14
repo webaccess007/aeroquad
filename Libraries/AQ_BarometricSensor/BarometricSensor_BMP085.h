@@ -36,9 +36,6 @@
 
 
 class BarometricSensor_BMP085 : public BarometricSensor {
-// This sets up the BMP085 from Sparkfun
-// Code from http://wiring.org.co/learning/libraries/bmp085.html
-// Also made bug fixes based on BMP085 library from Jordi Munoz and Jose Julio
 private:
   byte overSamplingSetting;
   int ac1, ac2, ac3;
@@ -46,19 +43,18 @@ private:
   int b1, b2, mb, mc, md;
   long pressure;
   long temperature;
-  int altitudeAddress;
   long rawPressure, rawTemperature;
   byte select, pressureCount;
   float pressureFactor;
   
   void requestRawPressure(void) {
-    updateRegisterI2C(altitudeAddress, 0xF4, 0x34+(overSamplingSetting<<6));
+    updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x34+(overSamplingSetting<<6));
   }
   
   long readRawPressure(void) {
     unsigned char msb, lsb, xlsb;
-    sendByteI2C(altitudeAddress, 0xF6);
-    Wire.requestFrom(altitudeAddress, 3); // request three bytes
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
+    Wire.requestFrom(BMP085_I2C_ADDRESS, 3); // request three bytes
     while(!Wire.available()); // wait until data available
     msb = Wire.receive();
     while(!Wire.available()); // wait until data available
@@ -69,17 +65,16 @@ private:
   }
 
   void requestRawTemperature(void) {
-    updateRegisterI2C(altitudeAddress, 0xF4, 0x2E);
+    updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x2E);
   }
   
   unsigned int readRawTemperature(void) {
-    sendByteI2C(altitudeAddress, 0xF6);
-    return readWordWaitI2C(altitudeAddress);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
+    return readWordWaitI2C(BMP085_I2C_ADDRESS);
   }
 
 public: 
   BarometricSensor_BMP085() : BarometricSensor(){
-    altitudeAddress = 0x77;
     // oversampling setting
     // 0 = ultra low power
     // 1 = standard
@@ -100,28 +95,28 @@ public:
   void initialize(void) {
 //    float verifyGroundAltitude;
     
-    sendByteI2C(altitudeAddress, 0xAA);
-    ac1 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xAC);
-    ac2 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xAE);
-    ac3 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB0);
-    ac4 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB2);
-    ac5 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB4);
-    ac6 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB6);
-    b1 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xB8);
-    b2 = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBA);
-    mb = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBC);
-    mc = readWordWaitI2C(altitudeAddress);
-    sendByteI2C(altitudeAddress, 0xBE);
-    md = readWordWaitI2C(altitudeAddress);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAA);
+    ac1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAC);
+    ac2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xAE);
+    ac3 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB0);
+    ac4 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB2);
+    ac5 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB4);
+    ac6 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB6);
+    b1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xB8);
+    b2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBA);
+    mb = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBC);
+    mc = readWordWaitI2C(BMP085_I2C_ADDRESS);
+    sendByteI2C(BMP085_I2C_ADDRESS, 0xBE);
+    md = readWordWaitI2C(BMP085_I2C_ADDRESS);
     requestRawTemperature(); // setup up next measure() for temperature
     select = TEMPERATURE;
     pressureCount = 0;
@@ -196,6 +191,9 @@ public:
     //rawAltitude = (101325.0-pressure)/4096*346;
     altitude = filterSmooth(rawAltitude, altitude, smoothFactor);
   }
+  
+  
+  
 };
 
 #endif

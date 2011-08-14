@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4.1 - June 2011
+  AeroQuad v2.5 Beta 1 - July 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -133,7 +133,7 @@
 #define AI_TOP_PIXEL ((RETICLE_ROW - AI_DISPLAY_RECT_HEIGHT/2)*18)
 #define AI_BOTTOM_PIXEL ((RETICLE_ROW + AI_DISPLAY_RECT_HEIGHT/2)*18)
 
-
+#ifdef MAX7456_OSD
 
 byte clear;
 
@@ -506,6 +506,9 @@ public:
   }
 
 };
+
+#endif
+
 
 #endif  //#define _AEROQUAD_OSD_MAX7456_H_
 

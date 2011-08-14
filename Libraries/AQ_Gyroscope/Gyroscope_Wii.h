@@ -24,70 +24,60 @@
 #include <Gyroscope.h>
 #include "../AQ_Platform_Wii/Platform_Wii.h"
 
-class Gyroscope_Wii : public Gyroscope {
-private:
-  float wmpLowRangeToRadPerSec;
-  float wmpHighRangeToRadPerSec;
+
+// Wii Motion+ has a low range and high range. Scaling is thought to be as follows:
+//
+// Vref = 1.35 volts
+// At 0 rate, reading is approximately 8063 bits
+// Scaling is then 1.35/8063, or 0.00016743 volts/bit
+//
+// Low Range
+//    440 degrees per second at 2.7 millivolts/degree (from datasheet)
+//    degrees per bit = 0.00016743 / 2.7 mVolts = 0.06201166 degrees per second per bit
+//                                              = 0.00108231 radians per second per bit
+// High Range
+//   2000 degrees per second at 0.5 millivolts/degree (from datasheet)
+//    degrees per bit = 0.00016743 / 0.5 mVolts = 0.33486295 degrees per second per bit
+//                                              = 0.00584446 radians per second per bit
+
+float wmpLowRangeToRadPerSec  = 0.001082308;
+float wmpHighRangeToRadPerSec = 0.005844461;
   
-  Platform_Wii *platformWii;
-  
+Platform_Wii *gyroPlatformWii;
 
-public:
-  Gyroscope_Wii() {
-    // Wii Motion+ has a low range and high range. Scaling is thought to be as follows:
-    //
-    // Vref = 1.35 volts
-    // At 0 rate, reading is approximately 8063 bits
-    // Scaling is then 1.35/8063, or 0.00016743 volts/bit
-    //
-    // Low Range
-    //    440 degrees per second at 2.7 millivolts/degree (from datasheet)
-    //    degrees per bit = 0.00016743 / 2.7 mVolts = 0.06201166 degrees per second per bit
-    //                                              = 0.00108231 radians per second per bit
-    // High Range
-    //   2000 degrees per second at 0.5 millivolts/degree (from datasheet)
-    //    degrees per bit = 0.00016743 / 0.5 mVolts = 0.33486295 degrees per second per bit
-    //                                              = 0.00584446 radians per second per bit
-    wmpLowRangeToRadPerSec  = 0.001082308;
-    wmpHighRangeToRadPerSec = 0.005844461;
-
-    lastMesuredTime = micros();
-  }
-
-  void setPlatformWii(Platform_Wii *platformWii) {
-    this->platformWii = platformWii;
-  }
-
-  void measure() {
-	int gyroADC[3];
-    gyroADC[ROLL] = zero[ROLL] - platformWii->getGyroADC(ROLL);
-	gyroADC[PITCH] = platformWii->getGyroADC(PITCH) - zero[PITCH];
-	gyroADC[YAW] = zero[YAW] - platformWii->getGyroADC(YAW);
-	
-	for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
-      float gyroScaleFactor = platformWii->getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
-      rate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, rate[axis], smoothFactor); 
-    }
-  
-    // Measure gyro heading
-    long int currentTime = micros();
-    if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
-      heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
-    }
-    lastMesuredTime = currentTime;
+void initializeGyro() {
 }
 
-  void calibrate() {
-    int findZero[FINDZERO];
-    
-    for (byte axis = ROLL; axis <= YAW; axis++) {
-      for (int i=0; i<FINDZERO; i++) {
-	    platformWii->measure();
-        findZero[i] = platformWii->getGyroADC(axis);
-        delay(5);
-      }
-      zero[axis] = findMedianInt(findZero, FINDZERO);
-    }
+void measureGyro() {
+  int gyroADC[3];
+  gyroADC[ROLL] = gyroZero[ROLL] - gyroPlatformWii->getGyroADC(ROLL);
+  gyroADC[PITCH] = gyroPlatformWii->getGyroADC(PITCH) - gyroZero[PITCH];
+  gyroADC[YAW] = gyroZero[YAW] - gyroPlatformWii->getGyroADC(YAW);
+	
+  for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
+    float gyroScaleFactor = gyroPlatformWii->getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
+    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
   }
-};
+  
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    heading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
+}
+
+void calibrateGyro() {
+  int findZero[FINDZERO];
+    
+  for (byte axis = ROLL; axis <= YAW; axis++) {
+    for (int i=0; i<FINDZERO; i++) {
+	  gyroPlatformWii->measure();
+      findZero[i] = gyroPlatformWii->getGyroADC(axis);
+      delay(5);
+    }
+    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
+  }
+}
+
 #endif

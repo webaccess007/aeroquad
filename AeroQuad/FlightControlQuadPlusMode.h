@@ -21,18 +21,31 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_PLUS_MODE_H_
 
+/*  
+                 CW
+            
+           0....Front....0  
+           ......***......    
+      CCW  ......***......  CCW
+           ......***......    
+           0....Back.....0  
+      
+                 CW
+*/     
+
+
 #define FRONT MOTOR1
 #define REAR  MOTOR2
 #define RIGHT MOTOR3
 #define LEFT  MOTOR4
 #define LASTMOTOR MOTOR4+1
 
-
 void applyMotorCommand() {
-  motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - motorAxisCommandYaw);
-  motors->setMotorCommand(REAR,  throttle + motorAxisCommandPitch - motorAxisCommandYaw);
-  motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll  + motorAxisCommandYaw);
-  motors->setMotorCommand(LEFT,  throttle + motorAxisCommandRoll  + motorAxisCommandYaw);
+  const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
+  motors->setMotorCommand(FRONT, (throttle - throttleCorrection) - motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR,  (throttle - throttleCorrection) + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(RIGHT, (throttle - throttleCorrection) - motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(LEFT,  (throttle - throttleCorrection) + motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
 }
 
 void processMinMaxCommand() {

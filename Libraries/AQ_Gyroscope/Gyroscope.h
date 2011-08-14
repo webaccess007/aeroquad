@@ -24,7 +24,7 @@
 #include <WProgram.h>
 #include <Axis.h>
 
-float radPerSec[3];
+float gyroRate[3];
 float gyroZero[3];
 float gyroSmoothFactor;
 float gyroScaleFactor;

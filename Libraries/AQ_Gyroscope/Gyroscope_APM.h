@@ -25,43 +25,41 @@
 
 //#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 
-class Gyroscope_APM : public Gyroscope {
-public:
-  Gyroscope_APM() {
-    gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
-    smoothFactor = 1.0;
+void initializeGyro() {
+  gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+  gyroSmoothFactor = 1.0;
+}
+  
+void measureGyro() {
+  int gyroADC;
+  for (byte axis = ROLL; axis <= YAW; axis++) {
+    float rawADC = readADC(axis);
+    if (rawADC > 500) // Check if good measurement
+      if (axis == ROLL)
+        gyroADC =  rawADC - gyroZero[axis];
+      else
+        gyroADC =  gyroZero[axis] - rawADC;
+    gyroRate[axis] = filterSmooth(gyroADC * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
   }
   
-  void measure(void) {
-    int gyroADC;
-    for (byte axis = ROLL; axis <= YAW; axis++) {
-      float rawADC = readADC(axis);
-      if (rawADC > 500) // Check if good measurement
-        if (axis == ROLL)
-          gyroADC =  rawADC - zero[axis];
-        else
-          gyroADC =  zero[axis] - rawADC;
-      rate[axis] = filterSmooth(gyroADC * gyroScaleFactor, rate[axis], smoothFactor);
-    }
-  
-    // Measure gyro heading
-    long int currentTime = micros();
-    if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
-      heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
-    }
-    lastMesuredTime = currentTime;
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    heading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
+  gyroLastMesuredTime = currentTime;
+}
 
-  void calibrate() {
-    int findZero[FINDZERO];
-    
-    for (byte axis = 0; axis < 3; axis++) {
-      for (int i=0; i<FINDZERO; i++) {
-	    findZero[i] = readADC(axis);
-        delay(10);
-      }
-      zero[axis] = findMedianInt(findZero, FINDZERO);
+void calibrateGyro() {
+  int findZero[FINDZERO];
+   
+  for (byte axis = 0; axis < 3; axis++) {
+    for (int i=0; i<FINDZERO; i++) {
+      findZero[i] = readADC(axis);
+      delay(10);
     }
+    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
   }
-};
+}
+
 #endif

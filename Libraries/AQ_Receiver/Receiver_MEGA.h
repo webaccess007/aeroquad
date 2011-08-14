@@ -103,12 +103,13 @@ SIGNAL(PCINT2_vect) {
   MegaPcIntISR();
 }
 
-#if defined (__AVR_ATmega1280__)
+// #ifdef AeroQuadMega_v1 is undefined in libraries,  @todo Kenny find another solution for this!
+#if defined (__AVR_ATmega1280__) 
   // arduino pins 67, 65, 64, 66, 63, 62
   static byte receiverPin[6] = {5, 3, 2, 4, 1, 0}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #else
- //arduino pins 63, 64, 65, 62, 66, 67
-  static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+  //arduino pins 63, 64, 65, 62, 66, 67
+  static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #endif
 
 
@@ -119,18 +120,20 @@ public:
   Receiver_MEGA() {
   }
 
-  void initialize(void) {
+  void initialize(int nbChannel = 6) {
     DDRK = 0;
     PORTK = 0;
-    PCMSK2 |= 0x3F;
+    PCMSK2 |= 0xFF;
     PCICR |= 0x1 << 2;
+	
+	Receiver::initialize(nbChannel);
 
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+    for (byte channel = ROLL; channel < lastChannel; channel++)
       pinData[receiverPin[channel]].edge = FALLING_EDGE;
   }
 
   void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for(byte channel = ROLL; channel < lastChannel; channel++) {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;
       cli();
@@ -148,7 +151,7 @@ public:
     for (byte channel = ROLL; channel < THROTTLE; channel++)
       transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
     // No xmitFactor reduction applied for throttle, mode and AUX
-    for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
+    for (byte channel = THROTTLE; channel < lastChannel; channel++)
       transmitterCommand[channel] = transmitterCommandSmooth[channel];
   }
   

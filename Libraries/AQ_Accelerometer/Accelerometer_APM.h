@@ -23,44 +23,42 @@
 
 #include <Accelerometer.h>
 
-class Accelerometer_APM : public Accelerometer {
-public:
-  Accelerometer_APM() {
-    accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);
-    smoothFactor = 1.0;
-  }
+void initializeAccel() {
+  accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);
+  accelSmoothFactor = 1.0;
+}
   
-  void measure(void) {
-    int accelADC;
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      const float rawADC = readADC(axis+3);
-      if (rawADC > 500) { // Check if measurement good
-        if (axis == ROLL)
-          accelADC = rawADC - zero[axis];
-        else
-          accelADC = zero[axis] - rawADC;
-        meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], smoothFactor);
-      }
+void measureAccel() {
+  int accelADC;
+  for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    const float rawADC = readADC(axis+3);
+    if (rawADC > 500) { // Check if measurement good
+      if (axis == ROLL)
+        accelADC = rawADC - accelZero[axis];
+      else
+        accelADC = accelZero[axis] - rawADC;
+      meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
     }
   }
+}
 
-  void calibrate() {
-    int findZero[FINDZERO];
-    
-    for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        findZero[i] = readADC(calAxis+3);
-        delay(2);
-      }
-      zero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-
-    // replace with estimated Z axis 0g value
-    zero[ZAXIS] = (zero[ROLL] + zero[PITCH]) / 2;
+void calibrateAccel() {
+  int findZero[FINDZERO];
    
-    // store accel value that represents 1g
-    measure();
-    oneG = -meterPerSec[ZAXIS];
+  for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
+    for (int i=0; i<FINDZERO; i++) {
+      findZero[i] = readADC(calAxis+3);
+      delay(2);
+    }
+    accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
   }
-};
+
+  // replace with estimated Z axis 0g value
+  accelZero[ZAXIS] = (accelZero[ROLL] + accelZero[PITCH]) / 2;
+   
+  // store accel value that represents 1g
+  measureAccel();
+  accelOneG = -meterPerSec[ZAXIS];
+}
+
 #endif

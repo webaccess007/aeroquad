@@ -24,46 +24,40 @@
 #include <Accelerometer.h>
 #include <Platform_Wii.h>
 
-class Accelerometer_WII : public Accelerometer {
-private:
-  Platform_Wii *platformWii;
-public:
-  Accelerometer_WII() {
-    accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2 
-    smoothFactor = 1.0;
-  }
+Platform_Wii *accelPlatformWii;
 
-  void setPlatformWii(Platform_Wii *platformWii) {
-    this->platformWii = platformWii;
-  }
-  
-  void measure(void) {
-    int accelADC[3];
-    accelADC[XAXIS] = platformWii->getAccelADC(XAXIS) - zero[XAXIS];
-    accelADC[YAXIS] = zero[YAXIS] - platformWii->getAccelADC(YAXIS);
-    accelADC[ZAXIS] = zero[ZAXIS] - platformWii->getAccelADC(ZAXIS);
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], smoothFactor);
-    }
-  }
-
-  void calibrate() {
-    int findZero[FINDZERO];
-
-    for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
-      for (int i=0; i<FINDZERO; i++) {
-        platformWii->measure();
-        findZero[i] = platformWii->getAccelADC(calAxis);
-	    delay(5);
-      }
-      zero[calAxis] = findMedianInt(findZero, FINDZERO);
-    }
-    
-    // store accel value that represents 1g
-    oneG = -meterPerSec[ZAXIS];
-    // replace with estimated Z axis 0g value
-    zero[ZAXIS] = (zero[XAXIS] + zero[YAXIS]) / 2;
+void initializeAccel() {
+  accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2 
+  accelSmoothFactor = 1.0;
 }
 
-};
+void measureAccel(void) {
+  int accelADC[3];
+  accelADC[XAXIS] = accelPlatformWii->getAccelADC(XAXIS) - accelZero[XAXIS];
+  accelADC[YAXIS] = accelZero[YAXIS] - accelPlatformWii->getAccelADC(YAXIS);
+  accelADC[ZAXIS] = accelZero[ZAXIS] - accelPlatformWii->getAccelADC(ZAXIS);
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+  }
+}
+
+void calibrateAccel() {
+  int findZero[FINDZERO];
+
+  for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
+    for (int i=0; i<FINDZERO; i++) {
+      accelPlatformWii->measure();
+      findZero[i] = accelPlatformWii->getAccelADC(calAxis);
+      delay(5);
+    }
+    accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+  }
+    
+  // store accel value that represents 1g
+  accelOneG = -meterPerSec[ZAXIS];
+  // replace with estimated Z axis 0g value
+  accelZero[ZAXIS] = (accelZero[XAXIS] + accelZero[YAXIS]) / 2;
+}
+
+
 #endif

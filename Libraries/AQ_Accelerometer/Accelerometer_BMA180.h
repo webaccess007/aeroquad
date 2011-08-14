@@ -39,13 +39,14 @@
 #define ACCEL_READ_YAW_ADDRESS 0x06
 
 void initializeAccel() {
+  
   accelScaleFactor = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range
   accelSmoothFactor = 1.0;
 
-
+  
   if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) // page 52 of datasheet
     Serial.println("Accelerometer not found!");
-
+	
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_RESET_REGISTER, ACCEL_TRIGER_RESET_VALUE); 					//reset device
   delay(10);  																							//sleep 10 ms after reset (page 25)
 
@@ -109,6 +110,8 @@ void calibrateAccel() {
   accelZero[ZAXIS] = (accelZero[XAXIS] + accelZero[PITCH]) / 2;
   // store accel value that represents 1g
   measureAccel();
-  oneG = -meterPerSec[ZAXIS];
+  accelOneG = -meterPerSec[ZAXIS];
 }
+
+
 #endif

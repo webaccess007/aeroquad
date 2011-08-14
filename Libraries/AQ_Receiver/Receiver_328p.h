@@ -45,6 +45,7 @@ volatile uint8_t *port_to_pcmask[] = {
   &PCMSK2
 };
 volatile static uint8_t PCintLast[3];
+
 // Channel data
 typedef struct {
   byte edge;
@@ -130,15 +131,14 @@ SIGNAL(PCINT2_vect) {
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
 
-
-
 class Receiver_328p : public Receiver {
 public:  
   Receiver_328p() {
   }
 
-  void initialize(void) {
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  void initialize(int nbChannel = 6) {
+    Receiver::initialize(nbChannel);
+    for (byte channel = ROLL; channel < lastChannel; channel++) {
       pinMode(receiverPin[channel], INPUT);
       pinData[receiverPin[channel]].edge = FALLING_EDGE;
       attachPinChangeInterrupt(receiverPin[channel]);
@@ -146,7 +146,7 @@ public:
   }
 
   void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for(byte channel = ROLL; channel < lastChannel; channel++) {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;
       cli();
@@ -161,7 +161,7 @@ public:
     }
 
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+    for (byte channel = ROLL; channel < lastChannel; channel++)
       if (channel < THROTTLE)
         transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
       else

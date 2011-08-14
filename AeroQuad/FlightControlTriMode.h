@@ -21,6 +21,20 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_TRI_MODE_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_TRI_MODE_H_
 
+
+/*
+       CW                  CCW
+            
+           0....Front....0  
+           ......***......    
+           ......***......
+           ......***......    
+           0....Back.....0  
+      
+                  CW           
+*/
+
+
 #define SERVO       MOTOR1
 #define REAR        MOTOR2
 #define FRONT_RIGHT MOTOR3
@@ -30,12 +44,8 @@
 #define TRI_YAW_CONSTRAINT_MIN 1200
 #define TRI_YAW_CONSTRAINT_MAX 1800
 #define TRI_YAW_MIDDLE 1500
-#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-//#define YAW_DIRECTION -1
 
-#define MAX_RECEIVER_OFFSET 25
-
-//unsigned long previousServoTime = 0;
+#define MAX_RECEIVER_OFFSET 10
 
 void applyMotorCommand() {
   motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3);
@@ -49,12 +59,12 @@ void processMinMaxCommand() {
   if ((motors->getMotorCommand(FRONT_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR) <= MINTHROTTLE)){
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
     motorMaxCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
-    motorMaxCommand[REAR] =   constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
+    motorMaxCommand[REAR]        = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
   }
   else if ((motors->getMotorCommand(FRONT_LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(REAR) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver->getData(THROTTLE);
     motorMinCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
-    motorMinCommand[REAR]   = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
+    motorMinCommand[REAR]        = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
   }     
   else {
     motorMaxCommand[FRONT_RIGHT] = MAXCOMMAND;

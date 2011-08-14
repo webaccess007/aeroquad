@@ -21,6 +21,22 @@
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_HEX_Y6_MODE_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_Y6_MODE_H_
 
+/*  
+             UPPER/LOWER
+
+
+       CW/CCW           CCW/CW
+            
+           0....Front....0  
+           ......***......    
+           ......***......
+           ......***......    
+           0....Back.....0  
+      
+                CW/CCW           
+*/     
+
+
 #define LEFT            MOTOR1
 #define REAR            MOTOR2
 #define RIGHT           MOTOR3
@@ -29,19 +45,15 @@
 #define RIGHT_UNDER     MOTOR6
 #define LASTMOTOR       MOTOR6+1
 
-#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-//#define YAW_DIRECTION -1
-
-
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   const int throttleCorrection = abs(motorAxisCommandYaw*3/6);
-  motors->setMotorCommand(REAR,        (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) + YAW_DIRECTION * motorAxisCommandYaw);
-  motors->setMotorCommand(RIGHT,       (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + YAW_DIRECTION * motorAxisCommandYaw);  
-  motors->setMotorCommand(LEFT,        (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - YAW_DIRECTION * motorAxisCommandYaw);
-  motors->setMotorCommand(REAR_UNDER,  (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) - YAW_DIRECTION * motorAxisCommandYaw);
-  motors->setMotorCommand(RIGHT_UNDER, (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - YAW_DIRECTION * motorAxisCommandYaw);
-  motors->setMotorCommand(LEFT_UNDER,  (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + YAW_DIRECTION * motorAxisCommandYaw);
+  motors->setMotorCommand(REAR,        (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(RIGHT,       (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw));  
+  motors->setMotorCommand(LEFT,        (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR_UNDER,  (throttle - throttleCorrection)                        + (motorAxisCommandPitch*4/3) + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(RIGHT_UNDER, (throttle - throttleCorrection) - motorAxisCommandRoll - (motorAxisCommandPitch*2/3) - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(LEFT_UNDER,  (throttle - throttleCorrection) + motorAxisCommandRoll - (motorAxisCommandPitch*2/3) + (YAW_DIRECTION * motorAxisCommandYaw));
 }
 
 void processMinMaxCommand() {

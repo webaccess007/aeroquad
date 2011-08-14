@@ -24,18 +24,14 @@
 #include <WProgram.h>
 #include <Axis.h>
 
-
 float accelScaleFactor;
 float accelSmoothFactor;
-float oneG;
+float accelOneG;
 float meterPerSec[3];
 float accelZero[3];
   
-
 void initializeAccel();
 void calibrateAccel();
 void measureAccel();
   
-
-
 #endif

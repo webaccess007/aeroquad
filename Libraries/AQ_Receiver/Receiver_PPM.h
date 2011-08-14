@@ -83,25 +83,39 @@ public:
   Receiver_PPM() {
   }
 
-  void initialize(void) {
+  void initialize(int nbChannel = 6) {
+    Receiver::initialize(nbChannel);
     attachInterrupt(0, rxInt, RISING);
   }
 
   void read(void) {
+  
+    
+	for(byte channel = ROLL; channel < lastChannel; channel++) {
+	  uint8_t oldSREG;
+      oldSREG = SREG;
+      cli(); // Let's disable interrupts
 
-	for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
 	  receiverData[channel] = (mTransmitter[channel] * rcValue[rcChannel[channel]]) + bTransmitter[channel];
+	  
+	  SREG = oldSREG;
+      sei();// Let's enable the interrupts	
+	
       // Smooth the flight control transmitter inputs
       transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
 	}
 	
+	
+	
     // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+    for (byte channel = ROLL; channel < lastChannel; channel++)
       if (channel < THROTTLE)
         transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
       else
         // No xmitFactor reduction applied for throttle, mode and
         transmitterCommand[channel] = transmitterCommandSmooth[channel];
+		
+	
   }
 };
 
