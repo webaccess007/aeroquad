@@ -59,12 +59,12 @@ void processMinMaxCommand() {
   if ((motors->getMotorCommand(FRONT_LEFT) <= MINTHROTTLE) || (motors->getMotorCommand(REAR) <= MINTHROTTLE)){
     delta = receiver->getData(THROTTLE) - MINTHROTTLE;
     motorMaxCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
-    motorMaxCommand[REAR] =   constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
+    motorMaxCommand[REAR]        = constrain(receiver->getData(THROTTLE) + delta, minAcro, MAXCHECK);
   }
   else if ((motors->getMotorCommand(FRONT_LEFT) >= MAXCOMMAND) || (motors->getMotorCommand(REAR) >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiver->getData(THROTTLE);
     motorMinCommand[FRONT_RIGHT] = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
-    motorMinCommand[REAR]   = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
+    motorMinCommand[REAR]        = constrain(receiver->getData(THROTTLE) - delta, minAcro, MAXCOMMAND);
   }     
   else {
     motorMaxCommand[FRONT_RIGHT] = MAXCOMMAND;

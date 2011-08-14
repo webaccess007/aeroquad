@@ -52,8 +52,8 @@
 //#define hexXConfig        // @todo Kenny NOT FLIGHT TESTED
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
-//#define octoX8Congig
+//#define hexY6Config
+#define octoX8Congig
 
 //
 // *******************************************************************************************************************************

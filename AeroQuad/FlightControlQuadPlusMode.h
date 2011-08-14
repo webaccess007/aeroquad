@@ -41,10 +41,11 @@
 #define LASTMOTOR MOTOR4+1
 
 void applyMotorCommand() {
-  motors->setMotorCommand(FRONT, throttle - motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(REAR,  throttle + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(RIGHT, throttle - motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(LEFT,  throttle + motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
+  const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
+  motors->setMotorCommand(FRONT, (throttle - throttleCorrection) - motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR,  (throttle - throttleCorrection) + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(RIGHT, (throttle - throttleCorrection) - motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(LEFT,  (throttle - throttleCorrection) + motorAxisCommandRoll  + (YAW_DIRECTION * motorAxisCommandYaw));
 }
 
 void processMinMaxCommand() {

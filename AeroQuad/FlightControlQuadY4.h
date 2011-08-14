@@ -45,7 +45,7 @@
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
+  const int throttleCorrection = abs(motorAxisCommandYaw*1/2);
   motors->setMotorCommand(FRONT_LEFT,  (throttle)                    - motorAxisCommandPitch + motorAxisCommandRoll);
   motors->setMotorCommand(FRONT_RIGHT, (throttle)                    - motorAxisCommandPitch - motorAxisCommandRoll);
   motors->setMotorCommand(REAR_UNDER,  (throttle-throttleCorrection) + motorAxisCommandPitch + (YAW_DIRECTION * motorAxisCommandYaw));

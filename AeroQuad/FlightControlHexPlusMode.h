@@ -45,12 +45,13 @@
 #define LASTMOTOR   MOTOR6+1
 
 void applyMotorCommand() {
-  motors->setMotorCommand(FRONT_LEFT,  throttle + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(REAR_RIGHT,  throttle - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(FRONT_RIGHT, throttle - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(REAR_LEFT,   throttle + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(FRONT,       throttle                          - motorAxisCommandPitch   + (YAW_DIRECTION * motorAxisCommandYaw));
-  motors->setMotorCommand(REAR,        throttle                          + motorAxisCommandPitch   - (YAW_DIRECTION * motorAxisCommandYaw));
+  const int throttleCorrection = abs(motorAxisCommandYaw*3/6);
+  motors->setMotorCommand(FRONT_LEFT,  (throttle - throttleCorrection) + motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR_RIGHT,  (throttle - throttleCorrection) - motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(FRONT_RIGHT, (throttle - throttleCorrection) - motorAxisCommandRoll/2 - motorAxisCommandPitch/2 - (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR_LEFT,   (throttle - throttleCorrection) + motorAxisCommandRoll/2 + motorAxisCommandPitch/2 + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(FRONT,       (throttle - throttleCorrection)                          - motorAxisCommandPitch   + (YAW_DIRECTION * motorAxisCommandYaw));
+  motors->setMotorCommand(REAR,        (throttle - throttleCorrection)                          + motorAxisCommandPitch   - (YAW_DIRECTION * motorAxisCommandYaw));
 }
 
 void processMinMaxCommand() {
