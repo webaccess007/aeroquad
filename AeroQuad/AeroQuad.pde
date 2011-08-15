@@ -31,11 +31,11 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -45,9 +45,9 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
-//#define hexPlusConfig
+#define hexPlusConfig
 //#define hexXConfig
 //#define triConfig
 //#define quadY4Config
@@ -61,8 +61,8 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
@@ -76,8 +76,8 @@
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
 #define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-#define BinaryWritePID // Enables fast binary transfer of attitude PID data
+//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
+//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
 //
@@ -99,10 +99,10 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
-#define MAX7456_OSD
+//#define MAX7456_OSD
 
 
 #define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
@@ -282,7 +282,7 @@
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #define MOTOR_PWM
   
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -752,7 +752,7 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined (AeroQuad_Mini) && defined (hexY6Config)
+#if defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
