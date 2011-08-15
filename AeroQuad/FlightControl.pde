@@ -28,6 +28,7 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
+
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
@@ -103,7 +104,7 @@ void processHeading(void)
         headingTime = currentTime;
       }
       else {
-        if (relativeHeading < .25 && relativeHeading > -.25) {
+        if (relativeHeading < 0.25 && relativeHeading > -0.25) {
           headingHold = 0;
           PID[HEADING].integratedError = 0;
         }
@@ -195,7 +196,7 @@ void processFlightControl() {
   processMinMaxCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-//  processHardManuevers();
+  processHardManuevers();
   
   // Apply limits to motor commands
   for (byte motor = 0; motor < LASTMOTOR; motor++) {

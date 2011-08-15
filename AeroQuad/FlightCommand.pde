@@ -55,7 +55,7 @@ void readPilotCommands() {
       zeroIntegralError();
       armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
-      digitalWrite(LED_Red, HIGH);
+        digitalWrite(LED_Red, HIGH);
       #endif
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
@@ -69,9 +69,9 @@ void readPilotCommands() {
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
   if (receiverData[THROTTLE] < 1300) {
-    receiverTrim[ROLL] = receiverData[ROLL];
+    receiverTrim[ROLL]  = receiverData[ROLL];
     receiverTrim[PITCH] = receiverData[PITCH];
-    receiverTrim[YAW] = receiverData[YAW];
+    receiverTrim[YAW]   = receiverData[YAW];
     //receiver->setZero(ROLL, receiverData[ROLL]);
     //receiver->setZero(PITCH, receiverData[PITCH]);
     //receiver->setZero(YAW, receiverData[YAW]);

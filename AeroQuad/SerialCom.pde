@@ -595,16 +595,16 @@ void fastTelemetry(void)
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyroRate[axis]);
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(meterPerSec[axis]);
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
-         sendBinaryFloat(compass->getRawData(axis));
+         sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematics->getGyroUnbias(axis));
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematics->getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(getGyroUnbias(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematicsAngle[axis]);
        printInt(32767); // Stop word of 0x7FFF
     #endif
   }

@@ -76,8 +76,8 @@
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
 #define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
+#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
+#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
 //
@@ -1012,54 +1012,54 @@ void loop () {
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
           calculateKinematics(gyroRate[ROLL],                       
-                                 gyroRate[PITCH],                      
-                                 gyroRate[YAW],                        
-                                 meterPerSec[XAXIS],                   
-                                 meterPerSec[YAXIS],                   
-                                 meterPerSec[ZAXIS],                   
-                                 compass->getRawData(XAXIS),                      
-                                 compass->getRawData(YAXIS),                     
-                                 compass->getRawData(ZAXIS),
-                                 G_Dt);
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              getMagnetometerRawData(XAXIS),                      
+                              getMagnetometerRawData(YAXIS),                     
+                              getMagnetometerRawData(ZAXIS),
+                              G_Dt);
         #endif
       
         #if defined FlightAngleARG
           calculateKinematics(gyroRate[ROLL],                       
-                                 gyroRate[PITCH],                      
-                                 gyroRate[YAW],                        
-                                 meterPerSec[XAXIS],                   
-                                 meterPerSec[YAXIS],                   
-                                 meterPerSec[ZAXIS],                   
-                                 0.0,                                            
-                                 0.0,                                            
-                                 0.0,
-                                 G_Dt);
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              0.0,                                            
+                              0.0,                                            
+                              0.0,
+                              G_Dt);
         #endif
 
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
           calculateKinematics(gyroRate[ROLL],                       
-                                 gyroRate[PITCH],                      
-                                 gyroRate[YAW],                        
-                                 meterPerSec[XAXIS],                   
-                                 meterPerSec[YAXIS],                   
-                                 meterPerSec[ZAXIS],                   
-                                 accelOneG,                              
-                                 compass->getHdgXY(XAXIS),                        
-                                 compass->getHdgXY(YAXIS),
-                                 G_Dt);
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              accelOneG,                              
+                              getHdgXY(XAXIS),                        
+                              getHdgXY(YAXIS),
+                              G_Dt);
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
           calculateKinematics(gyroRate[ROLL],                        
-                                 gyroRate[PITCH],                       
-                                 gyroRate[YAW],                         
-                                 meterPerSec[XAXIS],                    
-                                 meterPerSec[YAXIS],                    
-                                 meterPerSec[ZAXIS],                    
-                                 accel->getOneG(),                               
-                                 0.0,                                             
-                                 0.0,
-                                 G_Dt);
+                              gyroRate[PITCH],                       
+                              gyroRate[YAW],                         
+                              meterPerSec[XAXIS],                    
+                              meterPerSec[YAXIS],                    
+                              meterPerSec[ZAXIS],                    
+                              accel->getOneG(),                               
+                              0.0,                                             
+                              0.0,
+                              G_Dt);
         #endif
       }
       

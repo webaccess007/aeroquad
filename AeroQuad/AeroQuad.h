@@ -90,7 +90,6 @@ float smoothHeading;
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
 
-
 // Analog Reference Value
 // This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
@@ -194,14 +193,9 @@ unsigned long tenHZpreviousTime;
 unsigned long twentyFiveHZpreviousTime;
 unsigned long fiftyHZpreviousTime;
 unsigned long hundredHZpreviousTime;
-// old times.
-//unsigned long receiverTime = 0;
-//unsigned long compassTime = 5000;
-//unsigned long altitudeTime = 10000;
-//unsigned long batteryTime = 15000;
-//unsigned long autoZeroGyroTime = 0;
+
 #ifdef CameraControl
-unsigned long cameraTime = 10000;
+  unsigned long cameraTime = 10000;
 #endif
 unsigned long fastTelemetryTime = 0;
 //unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
@@ -241,7 +235,7 @@ byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
 #ifdef CameraControl
-byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+  byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 #endif
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
@@ -376,7 +370,7 @@ void comma(void);
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
   float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
- int findMode(int *data, int arraySize); // defined in Sensors.pde
+  int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
