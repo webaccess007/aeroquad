@@ -18,12 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Org   -> accel -> gyro  -> rec   -> Motor -> kinem
-// 38182 -> 38124 -> 37992 -> 37568 -> 37444 -> 37580
-
-// Carefully check baro!!!
-
-
 /****************************************************************************
    Before flight, select the different user options for your AeroQuad below
    If you need additional assitance go to http://AeroQuad.com/forum
@@ -41,11 +35,11 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
+//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -105,7 +99,7 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
 #define MAX7456_OSD
@@ -135,7 +129,6 @@
 /**
  * Kenny todo.
  * @todo : UNIT TEST
- * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
  *
  * @TODO : REMOVE DRIFT CORRECTION TEST FROM AGR WHEN ALAN AND JOHN HAVE FIX IT!
  */
@@ -158,7 +151,6 @@
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
   
   // Receiver declaration
@@ -194,7 +186,6 @@
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
   
   // Receiver declaration
@@ -232,7 +223,6 @@
   #include <Gyroscope_ITG3200.h>
   
   // Accelerometer declaraion
-  #include <Accelerometer.h>
   #include <Accelerometer_BMA180.h>
   
   // Receiver declaration
@@ -286,7 +276,6 @@
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL345.h>
   
   // Receiver declaration
@@ -335,7 +324,6 @@
   #include <Gyroscope_IDG_IDZ500.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
 
   // Reveiver declaration
@@ -442,7 +430,6 @@
   #include <Gyroscope_APM.h>
   
   // Accelerometer Declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_APM.h>
 
   // Receiver Declaration
@@ -500,7 +487,6 @@
   #include <Gyroscope_Wii.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_WII.h>
   
   // Receiver declaration
@@ -561,7 +547,6 @@
   #include <Gyroscope_Wii.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_WII.h>
 
   // Receiver declaration
@@ -615,7 +600,6 @@
   #include <Gyroscope_CHR6DM.h>
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_CHR6DM.h>
 
   // Receiver declaration
@@ -683,7 +667,6 @@
   #include <Gyroscope_CHR6DM.h>
   
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_CHR6DM.h>
 
   // Receiver declaration
@@ -821,17 +804,13 @@
   #include <BatteryMonitor_APM.h>
 #endif  
 
-
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
 //********************************************************
 // used only on mega for now
 #ifdef CameraControl
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-    #include <CameraStabilizer.h>
     #include <CameraStabilizer_Aeroquad.h>
-    CameraStabilizer_AeroQuad tempCameraStabilizer;
-    CameraStabilizer *camera = &tempCameraStabilizer;
   #else
     #undef CameraControl
   #endif
@@ -859,10 +838,11 @@
   #include "FlightControlOctoX8.h"
 #endif
 
-
+//********************************************************
+//****************** OSD DEVICE DECLARATION **************
+//********************************************************
 #ifdef MAX7456_OSD
-  #include "OSD.h"
-  OSD osd;
+  #include "MAX7456.h"
 #endif
 
 
@@ -951,15 +931,15 @@ void setup() {
   
   // Camera stabilization setup
   #if defined (CameraControl)
-    camera->initialize();
-    camera->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    camera->setCenterRoll(1500); // Need to figure out nice way to set center position
-    camera->setmCameraPitch(11.11);
-    camera->setCenterPitch(1300);
+    initializeCameraStabilization();
+    setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    setCenterRoll(1500); // Need to figure out nice way to set center position
+    setmCameraPitch(11.11);
+    setCenterPitch(1300);
   #endif
   
   #if defined(MAX7456_OSD)
-    osd.initialize();
+    initializeOSD();
   #endif
 
 
@@ -1176,7 +1156,7 @@ void loop () {
       }
       
       #ifdef MAX7456_OSD
-        osd.update();
+        updateOSD();
       #endif
 
       

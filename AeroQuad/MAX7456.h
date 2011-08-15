@@ -137,12 +137,9 @@
 
 byte clear;
 
-class OSD {
-private:
-
-  unsigned long prevUpdate; //armed time when last update occurred
-  unsigned long prevTime; //previous time since start when OSD.update() ran
-  unsigned long armedTime; //time motors have spent armed
+unsigned long prevUpdate = 0;       //armed time when last update occurred
+unsigned long prevTime = 0;         //previous time since start when OSD.update() ran
+unsigned long armedTime = micros(); //time motors have spent armed
   
 #if defined(AUTO_VIDEO_STANDARD)
   unsigned MAX_screen_size;
@@ -153,141 +150,61 @@ private:
   byte DISABLE_display;
 #endif
 
-public:
-  OSD (void) {
-    prevUpdate = 0;
-    armedTime = 0;
-    prevTime = currentTime;
-  }
 
-  void initialize( void ) {
-    int i;
-    pinMode( CS, OUTPUT );
-    pinMode( 53, OUTPUT ); //Default CS pin - needs to be output or SPI peripheral will behave as a slave instead of master
-    digitalWrite( CS, HIGH );
+//Performs an 8-bit SPI transfer operation
+char spi_transfer( volatile char data ) {
+  SPDR = data; //transfer data with hardware SPI
+  while ( !(SPSR & (1 << SPIF)) ) { }; //Wait until transmission done
+  return SPDR;
+} 
 
-    pinMode( DOUT, OUTPUT );
-    pinMode( DIN, INPUT );
-    pinMode( SCK, OUTPUT );
-
-    // SPCR = 01010000
-    //interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
-    //sample on leading edge of clk,system clock/4 rate (fastest)
-    SPCR = (1 << SPE) | (1 << MSTR);
-    clear = SPSR;
-    clear = SPDR;
-    delay( 10 ); 
-    
-    #if defined(AUTO_VIDEO_STANDARD)
-    detectVideoStandard();
-    #endif
-
-    //Soft reset the MAX7456 - clear display memory
-    digitalWrite( CS, LOW );
-    spi_transfer( VM0 ); //Writing to VM0 register
-    spi_transfer( MAX7456_reset ); //...reset bit
-    digitalWrite( CS, HIGH );
-    delay( 1 ); //Only takes ~100us typically
-
-    //Set white level to 90% for all rows
-    digitalWrite( CS, LOW );
-    for( i = 0; i < MAX_screen_rows; i++ ) {
-      spi_transfer( RB0 + i );
-      spi_transfer( WHITE_level_90 );
-    }
-
-    //ensure device is enabled
-    spi_transfer( VM0 );
-    spi_transfer( ENABLE_display );
-    delay(100);
-    //finished writing
-    digitalWrite( CS, HIGH );  
-    
-    initDisplays(); //Print initial values to screen
-  }
-
-private:
-  //Performs an 8-bit SPI transfer operation
-  char spi_transfer( volatile char data ) {
-    SPDR = data; //transfer data with hardware SPI
-    while ( !(SPSR & (1 << SPIF)) ) { }; //Wait until transmission done
-    return SPDR;
-  }  
+//Writes 'len' character address bytes to the display memory corresponding to row y, column x
+//Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
+//columns in row y
+void writeChars( byte* buf, unsigned len, unsigned y, unsigned x ) {
+  digitalWrite( CS, LOW );
   
-  void initDisplays() {
-    #ifdef ShowReticle
-      byte buf[2];
-      buf[0] = 0x01;
-      buf[1] = 0x02;
-      writeChars( buf, 2, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
-    #endif
-    
-    #ifdef ShowFlightTimer
-    updateTimer();
-    #endif
-    
-    #ifdef AltitudeHold
-    updateAltitude();
-    #endif
-    
-    #ifdef HeadingMagHold
-    updateHdg();
-    #endif
-    
-    #ifdef BatteryMonitor
-    updateVoltage();
-    #endif
-  }
+  //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
+  spi_transfer( DMM );
+  spi_transfer( 0x01 ); //16bit transfer, transparent BG, autoincrement mode
+  //send starting display memory address (position of text)
+  spi_transfer( DMAH );
+  spi_transfer( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
+  spi_transfer( DMAL );
+  spi_transfer( ( (y*30+x) > 0xff ) ? (byte)(y*30+x-0xff-1) : (byte)(y*30+x) );
   
-  
-  //Clears (ie sets to be transparent) a column 'col' of some characters - clears centreRow+-offset
-  void clearCol(unsigned col, unsigned centreRow, unsigned offset) {
-    int i = 0;
-    digitalWrite( CS, LOW );    
-    spi_transfer( DMM );
-    spi_transfer( 0x00 ); //16bit transfer, transparent BG
-    
-    for( i = ((centreRow-offset >= 0) ? centreRow-offset : 0) ; (i <= (centreRow + offset)) && (i <= MAX_screen_rows); i++ ) {
-      spi_transfer( DMAH );
-      spi_transfer( ( (i*30+col) > 0xff ) ? 0x01 :0x00 );
-      spi_transfer( DMAL );
-      spi_transfer( ( (i*30+col) > 0xff ) ? (byte)(i*30+col-0xff-1) : (byte)(i*30+col) );
-      spi_transfer( DMDI );
-      spi_transfer( 0x00 );
-    }
-    
-    digitalWrite( CS, HIGH );
-  }
-  
-  
-  //Writes 'len' character address bytes to the display memory corresponding to row y, column x
-  //Uses autoincrement mode so will wrap around to next row if 'len' is greater than the remaining
-  //columns in row y
-  void writeChars( byte* buf, unsigned len, unsigned y, unsigned x ) {
-    digitalWrite( CS, LOW );
-    
-    //don't disable display before writing as this makes the entire screen flicker, instead of just the character modified
-    spi_transfer( DMM );
-    spi_transfer( 0x01 ); //16bit transfer, transparent BG, autoincrement mode
-    //send starting display memory address (position of text)
-    spi_transfer( DMAH );
-    spi_transfer( ( (y*30+x) > 0xff ) ? 0x01 :0x00 );
-    spi_transfer( DMAL );
-    spi_transfer( ( (y*30+x) > 0xff ) ? (byte)(y*30+x-0xff-1) : (byte)(y*30+x) );
-    
-    //write out data
-    for ( int i = 0; i < len; i++ ) {
-      spi_transfer( DMDI );
-      spi_transfer( buf[i] );
-    }
-    
-    //Send escape 11111111 to exit autoincrement mode
+  //write out data
+  for ( int i = 0; i < len; i++ ) {
     spi_transfer( DMDI );
-    spi_transfer( END_string );
-
-    //finished writing
-    digitalWrite( CS, HIGH );
+    spi_transfer( buf[i] );
   }
+  
+  //Send escape 11111111 to exit autoincrement mode
+  spi_transfer( DMDI );
+  spi_transfer( END_string );
+
+  //finished writing
+  digitalWrite( CS, HIGH );
+}
+
+//Clears (ie sets to be transparent) a column 'col' of some characters - clears centreRow+-offset
+void clearCol(unsigned col, unsigned centreRow, unsigned offset) {
+  int i = 0;
+  digitalWrite( CS, LOW );    
+  spi_transfer( DMM );
+  spi_transfer( 0x00 ); //16bit transfer, transparent BG
+  
+  for( i = ((centreRow-offset >= 0) ? centreRow-offset : 0) ; (i <= (centreRow + offset)) && (i <= MAX_screen_rows); i++ ) {
+    spi_transfer( DMAH );
+    spi_transfer( ( (i*30+col) > 0xff ) ? 0x01 :0x00 );
+    spi_transfer( DMAL );
+    spi_transfer( ( (i*30+col) > 0xff ) ? (byte)(i*30+col-0xff-1) : (byte)(i*30+col) );
+    spi_transfer( DMDI );
+    spi_transfer( 0x00 );
+  }
+  
+  digitalWrite( CS, HIGH );
+}
   
 #if defined(AUTO_VIDEO_STANDARD)
   void detectVideoStandard() {
@@ -325,7 +242,7 @@ private:
 
 #ifdef BattMonitor
   float currentVoltage;
-  void updateVoltage(void) {
+  void displayVoltage() {
     currentVoltage = batteryVoltage;
     unsigned voltPrint = (unsigned)(currentVoltage*10); //1 decimal place
     char voltAscii[6]; //max 65536, plus null terminator
@@ -350,7 +267,7 @@ private:
 
 #ifdef AltitudeHold
   float currentAltitude;
-  void updateAltitude(void) {
+  void displayAltitude() {
     currentAltitude = getBaroAltitude();
     #ifdef feet
     currentAltitude = currentAltitude/0.3048;
@@ -372,7 +289,7 @@ private:
 
 #ifdef HeadingMagHold
   float currentHdg;
-  void updateHdg(void) {
+  void diaplayHeading() {
     currentHdg = kinematicsGetDegreesHeading(YAW);
     unsigned hdgPrint = (unsigned)currentHdg;
     char hdgAscii[6]; //max 65536, plus null terminator
@@ -399,114 +316,182 @@ private:
 #endif
 
 #ifdef ShowFlightTimer
-void updateTimer(void) {
-  unsigned armedTimeSecs = armedTime/1000000 ;
-  char timerAscii[7]; //clock symbol, two chars for mins, colon, two chars for secs, null terminator
-  
-  //seconds
-  utoa( armedTimeSecs % 60, timerAscii + 4, 10);
-  if( timerAscii[5] == '\0' ) { //0-9 secs
-    timerAscii[5] = timerAscii[4];
-    timerAscii[4] = '0';
+  void displayFlightTime() {
+    unsigned armedTimeSecs = armedTime/1000000 ;
+    char timerAscii[7]; //clock symbol, two chars for mins, colon, two chars for secs, null terminator
+    
+    //seconds
+    utoa( armedTimeSecs % 60, timerAscii + 4, 10);
+    if( timerAscii[5] == '\0' ) { //0-9 secs
+      timerAscii[5] = timerAscii[4];
+      timerAscii[4] = '0';
+    }
+    
+    //minutes - wrap around if > 100
+    utoa( (armedTimeSecs/60) % 100 , timerAscii + 1, 10 );
+    if( timerAscii[2] == '\0' ) { //0-9 mins
+      timerAscii[2] = timerAscii[1];
+      timerAscii[1] = '0';
+    }
+    
+    timerAscii[0] = 0x05; //clock symbol
+    timerAscii[3] = ':';
+    
+    writeChars( (byte*) timerAscii, 6, TIMER_ROW, TIMER_COL );
   }
-  
-  //minutes - wrap around if > 100
-  utoa( (armedTimeSecs/60) % 100 , timerAscii + 1, 10 );
-  if( timerAscii[2] == '\0' ) { //0-9 mins
-    timerAscii[2] = timerAscii[1];
-    timerAscii[1] = '0';
-  }
-  
-  timerAscii[0] = 0x05; //clock symbol
-  timerAscii[3] = ':';
-  
-  writeChars( (byte*) timerAscii, 6, TIMER_ROW, TIMER_COL );
-}
 #endif
 
 #ifdef ShowAttitudeIndicator
-void updateAI( void ) {
-  float roll = kinematicsAngle[ROLL];
-  float pitch = kinematicsAngle[PITCH];
-
-  unsigned centreRow = RETICLE_ROW*18 + 10;  //pixel row which corresponds to an angle of zero pitch - same row as centre reticle
-  int pitchPixelRow = constrain( (int)centreRow + (int)( (pitch/AI_MAX_PITCH_ANGLE)*(centreRow-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
+  void displayArtificialHorizon() {
+    float roll = kinematicsAngle[ROLL];
+    float pitch = kinematicsAngle[PITCH];
   
-  byte pitchLine = LINE_ROW_0 + (pitchPixelRow % 18);
-  byte empty = 0x00;
-  
-  //write pitch lines, clear spaces above/below pitch line so that old lines don't remain
-  clearCol( PITCH_L_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_L_COL );
-  clearCol( PITCH_R_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_R_COL );
-  
-  //calculating which row (in pixels) each roll line should be on. We know the desired angle between the 'line' displayed by the two
-  //  roll lines, plus the distance between the centre of reticle and centre of each roll line. so we can take tan(roll) to find the vertical offset
-  int distFar = (ROLL_R2_COL - (RETICLE_COL + 1))*12 + 6; //horizontal pixels between centre of reticle and centre of far angle line
-  int distNear = (ROLL_R1_COL- (RETICLE_COL + 1))*12 + 6;
-  int farRightRow = constrain( centreRow - (int)(((float)distFar)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL ); //row of far right angle line, in pixels from top
-  int nearRightRow = constrain( centreRow - (int)(((float)distNear)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  int farLeftRow = constrain( centreRow - (farRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  int nearLeftRow = constrain( centreRow - (nearRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
-  
-  //converting pixel offsets to character addresses
-  byte nearRightRollLine = LINE_ROW_0 + (nearRightRow % 18);
-  byte farRightRollLine = LINE_ROW_0 + (farRightRow % 18);
-  byte nearLeftRollLine = LINE_ROW_0 + (nearLeftRow % 18);
-  byte farLeftRollLine = LINE_ROW_0 + (farLeftRow % 18);
-  
-  //clearing old lines, writing new ones to screen
-  clearCol( ROLL_L1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farLeftRollLine, 1, farLeftRow/18, ROLL_L1_COL );
-  clearCol( ROLL_L2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearLeftRollLine, 1, nearLeftRow/18, ROLL_L2_COL );
-  clearCol( ROLL_R1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &nearRightRollLine, 1, nearRightRow/18, ROLL_R1_COL );
-  clearCol( ROLL_R2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
-  writeChars( &farRightRollLine, 1, farRightRow/18, ROLL_R2_COL );
-}
+    unsigned centreRow = RETICLE_ROW*18 + 10;  //pixel row which corresponds to an angle of zero pitch - same row as centre reticle
+    int pitchPixelRow = constrain( (int)centreRow + (int)( (pitch/AI_MAX_PITCH_ANGLE)*(centreRow-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
+    
+    byte pitchLine = LINE_ROW_0 + (pitchPixelRow % 18);
+    byte empty = 0x00;
+    
+    //write pitch lines, clear spaces above/below pitch line so that old lines don't remain
+    clearCol( PITCH_L_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_L_COL );
+    clearCol( PITCH_R_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &pitchLine, 1, pitchPixelRow/18, PITCH_R_COL );
+    
+    //calculating which row (in pixels) each roll line should be on. We know the desired angle between the 'line' displayed by the two
+    //  roll lines, plus the distance between the centre of reticle and centre of each roll line. so we can take tan(roll) to find the vertical offset
+    int distFar = (ROLL_R2_COL - (RETICLE_COL + 1))*12 + 6; //horizontal pixels between centre of reticle and centre of far angle line
+    int distNear = (ROLL_R1_COL- (RETICLE_COL + 1))*12 + 6;
+    int farRightRow = constrain( centreRow - (int)(((float)distFar)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL ); //row of far right angle line, in pixels from top
+    int nearRightRow = constrain( centreRow - (int)(((float)distNear)*tan(roll)), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+    int farLeftRow = constrain( centreRow - (farRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+    int nearLeftRow = constrain( centreRow - (nearRightRow - centreRow), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );
+    
+    //converting pixel offsets to character addresses
+    byte nearRightRollLine = LINE_ROW_0 + (nearRightRow % 18);
+    byte farRightRollLine = LINE_ROW_0 + (farRightRow % 18);
+    byte nearLeftRollLine = LINE_ROW_0 + (nearLeftRow % 18);
+    byte farLeftRollLine = LINE_ROW_0 + (farLeftRow % 18);
+    
+    //clearing old lines, writing new ones to screen
+    clearCol( ROLL_L1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &farLeftRollLine, 1, farLeftRow/18, ROLL_L1_COL );
+    clearCol( ROLL_L2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &nearLeftRollLine, 1, nearLeftRow/18, ROLL_L2_COL );
+    clearCol( ROLL_R1_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &nearRightRollLine, 1, nearRightRow/18, ROLL_R1_COL );
+    clearCol( ROLL_R2_COL, RETICLE_ROW, AI_DISPLAY_RECT_HEIGHT/2 );
+    writeChars( &farRightRollLine, 1, farRightRow/18, ROLL_R2_COL );
+  }
 #endif
 
-public:
-  //updates to display memory can make text flicker - we want to minimise # updates
-  void update(void) {
-    #ifdef BattMonitor
-      if( (unsigned)(batteryVoltage*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
-        updateVoltage();
-      }
-    #endif
-    
-    #ifdef AltitudeHold
-      if( (unsigned)(getBaroAltitude()) != (unsigned)(currentAltitude) ) {
-        updateAltitude();
-      }
-    #endif
-    
-    #ifdef HeadingMagHold
-      if( (unsigned)(kinematicsGetDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
-        updateHdg();
-      }
-    #endif
-    
-    #ifdef ShowFlightTimer
-      if( (armed == true) ) {
-        armedTime += ( currentTime-prevTime );
-      }
-      if( (armedTime - prevUpdate) >= 1000000 ) { //if more than 1 second since update
-        updateTimer();
-        prevUpdate = armedTime;
-      }
-      prevTime = currentTime;
-    #endif
-    
-    #ifdef ShowAttitudeIndicator
-    updateAI();
-    #endif
+
+void initDisplays() {
+  #ifdef ShowReticle
+    byte buf[2];
+    buf[0] = 0x01;
+    buf[1] = 0x02;
+    writeChars( buf, 2, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+  #endif
+  
+  #ifdef ShowFlightTimer
+    displayFlightTime();
+  #endif
+  
+  #ifdef AltitudeHold
+    displayAltitude();
+  #endif
+  
+  #ifdef HeadingMagHold
+    diaplayHeading();
+  #endif
+  
+  #ifdef BatteryMonitor
+    displayVoltage();
+  #endif
+}
+
+void initializeOSD() {
+  int i;
+  pinMode( CS, OUTPUT );
+  pinMode( 53, OUTPUT ); //Default CS pin - needs to be output or SPI peripheral will behave as a slave instead of master
+  digitalWrite( CS, HIGH );
+
+  pinMode( DOUT, OUTPUT );
+  pinMode( DIN, INPUT );
+  pinMode( SCK, OUTPUT );
+
+  // SPCR = 01010000
+  //interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
+  //sample on leading edge of clk,system clock/4 rate (fastest)
+  SPCR = (1 << SPE) | (1 << MSTR);
+  clear = SPSR;
+  clear = SPDR;
+  delay( 10 ); 
+  
+  #if defined(AUTO_VIDEO_STANDARD)
+    detectVideoStandard();
+  #endif
+
+  //Soft reset the MAX7456 - clear display memory
+  digitalWrite( CS, LOW );
+  spi_transfer( VM0 ); //Writing to VM0 register
+  spi_transfer( MAX7456_reset ); //...reset bit
+  digitalWrite( CS, HIGH );
+  delay( 1 ); //Only takes ~100us typically
+
+  //Set white level to 90% for all rows
+  digitalWrite( CS, LOW );
+  for( i = 0; i < MAX_screen_rows; i++ ) {
+    spi_transfer( RB0 + i );
+    spi_transfer( WHITE_level_90 );
   }
 
-};
+  //ensure device is enabled
+  spi_transfer( VM0 );
+  spi_transfer( ENABLE_display );
+  delay(100);
+  //finished writing
+  digitalWrite( CS, HIGH );  
+  
+  initDisplays(); //Print initial values to screen
+}
 
+//updates to display memory can make text flicker - we want to minimise # updates
+void updateOSD() {
+  #ifdef BattMonitor
+    if( (unsigned)(batteryVoltage*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
+      displayVoltage();
+    }
+  #endif
+  
+  #ifdef AltitudeHold
+    if( (unsigned)(getBaroAltitude()) != (unsigned)(currentAltitude) ) {
+      displayAltitude();
+    }
+  #endif
+  
+  #ifdef HeadingMagHold
+    if( (unsigned)(kinematicsGetDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
+      diaplayHeading();
+    }
+  #endif
+  
+  #ifdef ShowFlightTimer
+    if( (armed == true) ) {
+      armedTime += ( currentTime-prevTime );
+    }
+    if( (armedTime - prevUpdate) >= 1000000 ) { //if more than 1 second since update
+      displayFlightTime();
+      prevUpdate = armedTime;
+    }
+    prevTime = currentTime;
+  #endif
+  
+  #ifdef ShowAttitudeIndicator
+    displayArtificialHorizon();
+  #endif
+}
 #endif
 
 
