@@ -18,7 +18,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-
 /****************************************************************************
    Before flight, select the different user options for your AeroQuad below
    If you need additional assitance go to http://AeroQuad.com/forum
@@ -46,14 +45,14 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-//#define hexXConfig        // @todo Kenny NOT FLIGHT TESTED
+//#define hexXConfig
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
-#define octoX8Congig
+//#define octoX8Congig
 
 //
 // *******************************************************************************************************************************
@@ -62,7 +61,7 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
@@ -77,8 +76,8 @@
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
 #define FlightAngleARG // Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
-//#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
-//#define BinaryWritePID // Enables fast binary transfer of attitude PID data
+#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
+#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
 
 //
@@ -100,7 +99,7 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
 #define MAX7456_OSD
@@ -130,7 +129,6 @@
 /**
  * Kenny todo.
  * @todo : UNIT TEST
- * @todo : adapt Alan led class or use it, standardize led processing. Fix dave bug for WII
  *
  * @TODO : REMOVE DRIFT CORRECTION TEST FROM AGR WHEN ALAN AND JOHN HAVE FIX IT!
  */
@@ -150,16 +148,10 @@
 //********************************************************
 #ifdef AeroQuad_v1
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
-  Gyroscope_IDG_IDZ500 gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
-  Accelerometer_ADXL500 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
   #define RECEIVER_328P
@@ -176,31 +168,25 @@
    * Put AeroQuad_v1 specific intialization need here
    */
   void initPlatform() {
-    gyroSpecific.setAref(aref);
-    accelSpecific.setAref(aref);
+    setGyroAref(aref);
+    setAccelAref(aref);
   }
   
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
 #ifdef AeroQuad_v1_IDG
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
-  Gyroscope_IDG_IDZ500 gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
-  Accelerometer_ADXL500 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
   #define RECEIVER_328P
@@ -217,16 +203,16 @@
    * Put AeroQuad_v1_IDG specific intialization need here
    */
   void initPlatform() {
-    gyroSpecific.setAref(aref);
-    accelSpecific.setAref(aref);
+    setGyroAref(aref);
+    setAccelAref(aref);
   }
   
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -234,16 +220,10 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
-  Gyroscope_ITG3200 gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
   
   // Accelerometer declaraion
-  #include <Accelerometer.h>
   #include <Accelerometer_BMA180.h>
-  Accelerometer_BMA180 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
   #define RECEIVER_328P
@@ -280,22 +260,12 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 2000
-  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
-      lastSampleTime = currentTime;
-      gyro->measure();
-      accel->measure();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += accel->getMeterPerSec(i);
-        gyroSample[i] += gyro->getRadPerSec(i);
-      }
-      sampleCount++;
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -303,23 +273,16 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
-  Gyroscope_ITG3200 gyroSpecific(true);
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL345.h>
-  Accelerometer_ADXL345 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
   #define RECEIVER_328P
 
   // Motor declaration
-//  #define MOTOR_PWM_Timer
-  #define MOTOR_PWM
+  #define MOTOR_PWM_Timer
   
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -334,6 +297,7 @@
    * Put AeroQuad_Mini specific intialization need here
    */
   void initPlatform() {
+    gyroAddress = ITG3200_ADDRESS-1;
     
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
@@ -344,22 +308,12 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 4000
-  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
-      lastSampleTime = currentTime;
-      gyro->measure();
-      accel->measure();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += accel->getMeterPerSec(i);
-        gyroSample[i] += gyro->getRadPerSec(i);
-      }
-      sampleCount++;
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -367,16 +321,10 @@
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_IDG_IDZ500.h>
-  Gyroscope_IDG_IDZ500 gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_ADXL500.h>
-  Accelerometer_ADXL500 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Reveiver declaration
   #define RECEIVER_MEGA
@@ -393,16 +341,16 @@
    * Put AeroQuadMega_v1 specific intialization need here
    */
   void initPlatform() {
-    gyroSpecific.setAref(aref);
-    accelSpecific.setAref(aref);
+    setGyroAref(aref);
+    setAccelAref(aref);
   }
   
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -410,16 +358,10 @@
   #include <Device_I2C.h>
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_ITG3200.h>
-  Gyroscope_ITG3200 gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
   
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_BMA180.h>
-  Accelerometer_BMA180 accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Receiver Declaration
   #define RECEIVER_MEGA
@@ -441,6 +383,7 @@
   #ifdef BattMonitor
     #define BATTERY_MONITOR_AQ
   #endif
+
 
   /**
    * Put AeroQuadMega_v2 specific intialization need here
@@ -469,40 +412,25 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 1000
-  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
-      lastSampleTime = currentTime;
-      gyro->measure();
-      accel->measure();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += accel->getMeterPerSec(i);
-        gyroSample[i] += gyro->getRadPerSec(i);
-      }
-      sampleCount++;
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
 #ifdef ArduCopter
   #include <APM_ADC.h>
+  #include <APM_RC.h>
   #include <Device_I2C.h>
 
   // Gyroscope declaration 
-  #include <Gyroscope.h>
   #include <Gyroscope_APM.h>
-  Gyroscope_APM gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
   
   // Accelerometer Declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_APM.h>
-  Accelerometer_APM accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Receiver Declaration
   #define RECEIVER_APM
@@ -534,26 +462,17 @@
     pinMode(LED_Green, OUTPUT);
 
     initializeADC();
+    initRC();
     
     Wire.begin();
   }
   
-  #define DELAY_BETWEEN_READING 2500
-
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
-      lastSampleTime = currentTime;
-      gyro->measure();
-      accel->measure();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += accel->getMeterPerSec(i);
-        gyroSample[i] += gyro->getRadPerSec(i);
-      }
-      sampleCount++;
-    }
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -565,16 +484,10 @@
   Platform_Wii platformWii;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
-  Gyroscope_Wii gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_WII.h>
-  Accelerometer_WII accelSpecific;
-  Accelerometer *accel = &accelSpecific;
   
   // Receiver declaration
   #define RECEIVER_328P
@@ -609,27 +522,17 @@
        platformWii.initialize();
      #endif  
      
-     gyroSpecific.setPlatformWii(&platformWii);
-     accelSpecific.setPlatformWii(&platformWii);
+     gyroPlatformWii = &platformWii;
+     accelPlatformWii = &platformWii;
   }
-  
-  #define DELAY_BETWEEN_READING 3000
   
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
-      lastSampleTime = currentTime;
-      platformWii.measure();
-      gyro->measure();
-      accel->measure();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += accel->getMeterPerSec(i);
-        gyroSample[i] += gyro->getRadPerSec(i);
-      }
-      sampleCount++;
-    }
+    platformWii.measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -641,16 +544,10 @@
   Platform_Wii platformWii;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_Wii.h>
-  Gyroscope_Wii gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_WII.h>
-  Accelerometer_WII accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
   #define RECEIVER_MEGA
@@ -680,8 +577,8 @@
     Wire.begin();
     
     platformWii.initialize();
-    gyroSpecific.setPlatformWii(&platformWii);
-    accelSpecific.setPlatformWii(&platformWii);    
+    gyroPlatformWii = &platformWii;
+    accelPlatformWii = &platformWii;    
   }
   
   /**
@@ -689,8 +586,8 @@
    */
   void measureCriticalSensors() {
     platformWii.measure();
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -700,16 +597,10 @@
   CHR6DM chr6dm;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_CHR6DM.h>
-  Gyroscope_CHR6DM gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
 
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_CHR6DM.h>
-  Accelerometer_CHR6DM accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
   #define RECEIVER_MEGA
@@ -719,13 +610,11 @@
   
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  Kinematics_CHR6DM tempKinematics;
   
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
-  Magnetometer_CHR6DM compassSpecific;
 
   // Altitude declaration
   #ifdef AltitudeHold
@@ -751,11 +640,11 @@
     chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
     chr6dm.requestPacket();
     
-    gyroSpecific.setChr6dm(&chr6dm);
-    accelSpecific.setChr6dm(&chr6dm);
-    tempKinematics.setChr6dm(&chr6dm);
-    tempKinematics.setGyroscope(&gyroSpecific);
-    compassSpecific.setChr6dm(&chr6dm);
+    gyroChr6dm = &chr6dm;
+    accelChr6dm = &chr6dm;
+    kinematicsChr6dm = &chr6dm;
+//    tempKinematics.setGyroscope(&gyroSpecific);
+    compassChr6dm = &chr6dm;
   }
   
   /**
@@ -764,8 +653,8 @@
   void measureCriticalSensors() {
     
     chr6dm.read();
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -775,16 +664,10 @@
   CHR6DM chr6dm;
   
   // Gyroscope declaration
-  #include <Gyroscope.h>
   #include <Gyroscope_CHR6DM.h>
-  Gyroscope_CHR6DM gyroSpecific;
-  Gyroscope *gyro = &gyroSpecific;
   
   // Accelerometer declaration
-  #include <Accelerometer.h>
   #include <Accelerometer_CHR6DM.h>
-  Accelerometer_CHR6DM accelSpecific;
-  Accelerometer *accel = &accelSpecific;
 
   // Receiver declaration
   #define RECEIVER_APM
@@ -794,13 +677,11 @@
   
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  Kinematics_CHR6DM tempKinematics;
   
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
-  Magnetometer_CHR6DM compassSpecific;
 
   // Altitude declaration
   #ifdef AltitudeHold
@@ -830,11 +711,11 @@
     chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
     chr6dm.requestPacket();
     
-    gyroSpecific.setChr6dm(&chr6dm);
-    accelSpecific.setChr6dm(&chr6dm);
-    tempKinematics.setChr6dm(&chr6dm);
-    tempKinematics.setGyroscope(&gyroSpecific);
-    compassSpecific.setChr6dm(&chr6dm);
+    gyroChr6dm = &chr6dm;
+    accelChr6dm = &chr6dm;
+    kinematicsChr6dm = &chr6dm;
+//    tempKinematics.setGyroscope(&gyroSpecific);
+    compassChr6dm = &chr6dm;
   }
   
   /**
@@ -843,8 +724,8 @@
   void measureCriticalSensors() {
     
     chr6dm.read();
-    gyro->measure();
-    accel->measure();
+    measureGyro();
+    measureAccel();
   }
 #endif
 
@@ -862,115 +743,66 @@
   // CHR6DM have it's own kinematics, so, initialize in it's scope
 #elif defined FlightAngleARG
   #include "Kinematics_ARG.h"
-  Kinematics_ARG tempKinematics;
 #elif defined FlightAngleMARG
   #include "Kinematics_MARG.h"
-  Kinematics_MARG tempKinematics;
 #else
   #include "Kinematics_DCM.h"
-  Kinematics_DCM tempKinematics;
 #endif
-Kinematics *kinematics = &tempKinematics;
 
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined ReceiverPPM
-  #include <Receiver.h>
+#if defined (AeroQuad_Mini) && defined (hexY6Config)
   #include <Receiver_PPM.h>
-  Receiver_PPM receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RemotePCReceiver
-  #include <Receiver.h>
   #include <Receiver_RemotePC.h>
-  Receiver_RemotePC receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_328P
-  #include <Receiver.h>
   #include <Receiver_328p.h>
-  Receiver_328p receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_MEGA
-  #include <Receiver.h>
   #include <Receiver_MEGA.h>
-  Receiver_MEGA receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #elif defined RECEIVER_APM
-  #include <Receiver.h>
   #include <Receiver_APM.h>
-  Receiver_APM receiverSpecific;
-  Receiver *receiver = &receiverSpecific;
 #endif
 
 
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined triConfig
-  #include <Motors.h>
-  #include <Motors_PWM_Tri.h>
-  Motors_PWM_Tri motorsSpecific;
-  Motors *motors = &motorsSpecific;
-#elif defined MOTOR_PWM
-  #include <Motors.h>
+//#if defined triConfig 
+//  #include <Motors_PWM_Tri.h>
+#if defined MOTOR_PWM
   #include <Motors_PWM.h>
-  Motors_PWM motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_PWM_Timer
-  #include <Motors.h>
   #include <Motors_PWM_Timer.h>
-  Motors_PWM_Timer motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_APM
-  #include <Motors.h>
   #include <Motors_APM.h>
-  Motors_APM motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #elif defined MOTOR_I2C
-  #include <Motors.h>
   #include <Motors_I2C.h>
-  Motors_I2C motorsSpecific;
-  Motors *motors = &motorsSpecific;
 #endif
 
 //********************************************************
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined (HMC5843)
-  #include <Compass.h>
   #include <Magnetometer_HMC5843.h>
-  Magnetometer_HMC5843 compassSpecific;
-  Compass *compass = &compassSpecific;
 #elif defined (COMPASS_CHR6DM)
-  #include <Compass.h>
-  Compass *compass = &compassSpecific;
 #endif
 
 //********************************************************
 //******* ALTITUDE HOLD BAROMETER DECLARATION ************
 //********************************************************
 #if defined (BMP085)
-  #include <BarometricSensor.h>
   #include <BarometricSensor_BMP085.h>
-  BarometricSensor_BMP085 barometricSensorSpecific;
-  BarometricSensor *barometricSensor = &barometricSensorSpecific;
 #endif
 
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************
 //********************************************************
 #if defined (BATTERY_MONITOR_AQ)
-  #include <BatteryMonitor.h>
   #include <BatteryMonitor_AQ.h>
-  BatteryMonitor_AQ batteryMonitorSpecific;
-  BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
 #elif defined (BATTERY_MONITOR_APM)
-  #include <BatteryMonitor.h>
   #include <BatteryMonitor_APM.h>
-  BatteryMonitor_APM batteryMonitorSpecific;
-  BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
 #endif  
-
 
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
@@ -978,10 +810,7 @@ Kinematics *kinematics = &tempKinematics;
 // used only on mega for now
 #ifdef CameraControl
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-    #include <CameraStabilizer.h>
     #include <CameraStabilizer_Aeroquad.h>
-    CameraStabilizer_AeroQuad tempCameraStabilizer;
-    CameraStabilizer *camera = &tempCameraStabilizer;
   #else
     #undef CameraControl
   #endif
@@ -1009,9 +838,11 @@ Kinematics *kinematics = &tempKinematics;
   #include "FlightControlOctoX8.h"
 #endif
 
+//********************************************************
+//****************** OSD DEVICE DECLARATION **************
+//********************************************************
 #ifdef MAX7456_OSD
-  #include "OSD.h"
-  OSD osd;
+  #include "MAX7456.h"
 #endif
 
 
@@ -1046,16 +877,17 @@ void setup() {
   
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
-     motors->initialize(); 
+     initializeMotors(); 
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
-     motors->initialize(SIX_Motors); 
+     initializeMotors(SIX_Motors); 
   #elif defined (octoX8Congig)
-     motors->initialize(HEIGHT_Motors); 
+     initializeMotors(HEIGHT_Motors); 
   #endif
+
 
   // Setup receiver pins for pin change interrupts
   if (receiverLoop == ON) {
-    receiver->initialize(LASTCHANNEL);
+    initializeReceiver(LASTCHANNEL);
     initReceiverFromEEPROM();
   }
        
@@ -1063,22 +895,22 @@ void setup() {
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
   initSensorsZeroFromEEPROM();
-  gyro->initialize(); // defined in Gyro.h
-  accel->initialize(); // defined in Accel.h
+  initializeGyro(); // defined in Gyro.h
+  initializeAccel(); // defined in Accel.h
   
   // Calibrate sensors
-  gyro->calibrate(); // defined in Gyro.h
+  calibrateGyro(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
   
   // Flight angle estimation
   #ifdef HeadingMagHold
-    compass->initialize();
+    initializeMagnetometer();
     //setHeading = compass->getHeading();
-    kinematics->initialize(compass->getHdgXY(XAXIS), compass->getHdgXY(YAXIS));
+    initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
   #else
-    kinematics->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
+    initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -1089,25 +921,25 @@ void setup() {
 
   // Optional Sensors
   #ifdef AltitudeHold
-    barometricSensor->initialize();
+    initializeBaro();
   #endif
   
   // Battery Monitor
   #ifdef BattMonitor
-    batteryMonitor->initialize();
+    initializeBatteryMonitor();
   #endif
   
   // Camera stabilization setup
   #if defined (CameraControl)
-    camera->initialize();
-    camera->setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
-    camera->setCenterRoll(1500); // Need to figure out nice way to set center position
-    camera->setmCameraPitch(11.11);
-    camera->setCenterPitch(1300);
+    initializeCameraStabilization();
+    setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    setCenterRoll(1500); // Need to figure out nice way to set center position
+    setmCameraPitch(11.11);
+    setCenterPitch(1300);
   #endif
   
   #if defined(MAX7456_OSD)
-    osd.initialize();
+    initializeOSD();
   #endif
 
 
@@ -1152,14 +984,10 @@ void setup() {
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
-
-  if ((sensorLoop == ON)) {
-    measureCriticalSensors();
-  }
-
+  
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
-    
+
     #ifdef DEBUG_LOOP
       testSignal ^= HIGH;
       digitalWrite(LEDPIN, testSignal);
@@ -1179,70 +1007,67 @@ void loop () {
       hundredHZpreviousTime = currentTime;
       
       if (sensorLoop == ON) {
+        measureCriticalSensors();
+        
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
-                                 gyroSample[YAXIS]/sampleCount,                   
-                                 gyroSample[ZAXIS]/sampleCount,                        
-                                 accelSample[XAXIS]/sampleCount,                   
-                                 accelSample[YAXIS]/sampleCount,                   
-                                 accelSample[ZAXIS]/sampleCount,                   
-                                 compass->getRawData(XAXIS),                      
-                                 compass->getRawData(YAXIS),                     
-                                 compass->getRawData(ZAXIS),
-                                 G_Dt);
+          calculateKinematics(gyroRate[ROLL],                       
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              getMagnetometerRawData(XAXIS),                      
+                              getMagnetometerRawData(YAXIS),                     
+                              getMagnetometerRawData(ZAXIS),
+                              G_Dt);
         #endif
       
         #if defined FlightAngleARG
-          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
-                                 gyroSample[YAXIS]/sampleCount,                   
-                                 gyroSample[ZAXIS]/sampleCount,                   
-                                 accelSample[XAXIS]/sampleCount,                   
-                                 accelSample[YAXIS]/sampleCount,                   
-                                 accelSample[ZAXIS]/sampleCount,                   
-                                 0.0,                                            
-                                 0.0,                                            
-                                 0.0,
-                                 G_Dt);
+          calculateKinematics(gyroRate[ROLL],                       
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              0.0,                                            
+                              0.0,                                            
+                              0.0,
+                              G_Dt);
         #endif
 
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
-                                 gyroSample[YAXIS]/sampleCount,                   
-                                 gyroSample[ZAXIS]/sampleCount,                   
-                                 accelSample[XAXIS]/sampleCount,                   
-                                 accelSample[YAXIS]/sampleCount,                   
-                                 accelSample[ZAXIS]/sampleCount,                   
-                                 accel->getOneG(),                              
-                                 compass->getHdgXY(XAXIS),                        
-                                 compass->getHdgXY(YAXIS),
-                                 G_Dt);
+          calculateKinematics(gyroRate[ROLL],                       
+                              gyroRate[PITCH],                      
+                              gyroRate[YAW],                        
+                              meterPerSec[XAXIS],                   
+                              meterPerSec[YAXIS],                   
+                              meterPerSec[ZAXIS],                   
+                              accelOneG,                              
+                              getHdgXY(XAXIS),                        
+                              getHdgXY(YAXIS),
+                              G_Dt);
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyroSample[XAXIS]/sampleCount,                   
-                                 gyroSample[YAXIS]/sampleCount,                   
-                                 gyroSample[ZAXIS]/sampleCount,                        
-                                 accelSample[XAXIS]/sampleCount,                   
-                                 accelSample[YAXIS]/sampleCount,                   
-                                 accelSample[ZAXIS]/sampleCount,                   
-                                 accel->getOneG(),                               
-                                 0.0,                                             
-                                 0.0,
-                                 G_Dt);
+          calculateKinematics(gyroRate[ROLL],                        
+                              gyroRate[PITCH],                       
+                              gyroRate[YAW],                         
+                              meterPerSec[XAXIS],                    
+                              meterPerSec[YAXIS],                    
+                              meterPerSec[ZAXIS],                    
+                              accel->getOneG(),                               
+                              0.0,                                             
+                              0.0,
+                              G_Dt);
         #endif
-        for (int i = 0; i < LASTAXIS;i++) {
-          accelSample[i] = 0.0;
-          gyroSample[i] = 0.0;
-        }
-        sampleCount = 0.0;
       }
       
       // Combines external pilot commands and measured sensor data to generate motor commands
       if (controlLoop == ON) {
         processFlightControl();
-      }
-  
+      } 
+
       #ifdef BinaryWrite
         if (fastTransfer == ON) {
           // write out fastTelemetry to Configurator or openLog
@@ -1273,7 +1098,7 @@ void loop () {
       
       #ifdef AltitudeHold
         if (sensorLoop == ON) {
-          barometricSensor->measure(); // defined in altitude.h
+          measureBaro(); // defined in altitude.h
         }
       #endif
 
@@ -1295,7 +1120,7 @@ void loop () {
       
       if (sensorLoop == ON) {
         #if defined(AltitudeHold)
-          barometricSensor->measure(); // defined in altitude.h
+          measureBaro(); // defined in altitude.h
         #endif
       }
       
@@ -1317,10 +1142,10 @@ void loop () {
 
       if (sensorLoop == ON) {
         #if defined(HeadingMagHold)
-          compass->measure(kinematics->getData(ROLL), kinematics->getData(PITCH));
+          measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
         #endif
         #if defined(BattMonitor)
-          batteryMonitor->measure(armed);
+          measureBatteryVoltage(armed);
         #endif
         processAltitudeHold();
       }
@@ -1331,7 +1156,7 @@ void loop () {
       }
       
       #ifdef MAX7456_OSD
-        osd.update();
+        updateOSD();
       #endif
 
       

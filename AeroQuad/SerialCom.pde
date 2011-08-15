@@ -91,26 +91,26 @@ void readSerialCommand() {
       PID[ALTITUDE].windupGuard = readFloatSerial();
       minThrottleAdjust = readFloatSerial();
       maxThrottleAdjust = readFloatSerial();
-      barometricSensor->setSmoothFactor(readFloatSerial());
+      baroSmoothFactor = readFloatSerial();
       readSerialPID(ZDAMPENING);
 #endif
       break;
     case 'K': // Receive data filtering values
-      gyro->setSmoothFactor(readFloatSerial());
-      accel->setSmoothFactor(readFloatSerial());
+      gyroSmoothFactor = readFloatSerial();
+      accelSmoothFactor = readFloatSerial();
       timeConstant = readFloatSerial();
       aref = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
-      receiver->setXmitFactor(readFloatSerial());
+      receiverXmitFactor = readFloatSerial();
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver->setSmoothFactor(channel, readFloatSerial());
+        receiverSmoothFactor[channel] = readFloatSerial();
       }
       break;
     case 'O': // Receive transmitter calibration values
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiver->setTransmitterSlope(channel, readFloatSerial());
-        receiver->setTransmitterOffset(channel, readFloatSerial());
+        receiverSlope[channel] = readFloatSerial();
+        receiverOffset[channel] = readFloatSerial();
       }
       break;
     case 'W': // Write all user configurable values to EEPROM
@@ -119,14 +119,14 @@ void readSerialCommand() {
       break;
     case 'Y': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
-      gyro->calibrate();
-      accel->calibrate();
+      calibrateGyro();
+      calibrateAccel();
       zeroIntegralError();
 #ifdef HeadingMagHold
-      compass->initialize();
+      initializeMagnetometer();
 #endif
 #ifdef AltitudeHold
-      barometricSensor->initialize();
+      initializeBaro();
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
@@ -159,13 +159,13 @@ void readSerialCommand() {
         fastTransfer = OFF;
       break;
     case 'b': // calibrate gyros
-      gyro->calibrate();
+      calibrateGyro();
       break;
     case 'c': // calibrate accels
-      accel->calibrate();
+      calibrateAccel();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      kinematics->calibrate();
-      accel->setOneG(accel->getMeterPerSec(ZAXIS));
+      calibrateKinematics();
+      accelOneG = meterPerSec[ZAXIS];
 #endif
       break;
     case 'd': // *** Spare ***
@@ -174,7 +174,7 @@ void readSerialCommand() {
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-        compass->setMagCal(axis, readFloatSerial(), readFloatSerial());
+        setMagCal(axis, readFloatSerial(), readFloatSerial());
       }
 #endif
       break;
@@ -279,7 +279,7 @@ void sendSerialTelemetry() {
     PrintValueComma(PID[ALTITUDE].windupGuard);
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
-    PrintValueComma(barometricSensor->getSmoothFactor());
+    PrintValueComma(baroSmoothFactor);
     PrintPID(ZDAMPENING);
 #else
     for(byte i=0; i<10; i++) {
@@ -290,49 +290,49 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
-    PrintValueComma(gyro->getSmoothFactor());
-    PrintValueComma(accel->getSmoothFactor());
+    PrintValueComma(gyroSmoothFactor);
+    PrintValueComma(accelSmoothFactor);
     PrintValueComma(timeConstant);
     SERIAL_PRINTLN(aref);
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
-    PrintValueComma(receiver->getXmitFactor());
+    PrintValueComma(receiverXmitFactor);
     for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiver->getSmoothFactor(axis));
+      PrintValueComma(receiverSmoothFactor[axis]);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
     for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiver->getTransmitterSlope(axis));
-      PrintValueComma(receiver->getTransmitterOffset(axis));
+      PrintValueComma(receiverSlope[axis]);
+      PrintValueComma(receiverOffset[axis]);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(gyro->getRadPerSec(axis));
+      PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(accel->getMeterPerSec(axis));
+      PrintValueComma(meterPerSec[axis]);
     }
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
 #if defined(HeadingMagHold)
-      PrintValueComma(compass->getRawData(axis));
+      PrintValueComma(getMagnetometerRawData(axis));
 #else
       PrintValueComma(0);
 #endif
     }
 
-    PrintValueComma(degrees(kinematics->getData(ROLL)));
-    PrintValueComma(degrees(kinematics->getData(PITCH)));
+    PrintValueComma(degrees(kinematicsAngle[ROLL]));
+    PrintValueComma(degrees(kinematicsAngle[PITCH]));
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    SERIAL_PRINTLN((kinematics->getDegreesHeading(YAW)));
+    SERIAL_PRINTLN((kinematicsAngle[YAW]));
 #else
-    SERIAL_PRINTLN(degrees(gyro->getHeading()));
+    SERIAL_PRINTLN(degrees(gyroHeading));
 #endif
     break;
   case 'R': // *** Spare ***
@@ -344,28 +344,28 @@ void sendSerialTelemetry() {
   case 'S': // Send all flight data
     PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      PrintValueComma(gyro->getRadPerSec(axis));
+      PrintValueComma(gyroRate[axis]);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      PrintValueComma(accel->getMeterPerSec(axis));
+      PrintValueComma(meterPerSec[axis]);
 #ifdef BattMonitor
-    PrintValueComma(batteryMonitor->getBatteryVoltage());
+    PrintValueComma(batteryVoltage);
 #else
     PrintValueComma(0);
 #endif
     for (byte motor = 0; motor < LASTMOTOR; motor++)
-      PrintValueComma(motors->getMotorCommand(motor));
+      PrintValueComma(motorCommand[motor]);
     PrintValueComma((int)armed);
     if (flightMode == STABLE)
       PrintValueComma(2000);
     if (flightMode == ACRO)
       PrintValueComma(1000);
 #ifdef HeadingMagHold
-    PrintValueComma(kinematics->getDegreesHeading(YAW));
+    PrintValueComma(kinematicsGetDegreesHeading(YAW));
 #else
-    PrintValueComma(gyro->getHeading());
+    PrintValueComma(gyroHeading);
 #endif
 #ifdef AltitudeHold
-    PrintValueComma(barometricSensor->getAltitude());
+    PrintValueComma(getBaroAltitude());
     SERIAL_PRINTLN((int)altitudeHold);
 #else
     PrintValueComma(0);
@@ -373,25 +373,25 @@ void sendSerialTelemetry() {
 #endif
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
-    PrintValueComma(receiver->getXmitFactor());
+    PrintValueComma(receiverXmitFactor);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(receiver->getData(axis));
+      PrintValueComma(receiverData[axis]);
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motors->getMotorCommand(axis));
+      PrintValueComma(motorCommand[axis]);
 //      PrintValueComma(motorConfiguratorCommand[axis]);
     }
     SERIAL_PRINTLN();
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiver->getData(channel));
+      PrintValueComma(receiverData[channel]);
     }
     SERIAL_PRINTLN();
     break;
   case 'V': // Send receiver status
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiver->getData(channel));
+      PrintValueComma(receiverData[channel]);
     }
     SERIAL_PRINTLN();
     break;
@@ -405,7 +405,7 @@ void sendSerialTelemetry() {
     break;
   case '6': // Report remote commands
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      PrintValueComma(motors->getMotorCommand(motor));
+      PrintValueComma(motorCommand[motor]);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -465,8 +465,8 @@ void sendSerialTelemetry() {
     for (byte axis = XAXIS; axis < 99; axis++) {
       if(axis == LASTAXIS)
         break;
-      PrintValueComma(compass->getMagMax(axis));
-      PrintValueComma(compass->getMagMin(axis));
+      PrintValueComma(magMax[axis]);
+      PrintValueComma(magMin[axis]);
     }
     SERIAL_PRINTLN();
 #endif
@@ -595,16 +595,16 @@ void fastTelemetry(void)
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyroRate[axis]);
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(meterPerSec[axis]);
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
-         sendBinaryFloat(compass->getRawData(axis));
+         sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematics->getGyroUnbias(axis));
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematics->getData(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(getGyroUnbias(axis));
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematicsAngle[axis]);
        printInt(32767); // Stop word of 0x7FFF
     #endif
   }

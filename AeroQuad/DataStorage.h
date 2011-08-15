@@ -105,12 +105,12 @@ void initializeEEPROM(void) {
   minThrottleAdjust = -50.0;
   maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
   #ifdef AltitudeHold    
-    barometricSensor->setSmoothFactor(0.1);
+    baroSmoothFactor = 0.1;
   #endif
   #ifdef HeadingMagHold
-    compass->setMagCal(XAXIS, 1, 0);
-    compass->setMagCal(YAXIS, 1, 0);
-    compass->setMagCal(ZAXIS, 1, 0);
+    setMagCal(XAXIS, 1, 0);
+    setMagCal(YAXIS, 1, 0);
+    setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
 
@@ -125,18 +125,18 @@ void initializeEEPROM(void) {
         PID[i].typePID = NOTYPE;
   }
     
-  receiver->setXmitFactor(1.0);
-  gyro->setSmoothFactor(1.0);
-  accel->setSmoothFactor(1.0);
+  receiverXmitFactor = 1.0;
+  gyroSmoothFactor = 1.0;
+  accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
-  accel->setOneG(9.80665); // AKA set one G to 9.8 m/s^2
+  accelOneG = 9.80665; // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver->setTransmitterSlope(channel, 1.0);
-    receiver->setTransmitterOffset(channel, 0.0);
-    receiver->setSmoothFactor(channel, 1.0);
+    receiverSlope[channel] = 1.0;
+    receiverOffset[channel] = 0.0;
+    receiverSmoothFactor[channel] = 1.0;
   }
-  receiver->setSmoothFactor(YAW, 0.5);
+  receiverSmoothFactor[YAW] = 0.5;
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -177,14 +177,14 @@ void readEEPROM(void) {
   minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
-    barometricSensor->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+    baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
   #endif
   readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
 
   #ifdef HeadingMagHold
-    compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
-    compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
-    compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
+    setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -201,7 +201,7 @@ void readEEPROM(void) {
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   minAcro = readFloat(MINACRO_ADR);
-  accel->setOneG(readFloat(ACCEL_1G_ADR));
+  accelOneG = readFloat(ACCEL_1G_ADR);
   
   /*#ifdef Camera
   mCameraPitch = readFloat(MCAMERAPITCH_ADR);
@@ -234,18 +234,18 @@ void writeEEPROM(void){
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
-    writeFloat(barometricSensor->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(baroSmoothFactor, ALTITUDE_SMOOTH_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
   writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
   #ifdef HeadingMagHold
-    writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
-    writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
-    writeFloat(compass->getMagMax(YAXIS), MAGYMAX_ADR);
-    writeFloat(compass->getMagMin(YAXIS), MAGYMIN_ADR);
-    writeFloat(compass->getMagMax(ZAXIS), MAGZMAX_ADR);
-    writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
+    writeFloat(magMax[XAXIS], MAGXMAX_ADR);
+    writeFloat(magMin[XAXIS], MAGXMIN_ADR);
+    writeFloat(magMax[YAXIS], MAGYMAX_ADR);
+    writeFloat(magMin[YAXIS], MAGYMIN_ADR);
+    writeFloat(magMax[ZAXIS], MAGZMAX_ADR);
+    writeFloat(magMin[ZAXIS], MAGZMIN_ADR);
   #else
     writeFloat(1.0F, MAGXMAX_ADR);
     writeFloat(0.0F, MAGXMIN_ADR);
@@ -255,15 +255,15 @@ void writeEEPROM(void){
     writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(receiver->getXmitFactor(), XMITFACTOR_ADR);
-  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
-  writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
+  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
+  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
+  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    writeFloat(receiver->getTransmitterSlope(channel),  RECEIVER_DATA[channel].slope);
-    writeFloat(receiver->getTransmitterOffset(channel), RECEIVER_DATA[channel].offset);
-    writeFloat(receiver->getSmoothFactor(channel),      RECEIVER_DATA[channel].smooth_factor);
+    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
+    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
+    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
@@ -271,7 +271,7 @@ void writeEEPROM(void){
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(minAcro, MINACRO_ADR);
-  writeFloat(accel->getOneG(), ACCEL_1G_ADR);
+  writeFloat(accelOneG, ACCEL_1G_ADR);
     
   /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);
@@ -293,41 +293,41 @@ void writeEEPROM(void){
 
 void initSensorsZeroFromEEPROM(void) {
   // Gyro initialization from EEPROM
-  gyro->setZero(ROLL,readFloat(GYRO_ROLL_ZERO_ADR));
-  gyro->setZero(PITCH,readFloat(GYRO_PITCH_ZERO_ADR));
-  gyro->setZero(YAW,readFloat(GYRO_YAW_ZERO_ADR));
-  gyro->setSmoothFactor(readFloat(GYROSMOOTH_ADR));
+  gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
+  gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
+  gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
+  gyroSmoothFactor = readFloat(GYROSMOOTH_ADR);
   
   // Accel initialization from EEPROM
-  accel->setOneG(readFloat(ACCEL_1G_ADR));
-  accel->setZero(XAXIS,readFloat(ACCEL_XAXIS_ZERO_ADR));
-  accel->setZero(YAXIS,readFloat(ACCEL_YAXIS_ZERO_ADR));
-  accel->setZero(ZAXIS,readFloat(ACCEL_ZAXIS_ZERO_ADR));
-  accel->setSmoothFactor(readFloat(ACCSMOOTH_ADR));
+  accelOneG = readFloat(ACCEL_1G_ADR);
+  accelZero[XAXIS] = readFloat(ACCEL_XAXIS_ZERO_ADR);
+  accelZero[YAXIS] = readFloat(ACCEL_YAXIS_ZERO_ADR);
+  accelZero[ZAXIS] = readFloat(ACCEL_ZAXIS_ZERO_ADR);
+  accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
 void storeSensorsZeroToEEPROM(void) {
   // Store gyro data to EEPROM
-  writeFloat(gyro->getZero(ROLL), GYRO_ROLL_ZERO_ADR);
-  writeFloat(gyro->getZero(PITCH), GYRO_PITCH_ZERO_ADR);
-  writeFloat(gyro->getZero(YAW), GYRO_YAW_ZERO_ADR);
-  writeFloat(gyro->getSmoothFactor(), GYROSMOOTH_ADR);
+  writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
+  writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
+  writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
   
   // Store accel data to EEPROM
-  writeFloat(accel->getOneG(), ACCEL_1G_ADR);
-  writeFloat(accel->getZero(XAXIS), ACCEL_XAXIS_ZERO_ADR);
-  writeFloat(accel->getZero(YAXIS), ACCEL_YAXIS_ZERO_ADR);
-  writeFloat(accel->getZero(ZAXIS), ACCEL_ZAXIS_ZERO_ADR);
-  writeFloat(accel->getSmoothFactor(), ACCSMOOTH_ADR);
+  writeFloat(accelOneG, ACCEL_1G_ADR);
+  writeFloat(accelZero[XAXIS], ACCEL_XAXIS_ZERO_ADR);
+  writeFloat(accelZero[YAXIS], ACCEL_YAXIS_ZERO_ADR);
+  writeFloat(accelZero[ZAXIS], ACCEL_ZAXIS_ZERO_ADR);
+  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 }
 
 void initReceiverFromEEPROM(void) {
-  receiver->setXmitFactor(readFloat(XMITFACTOR_ADR));
+  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiver->setTransmitterSlope(channel,readFloat(RECEIVER_DATA[channel].slope));
-    receiver->setTransmitterOffset(channel,readFloat(RECEIVER_DATA[channel].offset));
-    receiver->setSmoothFactor(channel,readFloat(RECEIVER_DATA[channel].smooth_factor));
+    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
+    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
+    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
   }
 }
 

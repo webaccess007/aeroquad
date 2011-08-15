@@ -28,21 +28,19 @@
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
+
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motorAxisCommandRoll = updatePID(receiver->getSIData(ROLL), gyro->getRadPerSec(ROLL), &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(receiver->getSIData(PITCH), -gyro->getRadPerSec(PITCH), &PID[PITCH]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), gyroRate[ROLL], &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
   }
   else {
     
-    float rollAttitudeCmd = updatePID((receiver->getData(ROLL) - receiver->getZero(ROLL)) * ATTITUDE_SCALING, kinematics->getData(ROLL), &PID[LEVELROLL]);
-    float pitchAttitudeCmd = updatePID((receiver->getData(PITCH) - receiver->getZero(PITCH)) * ATTITUDE_SCALING, -kinematics->getData(PITCH), &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyro->getRadPerSec(ROLL), &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyro->getRadPerSec(PITCH), &PID[LEVELGYROPITCH]);
-//  motors->setMotorAxisCommand(ROLL, updatePID(rollAttitudeCmd, flightAngle->getGyroUnbias(ROLL), &PID[LEVELGYROROLL]));
-//  motors->setMotorAxisCommand(PITCH, updatePID(pitchAttitudeCmd, -flightAngle->getGyroUnbias(PITCH), &PID[LEVELGYROPITCH]));
-
+    float rollAttitudeCmd = updatePID((receiverData[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
+    float pitchAttitudeCmd = updatePID((receiverData[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyroRate[PITCH], &PID[LEVELGYROPITCH]);
   }
 }
 
@@ -54,23 +52,23 @@ void processCalibrateESC(void)
   switch (calibrateESC) { // used for calibrating ESC's
   case 1:
     for (byte motor = 0; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, MAXCOMMAND);
+      motorCommand[motor] = MAXCOMMAND;
     break;
   case 3:
     for (byte motor = 0; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, constrain(testCommand, 1000, 1200));
+      motorCommand[motor] = constrain(testCommand, 1000, 1200);
     break;
   case 5:
     for (byte motor = 0; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, constrain(motorConfiguratorCommand[motor], 1000, 1200));
+      motorCommand[motor] = constrain(motorConfiguratorCommand[motor], 1000, 1200);
     safetyCheck = ON;
     break;
   default:
     for (byte motor = 0; motor < LASTMOTOR; motor++)
-      motors->setMotorCommand(motor, MINCOMMAND);
+      motorCommand[motor] = MINCOMMAND;
   }
   // Send calibration commands to motors
-  motors->write(); // Defined in Motors.h
+  writeMotors(); // Defined in Motors.h
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -81,9 +79,9 @@ void processHeading(void)
   if (headingHoldConfig == ON) {
 
     #if defined(HeadingMagHold)
-      heading = degrees(kinematics->getHeading(YAW));
+      heading = degrees(kinematicsAngle[YAW]);
     #else
-      heading = degrees(gyro->getHeading());
+      heading = degrees(gyroHeading);
     #endif
 
     // Always center relative heading around absolute heading chosen during yaw command
@@ -96,8 +94,8 @@ void processHeading(void)
     if (heading >= (setHeading + 180)) relativeHeading -= 360;
 
     // Apply heading hold only when throttle high enough to start flight
-    if (receiver->getData(THROTTLE) > MINCHECK ) { 
-      if ((receiver->getData(YAW) > (MIDCOMMAND + 25)) || (receiver->getData(YAW) < (MIDCOMMAND - 25))) {
+    if (receiverData[THROTTLE] > MINCHECK ) { 
+      if ((receiverData[YAW] > (MIDCOMMAND + 25)) || (receiverData[YAW] < (MIDCOMMAND - 25))) {
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
         headingHold = 0;
@@ -106,7 +104,7 @@ void processHeading(void)
         headingTime = currentTime;
       }
       else {
-        if (relativeHeading < .25 && relativeHeading > -.25) {
+        if (relativeHeading < 0.25 && relativeHeading > -0.25) {
           headingHold = 0;
           PID[HEADING].integratedError = 0;
         }
@@ -134,8 +132,8 @@ void processHeading(void)
     }
   }
   // NEW SI Version
-  commandedYaw = constrain(receiver->getSIData(YAW) + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, gyro->getRadPerSec(YAW), &PID[YAW]);
+  commandedYaw = constrain(getReceiverSIData(YAW) + radians(headingHold), -PI, PI);
+  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[YAW], &PID[YAW]);
   // uses flightAngle unbias rate
   //motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }
@@ -152,30 +150,30 @@ void processAltitudeHold(void)
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
   if (altitudeHold == ON) {
-    throttleAdjust = updatePID(holdAltitude, barometricSensor->getAltitude(), &PID[ALTITUDE]);
+    throttleAdjust = updatePID(holdAltitude, getBaroAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
-    if (abs(holdThrottle - receiver->getData(THROTTLE)) > PANICSTICK_MOVEMENT) {
+    if (abs(holdThrottle - receiverData[THROTTLE]) > PANICSTICK_MOVEMENT) {
       altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
-      if (receiver->getData(THROTTLE) > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+      if (receiverData[THROTTLE] > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
         holdAltitude += 0.01;
       }
-      if (receiver->getData(THROTTLE) < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+      if (receiverData[THROTTLE] < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
         holdAltitude -= 0.01;
       }
     }
   }
   else {
     // Altitude hold is off, get throttle from receiver
-    holdThrottle = receiver->getData(THROTTLE);
+    holdThrottle = receiverData[THROTTLE];
     throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
   }
   // holdThrottle set in FlightCommand.pde if altitude hold is on
   throttle = holdThrottle + throttleAdjust; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
   // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-  throttle = receiver->getData(THROTTLE) + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
+  throttle = receiverData[THROTTLE] + autoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
 #endif
 }
 
@@ -198,17 +196,17 @@ void processFlightControl() {
   processMinMaxCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-//  processHardManuevers();
+  processHardManuevers();
   
   // Apply limits to motor commands
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    motors->setMotorCommand(motor, constrain(motors->getMotorCommand(motor), motorMinCommand[motor], motorMaxCommand[motor]));
+    motorCommand[motor] = constrain(motorCommand[motor], motorMinCommand[motor], motorMaxCommand[motor]);
   }
 
   // If throttle in minimum position, don't apply yaw
-  if (receiver->getData(THROTTLE) < MINCHECK) {
+  if (receiverData[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motors->setMotorCommand(motor, MINTHROTTLE);
+      motorCommand[motor] = MINTHROTTLE;
     }
   }
 
@@ -219,7 +217,7 @@ void processFlightControl() {
 
   // *********************** Command Motors **********************
   if (armed == ON && safetyCheck == ON) {
-    motors->write();
+    writeMotors();
   }
 }
 
