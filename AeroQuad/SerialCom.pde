@@ -91,7 +91,7 @@ void readSerialCommand() {
       PID[ALTITUDE].windupGuard = readFloatSerial();
       minThrottleAdjust = readFloatSerial();
       maxThrottleAdjust = readFloatSerial();
-      barometricSensor->setSmoothFactor(readFloatSerial());
+      baroSmoothFactor = readFloatSerial();
       readSerialPID(ZDAMPENING);
 #endif
       break;
@@ -123,10 +123,10 @@ void readSerialCommand() {
       calibrateAccel();
       zeroIntegralError();
 #ifdef HeadingMagHold
-      compass->initialize();
+      initializeMagnetometer();
 #endif
 #ifdef AltitudeHold
-      barometricSensor->initialize();
+      initializeBaro();
 #endif
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
@@ -164,7 +164,7 @@ void readSerialCommand() {
     case 'c': // calibrate accels
       calibrateAccel();
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      kinematics->calibrate();
+      calibrateKinematics();
       accelOneG = meterPerSec[ZAXIS];
 #endif
       break;
@@ -174,7 +174,7 @@ void readSerialCommand() {
     case 'f': // calibrate magnetometer
 #ifdef HeadingMagHold
       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-        compass->setMagCal(axis, readFloatSerial(), readFloatSerial());
+        setMagCal(axis, readFloatSerial(), readFloatSerial());
       }
 #endif
       break;
@@ -279,7 +279,7 @@ void sendSerialTelemetry() {
     PrintValueComma(PID[ALTITUDE].windupGuard);
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
-    PrintValueComma(barometricSensor->getSmoothFactor());
+    PrintValueComma(baroSmoothFactor);
     PrintPID(ZDAMPENING);
 #else
     for(byte i=0; i<10; i++) {
@@ -321,16 +321,16 @@ void sendSerialTelemetry() {
     }
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
 #if defined(HeadingMagHold)
-      PrintValueComma(compass->getRawData(axis));
+      PrintValueComma(getMagnetometerRawData(axis));
 #else
       PrintValueComma(0);
 #endif
     }
 
-    PrintValueComma(degrees(kinematics->getData(ROLL)));
-    PrintValueComma(degrees(kinematics->getData(PITCH)));
+    PrintValueComma(degrees(kinematicsAngle[ROLL]));
+    PrintValueComma(degrees(kinematicsAngle[PITCH]));
 #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-    SERIAL_PRINTLN((kinematics->getDegreesHeading(YAW)));
+    SERIAL_PRINTLN((kinematicsAngle[YAW]));
 #else
     SERIAL_PRINTLN(degrees(gyroHeading));
 #endif
@@ -348,7 +348,7 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(meterPerSec[axis]);
 #ifdef BattMonitor
-    PrintValueComma(batteryMonitor->getBatteryVoltage());
+    PrintValueComma(batteryVoltage);
 #else
     PrintValueComma(0);
 #endif
@@ -360,12 +360,12 @@ void sendSerialTelemetry() {
     if (flightMode == ACRO)
       PrintValueComma(1000);
 #ifdef HeadingMagHold
-    PrintValueComma(kinematics->getDegreesHeading(YAW));
+    PrintValueComma(kinematicsGetDegreesHeading(YAW));
 #else
     PrintValueComma(gyroHeading);
 #endif
 #ifdef AltitudeHold
-    PrintValueComma(barometricSensor->getAltitude());
+    PrintValueComma(getBaroAltitude());
     SERIAL_PRINTLN((int)altitudeHold);
 #else
     PrintValueComma(0);
@@ -465,8 +465,8 @@ void sendSerialTelemetry() {
     for (byte axis = XAXIS; axis < 99; axis++) {
       if(axis == LASTAXIS)
         break;
-      PrintValueComma(compass->getMagMax(axis));
-      PrintValueComma(compass->getMagMin(axis));
+      PrintValueComma(magMax[axis]);
+      PrintValueComma(magMin[axis]);
     }
     SERIAL_PRINTLN();
 #endif

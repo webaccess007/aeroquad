@@ -42,7 +42,7 @@ void readPilotCommands() {
       calibrateAccel(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
       //accel.setOneG(accel.getFlightData(ZAXIS));
-      kinematics->calibrate();
+      calibrateKinematics();
       zeroIntegralError();
       pulseMotors(3);
       // ledCW() is currently a private method in BatteryMonitor.h, fix and agree on this behavior in next revision
@@ -114,7 +114,7 @@ void readPilotCommands() {
    if (receiverData[AUX] < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
-         holdAltitude = barometricSensor->getAltitude();
+         holdAltitude = baroAltitude;
          holdThrottle = receiverData[THROTTLE];
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.

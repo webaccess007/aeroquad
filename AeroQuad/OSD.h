@@ -326,7 +326,7 @@ private:
 #ifdef BattMonitor
   float currentVoltage;
   void updateVoltage(void) {
-    currentVoltage = batteryMonitor->getBatteryVoltage();
+    currentVoltage = batteryVoltage;
     unsigned voltPrint = (unsigned)(currentVoltage*10); //1 decimal place
     char voltAscii[6]; //max 65536, plus null terminator
     utoa( voltPrint, voltAscii, 10 );
@@ -351,7 +351,7 @@ private:
 #ifdef AltitudeHold
   float currentAltitude;
   void updateAltitude(void) {
-    currentAltitude = barometricSensor->getAltitude();
+    currentAltitude = getBaroAltitude();
     #ifdef feet
     currentAltitude = currentAltitude/0.3048;
     #endif
@@ -373,7 +373,7 @@ private:
 #ifdef HeadingMagHold
   float currentHdg;
   void updateHdg(void) {
-    currentHdg = kinematics->getDegreesHeading(YAW);
+    currentHdg = kinematicsGetDegreesHeading(YAW);
     unsigned hdgPrint = (unsigned)currentHdg;
     char hdgAscii[6]; //max 65536, plus null terminator
     utoa( hdgPrint, hdgAscii, 10 );
@@ -426,8 +426,8 @@ void updateTimer(void) {
 
 #ifdef ShowAttitudeIndicator
 void updateAI( void ) {
-  float roll = kinematics->getData(ROLL);
-  float pitch = kinematics->getData(PITCH);
+  float roll = kinematicsAngle[ROLL];
+  float pitch = kinematicsAngle[PITCH];
 
   unsigned centreRow = RETICLE_ROW*18 + 10;  //pixel row which corresponds to an angle of zero pitch - same row as centre reticle
   int pitchPixelRow = constrain( (int)centreRow + (int)( (pitch/AI_MAX_PITCH_ANGLE)*(centreRow-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
@@ -472,19 +472,19 @@ public:
   //updates to display memory can make text flicker - we want to minimise # updates
   void update(void) {
     #ifdef BattMonitor
-      if( (unsigned)(batteryMonitor->getBatteryVoltage()*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
+      if( (unsigned)(batteryVoltage*10) != (unsigned)(currentVoltage*10) ) { //if changed by more than 0.1V
         updateVoltage();
       }
     #endif
     
     #ifdef AltitudeHold
-      if( (unsigned)(barometricSensor->getAltitude()) != (unsigned)(currentAltitude) ) {
+      if( (unsigned)(getBaroAltitude()) != (unsigned)(currentAltitude) ) {
         updateAltitude();
       }
     #endif
     
     #ifdef HeadingMagHold
-      if( (unsigned)(kinematics->getDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
+      if( (unsigned)(kinematicsGetDegreesHeading(YAW)) != (unsigned)(currentHdg) ) { //if changed by more than 1 deg
         updateHdg();
       }
     #endif

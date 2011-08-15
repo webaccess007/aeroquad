@@ -18,8 +18,10 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Org   -> accel -> gyro  -> rec
-// 38182 -> 38124 -> 37992 -> 37568
+// Org   -> accel -> gyro  -> rec   -> Motor -> kinem
+// 38182 -> 38124 -> 37992 -> 37568 -> 37444 -> 37580
+
+// Carefully check baro!!!
 
 
 /****************************************************************************
@@ -41,9 +43,9 @@
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
-//#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
+#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -65,9 +67,9 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 
@@ -624,13 +626,11 @@
   
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  Kinematics_CHR6DM tempKinematics;
   
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
-  Magnetometer_CHR6DM compassSpecific;
 
   // Altitude declaration
   #ifdef AltitudeHold
@@ -658,9 +658,9 @@
     
     gyroChr6dm = &chr6dm;
     accelChr6dm = &chr6dm;
-    tempKinematics.setChr6dm(&chr6dm);
+    kinematicsChr6dm = &chr6dm;
 //    tempKinematics.setGyroscope(&gyroSpecific);
-    compassSpecific.setChr6dm(&chr6dm);
+    compassChr6dm = &chr6dm;
   }
   
   /**
@@ -694,13 +694,11 @@
   
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  Kinematics_CHR6DM tempKinematics;
   
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
-  Magnetometer_CHR6DM compassSpecific;
 
   // Altitude declaration
   #ifdef AltitudeHold
@@ -732,9 +730,9 @@
     
     gyroChr6dm = &chr6dm;
     accelChr6dm = &chr6dm;
-    tempKinematics.setChr6dm(&chr6dm);
+    kinematicsChr6dm = &chr6dm;
 //    tempKinematics.setGyroscope(&gyroSpecific);
-    compassSpecific.setChr6dm(&chr6dm);
+    compassChr6dm = &chr6dm;
   }
   
   /**
@@ -762,15 +760,11 @@
   // CHR6DM have it's own kinematics, so, initialize in it's scope
 #elif defined FlightAngleARG
   #include "Kinematics_ARG.h"
-  Kinematics_ARG tempKinematics;
 #elif defined FlightAngleMARG
   #include "Kinematics_MARG.h"
-  Kinematics_MARG tempKinematics;
 #else
   #include "Kinematics_DCM.h"
-  Kinematics_DCM tempKinematics;
 #endif
-Kinematics *kinematics = &tempKinematics;
 
 //********************************************************
 //******************** RECEIVER DECLARATION **************
@@ -807,38 +801,24 @@ Kinematics *kinematics = &tempKinematics;
 //******* HEADING HOLD MAGNETOMETER DECLARATION **********
 //********************************************************
 #if defined (HMC5843)
-  #include <Compass.h>
   #include <Magnetometer_HMC5843.h>
-  Magnetometer_HMC5843 compassSpecific;
-  Compass *compass = &compassSpecific;
 #elif defined (COMPASS_CHR6DM)
-  #include <Compass.h>
-  Compass *compass = &compassSpecific;
 #endif
 
 //********************************************************
 //******* ALTITUDE HOLD BAROMETER DECLARATION ************
 //********************************************************
 #if defined (BMP085)
-  #include <BarometricSensor.h>
   #include <BarometricSensor_BMP085.h>
-  BarometricSensor_BMP085 barometricSensorSpecific;
-  BarometricSensor *barometricSensor = &barometricSensorSpecific;
 #endif
 
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************
 //********************************************************
 #if defined (BATTERY_MONITOR_AQ)
-  #include <BatteryMonitor.h>
   #include <BatteryMonitor_AQ.h>
-  BatteryMonitor_AQ batteryMonitorSpecific;
-    BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
 #elif defined (BATTERY_MONITOR_APM)
-  #include <BatteryMonitor.h>
   #include <BatteryMonitor_APM.h>
-  BatteryMonitor_APM batteryMonitorSpecific;
-  BatteryMonitor* batteryMonitor = &batteryMonitorSpecific;
 #endif  
 
 
@@ -946,11 +926,11 @@ void setup() {
   
   // Flight angle estimation
   #ifdef HeadingMagHold
-    compass->initialize();
+    initializeMagnetometer();
     //setHeading = compass->getHeading();
-    kinematics->initialize(compass->getHdgXY(XAXIS), compass->getHdgXY(YAXIS));
+    initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
   #else
-    kinematics->initialize(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
+    initializeKinematics(1.0, 0.0);  // with no compass, DCM matrix initalizes to a heading of 0 degrees
   #endif
   // Integral Limit for attitude mode
   // This overrides default set in readEEPROM()
@@ -961,12 +941,12 @@ void setup() {
 
   // Optional Sensors
   #ifdef AltitudeHold
-    barometricSensor->initialize();
+    initializeBaro();
   #endif
   
   // Battery Monitor
   #ifdef BattMonitor
-    batteryMonitor->initialize();
+    initializeBatteryMonitor();
   #endif
   
   // Camera stabilization setup
@@ -1051,7 +1031,7 @@ void loop () {
         
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          kinematics->calculate(gyroRate[ROLL],                       
+          calculateKinematics(gyroRate[ROLL],                       
                                  gyroRate[PITCH],                      
                                  gyroRate[YAW],                        
                                  meterPerSec[XAXIS],                   
@@ -1064,7 +1044,7 @@ void loop () {
         #endif
       
         #if defined FlightAngleARG
-          kinematics->calculate(gyroRate[ROLL],                       
+          calculateKinematics(gyroRate[ROLL],                       
                                  gyroRate[PITCH],                      
                                  gyroRate[YAW],                        
                                  meterPerSec[XAXIS],                   
@@ -1077,20 +1057,20 @@ void loop () {
         #endif
 
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyroRate[ROLL],                       
+          calculateKinematics(gyroRate[ROLL],                       
                                  gyroRate[PITCH],                      
                                  gyroRate[YAW],                        
                                  meterPerSec[XAXIS],                   
                                  meterPerSec[YAXIS],                   
                                  meterPerSec[ZAXIS],                   
-                                 accel->getOneG(),                              
+                                 accelOneG,                              
                                  compass->getHdgXY(XAXIS),                        
                                  compass->getHdgXY(YAXIS),
                                  G_Dt);
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          kinematics->calculate(gyroRate[ROLL],                        
+          calculateKinematics(gyroRate[ROLL],                        
                                  gyroRate[PITCH],                       
                                  gyroRate[YAW],                         
                                  meterPerSec[XAXIS],                    
@@ -1138,7 +1118,7 @@ void loop () {
       
       #ifdef AltitudeHold
         if (sensorLoop == ON) {
-          barometricSensor->measure(); // defined in altitude.h
+          measureBaro(); // defined in altitude.h
         }
       #endif
 
@@ -1160,7 +1140,7 @@ void loop () {
       
       if (sensorLoop == ON) {
         #if defined(AltitudeHold)
-          barometricSensor->measure(); // defined in altitude.h
+          measureBaro(); // defined in altitude.h
         #endif
       }
       
@@ -1182,10 +1162,10 @@ void loop () {
 
       if (sensorLoop == ON) {
         #if defined(HeadingMagHold)
-          compass->measure(kinematics->getData(ROLL), kinematics->getData(PITCH));
+          measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
         #endif
         #if defined(BattMonitor)
-          batteryMonitor->measure(armed);
+          measureBatteryVoltage(armed);
         #endif
         processAltitudeHold();
       }

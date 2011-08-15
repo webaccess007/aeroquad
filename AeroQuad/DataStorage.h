@@ -105,12 +105,12 @@ void initializeEEPROM(void) {
   minThrottleAdjust = -50.0;
   maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
   #ifdef AltitudeHold    
-    barometricSensor->setSmoothFactor(0.1);
+    baroSmoothFactor = 0.1;
   #endif
   #ifdef HeadingMagHold
-    compass->setMagCal(XAXIS, 1, 0);
-    compass->setMagCal(YAXIS, 1, 0);
-    compass->setMagCal(ZAXIS, 1, 0);
+    setMagCal(XAXIS, 1, 0);
+    setMagCal(YAXIS, 1, 0);
+    setMagCal(ZAXIS, 1, 0);
   #endif
   windupGuard = 1000.0;
 
@@ -177,14 +177,14 @@ void readEEPROM(void) {
   minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
-    barometricSensor->setSmoothFactor(readFloat(ALTITUDE_SMOOTH_ADR));
+    baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
   #endif
   readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
 
   #ifdef HeadingMagHold
-    compass->setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
-    compass->setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
-    compass->setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
+    setMagCal(XAXIS, readFloat(MAGXMAX_ADR), readFloat(MAGXMIN_ADR));
+    setMagCal(YAXIS, readFloat(MAGYMAX_ADR), readFloat(MAGYMIN_ADR));
+    setMagCal(ZAXIS, readFloat(MAGZMAX_ADR), readFloat(MAGZMIN_ADR));
   #endif
 
   windupGuard = readFloat(WINDUPGUARD_ADR);
@@ -234,18 +234,18 @@ void writeEEPROM(void){
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
-    writeFloat(barometricSensor->getSmoothFactor(), ALTITUDE_SMOOTH_ADR);
+    writeFloat(baroSmoothFactor, ALTITUDE_SMOOTH_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
   writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
   #ifdef HeadingMagHold
-    writeFloat(compass->getMagMax(XAXIS), MAGXMAX_ADR);
-    writeFloat(compass->getMagMin(XAXIS), MAGXMIN_ADR);
-    writeFloat(compass->getMagMax(YAXIS), MAGYMAX_ADR);
-    writeFloat(compass->getMagMin(YAXIS), MAGYMIN_ADR);
-    writeFloat(compass->getMagMax(ZAXIS), MAGZMAX_ADR);
-    writeFloat(compass->getMagMin(ZAXIS), MAGZMIN_ADR);
+    writeFloat(magMax[XAXIS], MAGXMAX_ADR);
+    writeFloat(magMin[XAXIS], MAGXMIN_ADR);
+    writeFloat(magMax[YAXIS], MAGYMAX_ADR);
+    writeFloat(magMin[YAXIS], MAGYMIN_ADR);
+    writeFloat(magMax[ZAXIS], MAGZMAX_ADR);
+    writeFloat(magMin[ZAXIS], MAGZMIN_ADR);
   #else
     writeFloat(1.0F, MAGXMAX_ADR);
     writeFloat(0.0F, MAGXMIN_ADR);
