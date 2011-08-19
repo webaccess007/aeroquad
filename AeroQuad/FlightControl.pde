@@ -36,7 +36,6 @@ void calculateFlightError(void)
     motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
   }
   else {
-    
     float rollAttitudeCmd = updatePID((receiverData[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
     float pitchAttitudeCmd = updatePID((receiverData[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
     motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
@@ -214,6 +213,8 @@ void processFlightControl() {
   if (armed == OFF) {
     processCalibrateESC();
   }
+  
+
 
   // *********************** Command Motors **********************
   if (armed == ON && safetyCheck == ON) {
