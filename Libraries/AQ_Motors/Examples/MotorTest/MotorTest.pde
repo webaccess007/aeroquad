@@ -19,57 +19,43 @@
 */
 
 //#define MOTOR_PWM
-//#define MOTOR_PWM_Timer
-#define MOTOR_APM
+#define MOTOR_PWM_Timer
+//#define MOTOR_APM
 //#define MOTOR_I2C
 
-//#define NB_MOTOR_4
+#define NB_MOTOR_4
 //#define NB_MOTOR_6
-#define NB_MOTOR_8
+//#define NB_MOTOR_8
 
 
 #if defined MOTOR_PWM
-  #include <Motors.h>
   #include <Motors_PWM.h>
-  Motors_PWM motorsSpecific;
-  Motors *motors = &motorsSpecific;
   
   void initMotors(NB_Motors motorConfig) {
-    motors->initialize(motorConfig); 
+    initializeMotors(motorConfig); 
   }
 #elif defined MOTOR_PWM_Timer
-  #include <Motors.h>
   #include <Motors_PWM_Timer.h>
-  Motors_PWM_Timer motorsSpecific;
-  Motors *motors = &motorsSpecific;
   
   void initMotors(NB_Motors motorConfig) {
-    motors->initialize(motorConfig); 
+    initializeMotors(motorConfig); 
   }
 
 #elif defined MOTOR_APM
-  #include <APM_RC.h>
-  #include <Motors.h>
   #include <Motors_APM.h>
-  Motors_APM motorsSpecific;
-  Motors *motors = &motorsSpecific;
-  
+ 
   void initMotors(NB_Motors motorConfig) {
     initRC();
-    motors->initialize(motorConfig); 
+    initializeMotors(motorConfig); 
   }
   
 #elif defined MOTOR_I2C
   #include <Wire.h>
   #include <Device_I2C.h>
-  #include <Motors.h>
-  #include <Motors_I2C.h>
-  Motors_I2C motorsSpecific;
-  Motors *motors = &motorsSpecific;
 
-  void initMotors(NB_Motors motorConfig) {
+   void initMotors(NB_Motors motorConfig) {
     Wire.begin();
-    motors->initialize(motorConfig); 
+    initializeMotors(motorConfig); 
   }
 
   
@@ -97,17 +83,17 @@ void testMotor(int motor) {
   Serial.print("TEST MOTOR ");
   Serial.println(motor);
   for (int motorTrust = 1000; motorTrust < 1200; motorTrust+=10) {
-    motors->setMotorCommand(motor, motorTrust);
-    motors->write();
+    motorCommand[motor] = motorTrust;
+    writeMotors();
     delay(200);
   }
   for (int motorTrust = 1200; motorTrust > 1000; motorTrust-=10) {
-    motors->setMotorCommand(motor, motorTrust);
-    motors->write();
+    motorCommand[motor] = motorTrust;
+    writeMotors();
     delay(200);
   }
-  motors->setMotorCommand(motor, 1000);
-  motors->write();
+  motorCommand[motor] = 1000;
+  writeMotors();
 }
  
 void loop() {
