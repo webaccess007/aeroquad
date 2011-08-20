@@ -39,7 +39,6 @@
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
   const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
-//  const int throttleCorrection = 0;
   motorCommand[FRONT_LEFT] = (throttle-throttleCorrection) - motorAxisCommandPitch + motorAxisCommandRoll - (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[FRONT_RIGHT] = (throttle-throttleCorrection) - motorAxisCommandPitch - motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
   motorCommand[REAR_LEFT] =   (throttle-throttleCorrection) + motorAxisCommandPitch + motorAxisCommandRoll + (YAW_DIRECTION * motorAxisCommandYaw);
@@ -85,10 +84,10 @@ void processMinMaxCommand() {
 void processHardManuevers() {
   if (flightMode == ACRO) {
     if (receiverData[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-      motorMinCommand[FRONT_RIGHT] =MAXCOMMAND;
-      motorMinCommand[REAR_RIGHT] = MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT] = minAcro;
-      motorMaxCommand[REAR_LEFT]  = minAcro;
+      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
+      motorMinCommand[REAR_RIGHT]  = MAXCOMMAND;
+      motorMaxCommand[FRONT_LEFT]  = minAcro;
+      motorMaxCommand[REAR_LEFT]   = minAcro;
     }
     else if (receiverData[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
       motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
@@ -97,7 +96,7 @@ void processHardManuevers() {
       motorMaxCommand[REAR_RIGHT]  = minAcro;
     }
     else if (receiverData[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-      motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
+      motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
       motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
       motorMaxCommand[REAR_LEFT]   = minAcro;
       motorMaxCommand[REAR_RIGHT]  = minAcro;

@@ -37,54 +37,54 @@
 */
 
 
-#define FRONT_LEFT  MOTOR1
+#define LEFT        MOTOR1
 #define REAR        MOTOR2
-#define FRONT_RIGHT MOTOR3
+#define RIGHT       MOTOR3
 #define REAR_UNDER  MOTOR4
 #define LASTMOTOR   MOTOR4+1
 
 void applyMotorCommand() {
   // Front = Front/Right, Back = Left/Rear, Left = Front/Left, Right = Right/Rear 
-  const int throttleCorrection = abs(motorAxisCommandYaw*1/2);
-  motorCommand[FRONT_LEFT]  = (throttle)                    - motorAxisCommandPitch + motorAxisCommandRoll;
-  motorCommand[FRONT_RIGHT] = (throttle)                    - motorAxisCommandPitch - motorAxisCommandRoll;
+  const int throttleCorrection = abs(motorAxisCommandYaw*2/4);
+  motorCommand[LEFT]        = (throttle)                    - motorAxisCommandPitch + motorAxisCommandRoll;
+  motorCommand[RIGHT]       = (throttle)                    - motorAxisCommandPitch - motorAxisCommandRoll;
   motorCommand[REAR_UNDER]  = (throttle-throttleCorrection) + motorAxisCommandPitch + (YAW_DIRECTION * motorAxisCommandYaw);
-  motorCommand[REAR]=         (throttle-throttleCorrection) + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
+  motorCommand[REAR]        = (throttle-throttleCorrection) + motorAxisCommandPitch - (YAW_DIRECTION * motorAxisCommandYaw);
 }
 
 void processMinMaxCommand() {
   
-  if ((motorCommand[FRONT_LEFT] <= MINTHROTTLE) || (motorCommand[REAR_UNDER] <= MINTHROTTLE)){
+  if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[REAR_UNDER] <= MINTHROTTLE)){
     delta = receiverData[THROTTLE] - MINTHROTTLE;
-    motorMaxCommand[FRONT_RIGHT] = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[REAR] =   constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[RIGHT] = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[REAR]  = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
   }
-  else if ((motorCommand[FRONT_LEFT] >= MAXCOMMAND) || (motorCommand[REAR_UNDER] >= MAXCOMMAND)) {
+  else if ((motorCommand[LEFT] >= MAXCOMMAND) || (motorCommand[REAR_UNDER] >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiverData[THROTTLE];
-    motorMinCommand[FRONT_RIGHT] = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[REAR]   = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[RIGHT] = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[REAR]  = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
-    motorMaxCommand[FRONT_RIGHT] = MAXCOMMAND;
-    motorMaxCommand[REAR]      = MAXCOMMAND; 
-    motorMinCommand[FRONT_RIGHT] = MINTHROTTLE;
-    motorMinCommand[REAR]      = MINTHROTTLE;
+    motorMaxCommand[RIGHT] = MAXCOMMAND;
+    motorMaxCommand[REAR]  = MAXCOMMAND; 
+    motorMinCommand[RIGHT] = MINTHROTTLE;
+    motorMinCommand[REAR]  = MINTHROTTLE;
   }
 
-  if ((motorCommand[REAR] <= MINTHROTTLE) || (motorCommand[FRONT_RIGHT] <= MINTHROTTLE)){
+  if ((motorCommand[REAR] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)){
     delta = receiverData[THROTTLE] - MINTHROTTLE;
-    motorMaxCommand[FRONT_LEFT] = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[LEFT]       = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
     motorMaxCommand[REAR_UNDER] = constrain(receiverData[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
   }
-  else if ((motorCommand[REAR] >= MAXCOMMAND) || (motorCommand[FRONT_RIGHT] >= MAXCOMMAND)) {
+  else if ((motorCommand[REAR] >= MAXCOMMAND) || (motorCommand[RIGHT] >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiverData[THROTTLE];
-    motorMinCommand[FRONT_LEFT] = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[LEFT]       = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
     motorMinCommand[REAR_UNDER] = constrain(receiverData[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
-    motorMaxCommand[FRONT_LEFT] = MAXCOMMAND;
+    motorMaxCommand[LEFT]       = MAXCOMMAND;
     motorMaxCommand[REAR_UNDER] = MAXCOMMAND;
-    motorMinCommand[FRONT_LEFT] = MINTHROTTLE;
+    motorMinCommand[LEFT]       = MINTHROTTLE;
     motorMinCommand[REAR_UNDER] = MINTHROTTLE;
   }
 }
@@ -92,28 +92,24 @@ void processMinMaxCommand() {
 void processHardManuevers() {
   if (flightMode == ACRO) {
     if (receiverData[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-      motorMinCommand[FRONT_RIGHT] =MAXCOMMAND;
-      motorMinCommand[REAR] = MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT] = minAcro;
-      motorMaxCommand[REAR_UNDER]  = minAcro;
+      motorMinCommand[RIGHT] = MAXCOMMAND;
+      motorMaxCommand[LEFT]  = minAcro;
     }
     else if (receiverData[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
-      motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
-      motorMinCommand[REAR_UNDER]   = MAXCOMMAND;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
-      motorMaxCommand[REAR]  = minAcro;
+      motorMinCommand[RIGHT] = minAcro;
+      motorMaxCommand[LEFT]  = MAXCOMMAND;
     }
     else if (receiverData[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-      motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
-      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
-      motorMaxCommand[REAR_UNDER]   = minAcro;
-      motorMaxCommand[REAR]  = minAcro;
+      motorMinCommand[LEFT]        = MAXCOMMAND;
+      motorMinCommand[RIGHT]       = MAXCOMMAND;
+      motorMaxCommand[REAR_UNDER]  = minAcro;
+      motorMaxCommand[REAR]        = minAcro;
     }
     else if (receiverData[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
-      motorMinCommand[REAR_UNDER]   = MAXCOMMAND;
-      motorMinCommand[REAR]  = MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT]  = minAcro;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
+      motorMinCommand[REAR_UNDER]  = MAXCOMMAND;
+      motorMinCommand[REAR]        = MAXCOMMAND;
+      motorMaxCommand[LEFT]        = minAcro;
+      motorMaxCommand[RIGHT]       = minAcro;
     }
   }
 }

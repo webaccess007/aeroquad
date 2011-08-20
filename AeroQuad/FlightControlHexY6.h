@@ -112,28 +112,32 @@ void processMinMaxCommand() {
 void processHardManuevers() {
   if (flightMode == ACRO) {
     if (receiverData[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-      motorMinCommand[RIGHT] = MAXCOMMAND;
-      motorMinCommand[REAR] = MAXCOMMAND;
-      motorMaxCommand[LEFT] = minAcro;
-      motorMaxCommand[REAR_UNDER]  = minAcro;
+      motorMinCommand[RIGHT]       = MAXCOMMAND;
+      motorMinCommand[RIGHT_UNDER] = MAXCOMMAND;
+      motorMaxCommand[LEFT]        = minAcro;
+      motorMaxCommand[LEFT_UNDER]  = minAcro;
     }
     else if (receiverData[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
-      motorMinCommand[LEFT]  = MAXCOMMAND;
-      motorMinCommand[REAR_UNDER]   = MAXCOMMAND;
-      motorMaxCommand[RIGHT] = minAcro;
-      motorMaxCommand[REAR]  = minAcro;
+      motorMinCommand[LEFT]        = MAXCOMMAND;
+      motorMinCommand[LEFT_UNDER]  = MAXCOMMAND;
+      motorMaxCommand[RIGHT]       = minAcro;
+      motorMaxCommand[RIGHT_UNDER] = minAcro;
     }
     else if (receiverData[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-      motorMinCommand[LEFT] =  MAXCOMMAND;
-      motorMinCommand[RIGHT] = MAXCOMMAND;
-      motorMaxCommand[REAR_UNDER]   = minAcro;
-      motorMaxCommand[REAR]  = minAcro;
+      motorMinCommand[LEFT]        = MAXCOMMAND;
+      motorMinCommand[LEFT_UNDER]  = MAXCOMMAND;
+      motorMinCommand[RIGHT]       = MAXCOMMAND;
+      motorMinCommand[RIGHT_UNDER] = MAXCOMMAND;
+      motorMaxCommand[REAR_UNDER]  = minAcro;
+      motorMaxCommand[REAR]        = minAcro;
     }
     else if (receiverData[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
-      motorMinCommand[REAR_UNDER]   = MAXCOMMAND;
-      motorMinCommand[REAR]  = MAXCOMMAND;
-      motorMaxCommand[LEFT]  = minAcro;
-      motorMaxCommand[RIGHT] = minAcro;
+      motorMinCommand[LEFT]        = minAcro;
+      motorMinCommand[LEFT_UNDER]  = minAcro;
+      motorMinCommand[RIGHT]       = minAcro;
+      motorMinCommand[RIGHT_UNDER] = minAcro;
+      motorMaxCommand[REAR_UNDER]  = MAXCOMMAND;
+      motorMaxCommand[REAR]        = MAXCOMMAND;
     }
   }
 }
