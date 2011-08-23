@@ -85,6 +85,7 @@ ISR(TIMER0_COMPB_vect) { //the same with digital PIN 6 and OCR0B counter
 
 
 void initializeMotors(NB_Motors numbers) {
+  numberOfMotors = numbers;
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 	  
   #else
