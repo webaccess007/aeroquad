@@ -45,7 +45,7 @@
 #define TRI_YAW_CONSTRAINT_MAX 1800
 #define TRI_YAW_MIDDLE 1500
 
-#define MAX_RECEIVER_OFFSET 10
+#define MAX_RECEIVER_OFFSET 50
 
 void applyMotorCommand() {
   motorCommand[FRONT_LEFT]  = throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3;

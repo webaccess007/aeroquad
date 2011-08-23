@@ -31,11 +31,11 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -45,11 +45,11 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
-//#define triConfig
+#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Congig
@@ -63,9 +63,10 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
+//#define ReceiverPPM
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -105,8 +106,8 @@
 //#define MAX7456_OSD
 
 
-#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-//#define YAW_DIRECTION -1
+//#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
+#define YAW_DIRECTION -1
 
 
 /****************************************************************************
@@ -218,7 +219,7 @@
     setAccelAref(aref);
   }
   
-  #define DELAY_BETWEEN_READING 2000
+  #define DELAY_BETWEEN_READING 1000
   
   /**
    * Measure critical sensors
@@ -288,7 +289,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
+//    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING){
       lastSampleTime = currentTime;
       measureGyro();
       measureAccel();
@@ -297,7 +298,7 @@
         gyroSample[i] += gyroRate[i];
       }
       sampleCount++;
-    }
+//    }
   }
 
 #endif
@@ -866,7 +867,9 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
+#if defined (ReceiverPPM)
+  #include <Receiver_PPM.h>
+#elif defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
   #include <Receiver_PPM.h>
 #elif defined RemotePCReceiver
   #include <Receiver_RemotePC.h>
