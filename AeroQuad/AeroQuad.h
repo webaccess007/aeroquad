@@ -327,13 +327,7 @@ void initReceiverFromEEPROM(void);
 void readPilotCommands(void); 
 //////////////////////////////////////////////////////
 
-// defined in FlightControl.pde Flight control needs
-
-unsigned long lastSampleTime;		
-float accelSample[3];		
-float gyroSample[3];		
-byte sampleCount;
-
+// defined and used in FlightControl.pde Flight control needs
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
@@ -362,15 +356,41 @@ void processFlightControl();
 void processAltitudeHold();
 //////////////////////////////////////////////////////
 
-//defined in SerialCom.pde
-void readSerialCommand(void);
-void sendSerialTelemetry(void);
+// used in SerialCom.pde
+void readSerialCommand();
+void sendSerialTelemetry();
 void printInt(int data);
-float readFloatSerial(void);
+float readFloatSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
-void fastTelemetry(void);
-void comma(void);
+void fastTelemetry();
+void comma();
+//////////////////////////////////////////////////////
+
+// used in IsrSensorsProcessor.h
+// Isr utility variable and defines
+#define ISR_FRAME_COUNT        500
+#define SUM_COUNT              5.0   // Sum of 5 for average
+#define BACKGROUND_COUNT       5     // Number of 500 Hz frames for 100 Hz
+#define COMPASS_COUNT          10    // Number of 500 Hz frames for 50 Hz
+#define PRESSURE_COUNT         10    // Number of 500 Hz frames for 50 Hz
+#define RECEIVER_COUNT         10    // Number of 500 Hz frames for 50 Hz
+#define ALTITUDE_COUNT         50    // Number of 500 Hz frames for 10 Hz
+#define SERIAL_COM_COUNT       50    // Number of 500 Hz frames for 10 Hz
+#define TIMER0_COUNT0          250   // For 8 bit system timer with prescaler = 64
+#define TIMER0_COUNT1          250   // 16E6/64/500 = 500, 250 + 250 = 500
+
+unsigned int isrFrameCounter = 1;
+byte timer0countIndex;
+
+volatile float meterPerSecSum[3];
+volatile float meterPerSecSample[3];
+volatile float gyroRateSum[3];
+volatile float gyroRateSample[3];
+volatile byte gyroAccelSampleCount;
+
+void initIsrSensorsProcessor();
+void gaterSensorsSampleSumm();
 //////////////////////////////////////////////////////
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
