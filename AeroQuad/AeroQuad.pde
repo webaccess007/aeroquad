@@ -30,14 +30,14 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
+#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -45,14 +45,16 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
-//#define hexXConfig
+//#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Congig
+//#define octoPlusCongig  // not yet implemented
+#define octoXCongig
 
 //
 // *******************************************************************************************************************************
@@ -836,6 +838,10 @@
   #include "FlightControlHexY6.h"  
 #elif defined octoX8Congig
   #include "FlightControlOctoX8.h"
+#elif defined octoXCongig
+  #include "FlightControlOctoX.h"
+#elif defined octoPlusCongig
+  #include "FlightControlOctoPlus.h"
 #endif
 
 //********************************************************
@@ -880,7 +886,7 @@ void setup() {
      initializeMotors(); 
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors); 
-  #elif defined (octoX8Congig)
+  #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoXPlusCongig)
      initializeMotors(HEIGHT_Motors); 
   #endif
 

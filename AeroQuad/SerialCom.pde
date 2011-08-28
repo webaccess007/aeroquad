@@ -444,7 +444,7 @@ void sendSerialTelemetry() {
     PrintValueComma('1');
 #elif defined(hexPlusConfig) || defined(hexXConfig) || defined(hexY6Config)
     PrintValueComma('2');
-#elif defined(octoX8Congig)
+#elif defined(octoX8Congig) || defined(octoXCongig) || defined(octoXPlusCongig)
     PrintValueComma('3');
 #endif
     PrintValueComma(LASTCHANNEL);

@@ -340,7 +340,7 @@ int motorAxisCommandYaw = 0;
   int motorMaxCommand[6];
   int motorMinCommand[6];
   int motorConfiguratorCommand[6];
-#elif defined (octoX8Congig)  
+#elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig) 
   int motorMaxCommand[8];
   int motorMinCommand[8];
   int motorConfiguratorCommand[8];
