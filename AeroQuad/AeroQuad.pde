@@ -45,7 +45,7 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig
@@ -176,8 +176,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -211,8 +212,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -264,7 +266,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    gaterSensorsSampleSumm();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -311,8 +315,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -348,8 +353,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -415,8 +421,9 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      gaterSensorsSampleSumm();
+    }
   }
 #endif
 
@@ -470,6 +477,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    fix this
     measureGyro();
     measureAccel();
   }
@@ -529,6 +537,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    
+    fix this
     platformWii.measure();
     measureGyro();
     measureAccel();
@@ -584,6 +594,8 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
+    
+    fix thi
     platformWii.measure();
     measureGyro();
     measureAccel();
@@ -650,7 +662,7 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    
+    fix this
     chr6dm.read();
     measureGyro();
     measureAccel();
@@ -722,6 +734,7 @@
    */
   void measureCriticalSensors() {
     
+    fix this
     chr6dm.read();
     measureGyro();
     measureAccel();
@@ -1025,7 +1038,6 @@ void loop () {
                               getMagnetometerRawData(ZAXIS),
                               G_Dt);
         #endif
-      
         #if defined FlightAngleARG
           calculateKinematics(gyroRateSample[ROLL],                       
                               gyroRateSample[PITCH],                      
@@ -1174,5 +1186,9 @@ void loop () {
       frameCounter = 0;
   }
 }
+
+
+
+
 
 

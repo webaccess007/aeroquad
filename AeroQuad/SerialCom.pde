@@ -377,10 +377,12 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(receiverData[axis]);
     }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motorCommand[axis]);
-//      PrintValueComma(motorConfiguratorCommand[axis]);
-    }
+    PrintValueComma(motorAxisCommandRoll);
+    PrintValueComma(motorAxisCommandPitch);
+    PrintValueComma(motorAxisCommandYaw);
+//    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+//      PrintValueComma(motorCommand[axis]);
+//    }
     SERIAL_PRINTLN();
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values

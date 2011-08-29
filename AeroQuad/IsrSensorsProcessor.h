@@ -72,24 +72,24 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)
       meterPerSecSum[axis] += meterPerSec[axis];
       gyroRateSum[axis] += gyroRate[axis];
     }
-     gyroAccelSampleCount++;
+    gyroAccelSampleCount++;
   
     
     
-    #if defined(HMC5843) | defined(HMC5883)
+//    #if defined(HMC5843) | defined(HMC5883)
 //      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
 //        readCompass();
 //        newMagData = 1;
 //      }
-    #endif
+//    #endif
     
-    #if defined(BMP085)
+//    #if defined(BMP085)
 //      if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0) {
 //        if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
 //        else if (isrFrameCounter == (ISR_FRAME_COUNT-1)) readPressureRequestTemperature();
 //        else readPressureRequestPressure();
 //      }
-    #endif
+//    #endif
     
     isrFrameCounter++;
     if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
@@ -119,6 +119,7 @@ void gaterSensorsSampleSumm() {
     gyroRateSum[axis] = 0;
   }
   gyroAccelSampleCount = 0;
+  
   sei();  // restart isr
 }
 

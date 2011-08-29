@@ -380,14 +380,19 @@ void comma();
 #define TIMER0_COUNT0          250   // For 8 bit system timer with prescaler = 64
 #define TIMER0_COUNT1          250   // 16E6/64/500 = 500, 250 + 250 = 500
 
+//#define LOOP_50Hz              10    // Number of 500 Hz frames for 50 Hz
+//#define LOOP_25Hz              25    // not sure about this one  @todo Kenny
+//#define LOOP_10Hz              50    // Number of 500 Hz frames for 10 Hz
+
 unsigned int isrFrameCounter = 1;
+unsigned int thisIsrFrame = 0;
 byte timer0countIndex;
 
-volatile float meterPerSecSum[3];
-volatile float meterPerSecSample[3];
-volatile float gyroRateSum[3];
-volatile float gyroRateSample[3];
-volatile byte gyroAccelSampleCount;
+float meterPerSecSum[3];
+float meterPerSecSample[3];
+float gyroRateSum[3];
+float gyroRateSample[3];
+byte gyroAccelSampleCount;
 
 void initIsrSensorsProcessor();
 void gaterSensorsSampleSumm();
