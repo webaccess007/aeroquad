@@ -24,60 +24,43 @@
 
 #include <WProgram.h>
 
-class Compass {
-private:
-  float magMax[3];
-  float magMin[3];
+float magMax[3];
+float magMin[3];
   
-protected:  
-  float hdgX;
-  float hdgY;
+float hdgX;
+float hdgY;
 
-  float measuredMagX;
-  float measuredMagY;
-  float measuredMagZ;
-  float magScale[3];
-  float magOffset[3];
+float measuredMagX;
+float measuredMagY;
+float measuredMagZ;
+float magScale[3];
+float magOffset[3];
 
-public:
-
-  Compass() {}
+void initializeMagnetometer();
+void measureMagnetometer(float roll, float pitch);
   
-  virtual void initialize();
-  virtual void measure(float roll, float pitch);
-  
-  const float getHdgXY(byte axis) {
-    if (axis == XAXIS) return hdgX;
-    if (axis == YAXIS) return hdgY;
-  }
+const float getHdgXY(byte axis) {
+  if (axis == XAXIS) return hdgX;
+  if (axis == YAXIS) return hdgY;
+}
 
-  const int getRawData(byte axis) {
-    if (axis == XAXIS) return measuredMagX;
-    if (axis == YAXIS) return measuredMagY;
-    if (axis == ZAXIS) return measuredMagZ;
-  }
+const int getMagnetometerRawData(byte axis) {
+  if (axis == XAXIS) return measuredMagX;
+  if (axis == YAXIS) return measuredMagY;
+  if (axis == ZAXIS) return measuredMagZ;
+}
 
-  void setMagCal(byte axis, float maxValue, float minValue) {
-    magMax[axis] = maxValue;
-    magMin[axis] = minValue;
-    // Assume max/min is scaled to +1 and -1
-    // y2 = 1, x2 = max; y1 = -1, x1 = min
-    // m = (y2 - y1) / (x2 - x1)
-    // m = 2 / (max - min)
-    magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
-    // b = y1 - mx1; b = -1 - (m * min)
-    magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
-  }
-
-  const float getMagMax(byte axis) {
-    return magMax[axis];
-  }
-
-  const float getMagMin(byte axis) {
-    return magMin[axis];
-  }
-};
-
+void setMagCal(byte axis, float maxValue, float minValue) {
+  magMax[axis] = maxValue;
+  magMin[axis] = minValue;
+  // Assume max/min is scaled to +1 and -1
+  // y2 = 1, x2 = max; y1 = -1, x1 = min
+  // m = (y2 - y1) / (x2 - x1)
+  // m = 2 / (max - min)
+  magScale[axis] = 2.0 / (magMax[axis] - magMin[axis]);
+  // b = y1 - mx1; b = -1 - (m * min)
+  magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
+}
 
 
 #endif

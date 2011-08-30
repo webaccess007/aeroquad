@@ -26,61 +26,39 @@
 #include <APM_RC.h>
 #include "Motors.h"
 
+void initializeMotors(NB_Motors numbers) {
+  commandAllMotors(1000);
+}
 
-class Motors_APM : public Motors {
-private:
-  NB_Motors numbersOfMotors;
-public:
+void writeMotors() {
+  writeMotorCommand(0,motorCommand[MOTOR1]);
+  writeMotorCommand(1,motorCommand[MOTOR2]);
+  writeMotorCommand(2,motorCommand[MOTOR3]);
+  writeMotorCommand(3,motorCommand[MOTOR4]);
+  writeMotorCommand(6,motorCommand[MOTOR5]);
+  writeMotorCommand(7,motorCommand[MOTOR6]);
+  writeMotorCommand(9,motorCommand[MOTOR7]);
+  writeMotorCommand(10,motorCommand[MOTOR8]);
+  force_Out0_Out1();
+  force_Out2_Out3();
+  force_Out6_Out7();
+}
 
-  Motors_APM() {
-  }
-
-  void initialize(NB_Motors numbers) {
-    numbersOfMotors = numbers;
-    commandAllMotors(1000);
-  }
-
-  void write() {
-    writeMotorCommand(0,motorCommand[MOTOR1]);
-    writeMotorCommand(1,motorCommand[MOTOR2]);
-    writeMotorCommand(2,motorCommand[MOTOR3]);
-    writeMotorCommand(3,motorCommand[MOTOR4]);
-//	if (numbersOfMotors == SIX_Motors || numbersOfMotors == HEIGHT_Motors) {
-	  writeMotorCommand(6,motorCommand[MOTOR5]);
-	  writeMotorCommand(7,motorCommand[MOTOR6]);
-//	}
-//	if (numbersOfMotors == HEIGHT_Motors) {
-	  writeMotorCommand(9,motorCommand[MOTOR7]);
-	  writeMotorCommand(10,motorCommand[MOTOR8]);
-//	}
-	force_Out0_Out1();
-	force_Out2_Out3();
-//	if (numbersOfMotors == SIX_Motors || numbersOfMotors == HEIGHT_Motors) {
-	  force_Out6_Out7();
-//	}
-  }
-
-  void commandAllMotors(int command) {
-    writeMotorCommand(0,command);
-	writeMotorCommand(1,command);
-	writeMotorCommand(2,command);
-	writeMotorCommand(3,command);
-	writeMotorCommand(6,command);
-//	if (numbersOfMotors == SIX_Motors || numbersOfMotors == HEIGHT_Motors) {
-	  writeMotorCommand(6,command);
-	  writeMotorCommand(7,command);
-//	}
-//	if (numbersOfMotors == HEIGHT_Motors) {
-	  writeMotorCommand(9,command);
-	  writeMotorCommand(10,command);
-//	}
-	force_Out0_Out1();
-	force_Out2_Out3();
-//	if (numbersOfMotors == SIX_Motors || numbersOfMotors == HEIGHT_Motors) {
-	  force_Out6_Out7();
-//	}
-  }
+void commandAllMotors(int command) {
+  writeMotorCommand(0,command);
+  writeMotorCommand(1,command);
+  writeMotorCommand(2,command);
+  writeMotorCommand(3,command);
+  writeMotorCommand(6,command);
+  writeMotorCommand(6,command);
+  writeMotorCommand(7,command);
+  writeMotorCommand(9,command);
+  writeMotorCommand(10,command);
+  force_Out0_Out1();
+  force_Out2_Out3();
+  force_Out6_Out7();
+}
   
-};
+
 
 #endif

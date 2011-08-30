@@ -23,39 +23,48 @@
 
 #include "WProgram.h"
 
-class BarometricSensor {
-protected:
-  double altitude;
-  float smoothFactor;
-  float groundAltitude;
+double baroAltitude = 0.0; 
+double baroRawAltitude = 0.0;
+float groundTemperature; // remove later
+float groundPressure; // remove later
+float groundAltitude;
+float baroSmoothFactor = 0.02;
   
-public:
+// **********************************************************************
+// The following function calls must be defined inside any new subclasses
+// **********************************************************************
+void initializeBaro(); 
+void measureBaro();
   
-  BarometricSensor() { 
-    altitude = 0;
-    smoothFactor = 0.02;
-  }
-
-  // **********************************************************************
-  // The following function calls must be defined inside any new subclasses
-  // **********************************************************************
-  virtual void initialize(); 
-  virtual void measure();
-  
-  // *********************************************************
-  // The following functions are common between all subclasses
-  // *********************************************************
-  const float getAltitude() {
-    return altitude - groundAltitude;
-  }
+// *********************************************************
+// The following functions are common between all subclasses
+// *********************************************************
+const float getBaroAltitude() {
+  return baroAltitude - groundAltitude;
+}
  
-  void setSmoothFactor(float value) {
-    smoothFactor = value;
+void measureGroundBaro() {
+  // measure initial ground pressure (multiple samples)
+  groundAltitude = 0;
+  for (int i=0; i < 25; i++) {
+    measureBaro();
+    delay(26);
+    groundAltitude += baroRawAltitude;
   }
+  groundAltitude = groundAltitude / 25.0;
+}
+
+//  const float getRawData() {
+//    return rawAltitude;
+//  }
   
-  const float getSmoothFactor() {
-    return smoothFactor;
-  }
-};
+//  const float getGroundAltitude() {
+//    return groundAltitude;
+//  }
+
+//  void setStartAltitude(float value) {
+//    altitude = value;
+//  }
+
 
 #endif

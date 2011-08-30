@@ -26,31 +26,17 @@
 #include <WProgram.h>
 #include <Platform_CHR6DM.h>
 
-class Magnetometer_CHR6DM : public Compass{
-private:
-  CHR6DM *chr6dm;
-  float absoluteHeading;
-  
-public:
-  Magnetometer_CHR6DM() : Compass() {
-  }
-  
-  void setChr6dm(CHR6DM *chr6dm) {
-    this->chr6dm = chr6dm;
-  }
+CHR6DM *compassChr6dm;
+float absoluteHeading = 0;
 
-  void initialize() {
-    absoluteHeading = 0;
-  }
+void initializeMagnetometer() {}
 
-  void measure(float roll, float pitch) {
-    heading = chr6dm->data.yaw; //this hardly needs any filtering :)
-    // Change from +/-180 to 0-360
-    if (heading < 0) absoluteHeading = 360 + heading;
-    else absoluteHeading = heading;
-  }
-};
-
+void measureMagnetometer(float roll, float pitch) {
+  heading = compassChr6dm->data.yaw; //this hardly needs any filtering :)
+  // Change from +/-180 to 0-360
+  if (heading < 0) absoluteHeading = 360 + heading;
+  else absoluteHeading = heading;
+}
 
 
 #endif

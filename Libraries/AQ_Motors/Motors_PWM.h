@@ -83,86 +83,79 @@ ISR(TIMER0_COMPB_vect) { //the same with digital PIN 6 and OCR0B counter
 
 #endif
 
-class Motors_PWM : public Motors {
-private:
-  NB_Motors numbersOfMotors;
-public:
 
-  Motors_PWM() {
-  }
-
-  void initialize(NB_Motors numbers) {
-    #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+void initializeMotors(NB_Motors numbers) {
+  numberOfMotors = numbers;
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 	  
-	#else
-	  pinMode(MOTORPIN0, OUTPUT);
-	  pinMode(MOTORPIN1, OUTPUT);
-	  pinMode(MOTORPIN2, OUTPUT);
-	  pinMode(MOTORPIN3, OUTPUT);
-	  if (numbers == SIX_Motors) {
-		pinMode(MOTORPIN4, OUTPUT);
-	    pinMode(MOTORPIN5, OUTPUT);
-		initializeSoftPWM();
-	  }
-	#endif
-    
-    numbersOfMotors = numbers;
-    commandAllMotors(1000);
-  }
-
-  void write() {
-    analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
-    analogWrite(MOTORPIN1, motorCommand[MOTOR2] / 8);
-    analogWrite(MOTORPIN2, motorCommand[MOTOR3] / 8);
-    analogWrite(MOTORPIN3, motorCommand[MOTOR4] / 8); 
-	if (numbersOfMotors == SIX_Motors) {
-	  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	    analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
-        analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
-	  #else
-	    atomicPWM_PIN5_highState = motorCommand[MOTOR6]/8;
-        atomicPWM_PIN5_lowState = 255-atomicPWM_PIN5_highState;
-        atomicPWM_PIN6_highState = motorCommand[MOTOR5]/8;
-        atomicPWM_PIN6_lowState = 255-atomicPWM_PIN6_highState;
-      #endif
-	  
+  #else
+    pinMode(MOTORPIN0, OUTPUT);
+    pinMode(MOTORPIN1, OUTPUT);
+    pinMode(MOTORPIN2, OUTPUT);
+    pinMode(MOTORPIN3, OUTPUT);
+    if (numbers == SIX_Motors) {
+	  pinMode(MOTORPIN4, OUTPUT);
+      pinMode(MOTORPIN5, OUTPUT);
+	  initializeSoftPWM();
     }
+  #endif
+    
+  numberOfMotors = numbers;
+  commandAllMotors(1000);
+}
+
+void writeMotors() {
+  analogWrite(MOTORPIN0, motorCommand[MOTOR1] / 8);
+  analogWrite(MOTORPIN1, motorCommand[MOTOR2] / 8);
+  analogWrite(MOTORPIN2, motorCommand[MOTOR3] / 8);
+  analogWrite(MOTORPIN3, motorCommand[MOTOR4] / 8); 
+  if (numberOfMotors == SIX_Motors) {
 	#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	else if (numbersOfMotors == HEIGHT_Motors) {
 	  analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
       analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
-	  analogWrite(MOTORPIN6, motorCommand[MOTOR5] / 8);
-      analogWrite(MOTORPIN7, motorCommand[MOTOR6] / 8);
-	}
-	#endif
+	#else
+	  atomicPWM_PIN5_highState = motorCommand[MOTOR6]/8;
+      atomicPWM_PIN5_lowState = 255-atomicPWM_PIN5_highState;
+      atomicPWM_PIN6_highState = motorCommand[MOTOR5]/8;
+      atomicPWM_PIN6_lowState = 255-atomicPWM_PIN6_highState;
+    #endif
   }
-
-  void commandAllMotors(int command) {
-    analogWrite(MOTORPIN0, command / 8);
-    analogWrite(MOTORPIN1, command / 8);
-    analogWrite(MOTORPIN2, command / 8);
-    analogWrite(MOTORPIN3, command / 8);
-	if (numbersOfMotors == SIX_Motors) {
-	  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	    analogWrite(MOTORPIN4, command / 8);
-        analogWrite(MOTORPIN5, command / 8);
-	  #else
-	    atomicPWM_PIN5_highState = command/8;
-        atomicPWM_PIN5_lowState = 255-atomicPWM_PIN5_highState;
-        atomicPWM_PIN6_highState = command/8;
-        atomicPWM_PIN6_lowState = 255-atomicPWM_PIN6_highState;
-      #endif
-	  
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    else if (numberOfMotors == HEIGHT_Motors) {
+      analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
+      analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
+      analogWrite(MOTORPIN6, motorCommand[MOTOR5] / 8);
+      analogWrite(MOTORPIN7, motorCommand[MOTOR6] / 8);
     }
+  #endif
+}
+
+void commandAllMotors(int command) {
+  analogWrite(MOTORPIN0, command / 8);
+  analogWrite(MOTORPIN1, command / 8);
+  analogWrite(MOTORPIN2, command / 8);
+  analogWrite(MOTORPIN3, command / 8);
+  if (numberOfMotors == SIX_Motors) {
 	#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	else if (numbersOfMotors == HEIGHT_Motors) {
 	  analogWrite(MOTORPIN4, command / 8);
       analogWrite(MOTORPIN5, command / 8);
-	  analogWrite(MOTORPIN6, command / 8);
+	#else
+	  atomicPWM_PIN5_highState = command/8;
+      atomicPWM_PIN5_lowState = 255-atomicPWM_PIN5_highState;
+      atomicPWM_PIN6_highState = command/8;
+      atomicPWM_PIN6_lowState = 255-atomicPWM_PIN6_highState;
+    #endif
+	  
+  }
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    else if (numberOfMotors == HEIGHT_Motors) {
+      analogWrite(MOTORPIN4, command / 8);
+      analogWrite(MOTORPIN5, command / 8);
+      analogWrite(MOTORPIN6, command / 8);
       analogWrite(MOTORPIN7, command / 8);
-	}
-	#endif
-  }  
-};
+    }
+  #endif
+}  
+
 
 #endif

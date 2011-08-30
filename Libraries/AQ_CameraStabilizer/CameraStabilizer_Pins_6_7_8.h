@@ -30,25 +30,22 @@
 
 #include "CameraStabilizer.h"
 
-class CameraStabilizer_Pins_6_7_8 : public CameraStabilizer {
-public:
-  CCameraStabilizer_Pins_6_7_8() : CameraStabilizer() {}
-  void _initialize(void) {
-    // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
-    DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
-    TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
-    TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
-    ICR4 = 39999; //50hz freq (standard servos)
-  }
+void _initialize(void) {
+  // Init PWM Timer 4    Probable conflict with AeroQuad Motor or Arducopter PPM
+  DDRH = DDRH | B00111000;                                  //Set to Output Mega Port-Pin PH3-8, PE4-7, PE5-6
+  TCCR4A =((1<<WGM41)|(1<<COM4A1)|(1<<COM4B1)|(1<<COM4C1)); 
+  TCCR4B = (1<<WGM43)|(1<<WGM42)|(1<<CS41);
+  ICR4 = 39999; //50hz freq (standard servos)
+}
   
-  void move(void) {
-    if (mode > 0) {
-      OCR4A = servoPitch * 2;
-      OCR4B = servoRoll * 2;
-      OCR4C = servoYaw * 2;
-    }
+void move(void) {
+  if (mode > 0) {
+    OCR4A = servoPitch * 2;
+    OCR4B = servoRoll * 2;
+    OCR4C = servoYaw * 2;
   }
-};
+}
+
 
 #endif  // #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 

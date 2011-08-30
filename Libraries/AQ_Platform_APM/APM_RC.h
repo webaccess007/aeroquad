@@ -128,10 +128,10 @@ void writeMotorCommand(unsigned char ch, uint16_t pwm)
  
  switch(ch)
   {
-    case 0:  OCR5B=pwm; break;  //ch0
-    case 1:  OCR5C=pwm; break;  //ch1
-    case 2:  OCR1B=pwm; break;  //ch2
-    case 3:  OCR1C=pwm; break;  //ch3
+    case 0:  OCR1B=pwm; break;  //ch2  
+    case 1:  OCR1C=pwm; break;  //ch3  
+	case 2:  OCR5B=pwm; break;  //ch0  
+    case 3:  OCR5C=pwm; break;  //ch1  
     case 4:  OCR4C=pwm; break;  //ch4
     case 5:  OCR4B=pwm; break;  //ch5
     case 6:  OCR3C=pwm; break;  //ch6

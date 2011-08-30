@@ -32,42 +32,38 @@
 #include <APM_RC.h>
 
 
-class Receiver_APM : public Receiver {
-private:
-  int receiverPin[6];
+int receiverPin[6];
   
-public:  
-  Receiver_APM() {
+void initializeReceiver(int nbChannel = 6) {
+  initializeReceiverParam(nbChannel);
+  receiverPin[ROLL] = 0;
+  receiverPin[PITCH] = 1;
+  receiverPin[YAW] = 3;
+  receiverPin[THROTTLE] = 2;
+  receiverPin[MODE] = 4;
+  receiverPin[AUX] = 5;
+}
 
-    receiverPin[ROLL] = 0;
-    receiverPin[PITCH] = 1;
-    receiverPin[YAW] = 3;
-    receiverPin[THROTTLE] = 2;
-    receiverPin[MODE] = 4;
-    receiverPin[AUX] = 5;
+void readReceiver() {
+  for(byte channel = ROLL; channel < lastChannel; channel++) {
+    // Apply receiver calibration adjustment
+    receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
+    // Smooth the flight control receiver inputs
+    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }
 
-  void initialize(void) {
-  }
+  // Reduce receiver commands using receiverXmitFactor and center around 1500
+  for (byte channel = ROLL; channel < THROTTLE; channel++)
+    receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+  // No receiverXmitFactor reduction applied for throttle, mode and
+  for (byte channel = THROTTLE; channel < lastChannel; channel++)
+    receiverCommand[channel] = receiverCommandSmooth[channel];
+}
 
-  void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      //currentTime = micros();
-      // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * ((readReceiverChannel(receiverPin[channel])/*+600)/2*/))) + bTransmitter[channel];
-      // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-      //previousTime = currentTime;
-    }
-
-    // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < THROTTLE; channel++)
-      transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-    // No xmitFactor reduction applied for throttle, mode and
-    for (byte channel = THROTTLE; channel < LASTCHANNEL; channel++)
-      transmitterCommand[channel] = transmitterCommandSmooth[channel];
-  }
-};
+  
+void setChannelValue(byte channel,int value) {
+}
+  
 #endif
 
 #endif

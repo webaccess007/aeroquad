@@ -25,54 +25,48 @@
 #include <Platform_CHR6DM.h>
 #include <AQMath.h>
 
-class Gyroscope_CHR6DM : public Gyroscope {
-private:
+
+CHR6DM *gyroChr6dm;
+  
+void initializeGyro(){
+}
+  
+void measureGyro() {
+  
   int gyroADC[3];
-  CHR6DM *chr6dm;
-  
-public:
-  Gyroscope_CHR6DM() {
+  gyroADC[ROLL] = gyroChr6dm->data.rollRate - gyroZero[ROLL]; //gx yawRate
+  gyroADC[PITCH] = gyroZero[PITCH] - gyroChr6dm->data.pitchRate; //gy pitchRate
+  gyroADC[YAW] = gyroChr6dm->data.yawRate - gyroZero[ZAXIS]; //gz rollRate
+
+  gyroRate[ROLL] = filterSmooth(gyroADC[ROLL], gyroRate[ROLL], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+  gyroRate[PITCH] = filterSmooth(gyroADC[PITCH], gyroRate[PITCH], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+  gyroRate[YAW] = filterSmooth(gyroADC[YAW], gyroRate[YAW], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
+}
+
+void calibrateGyro() {
+  float zeroXreads[FINDZERO];
+  float zeroYreads[FINDZERO];
+  float zeroZreads[FINDZERO];
+
+  for (int i=0; i<FINDZERO; i++) {
+    gyroChr6dm->read();
+    zeroXreads[i] = gyroChr6dm->data.rollRate;
+    zeroYreads[i] = gyroChr6dm->data.pitchRate;
+    zeroZreads[i] = gyroChr6dm->data.yawRate;
   }
 
-  void setChr6dm(CHR6DM *chr6dm) {
-    this->chr6dm = chr6dm;
-  }
-  
-  void measure(void) {
-  
-    gyroADC[ROLL] = chr6dm->data.rollRate - zero[ROLL]; //gx yawRate
-    gyroADC[PITCH] = zero[PITCH] - chr6dm->data.pitchRate; //gy pitchRate
-    gyroADC[YAW] = chr6dm->data.yawRate - zero[ZAXIS]; //gz rollRate
+  gyroZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
+  gyroZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
+  gyroZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
+}
 
-    rate[ROLL] = filterSmooth(gyroADC[ROLL], rate[ROLL], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    rate[PITCH] = filterSmooth(gyroADC[PITCH], rate[PITCH], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-    rate[YAW] = filterSmooth(gyroADC[YAW], rate[YAW], smoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-
-    // Measure gyro heading
-    long int currentTime = micros();
-    if (rate[YAW] > radians(1.0) || rate[YAW] < radians(-1.0)) {
-      heading += rate[YAW] * ((currentTime - lastMesuredTime) / 1000000.0);
-    }
-    lastMesuredTime = currentTime;
-  }
-
-  void calibrate() {
-    float zeroXreads[FINDZERO];
-    float zeroYreads[FINDZERO];
-    float zeroZreads[FINDZERO];
-
-    for (int i=0; i<FINDZERO; i++) {
-        chr6dm->read();
-        zeroXreads[i] = chr6dm->data.rollRate;
-        zeroYreads[i] = chr6dm->data.pitchRate;
-        zeroZreads[i] = chr6dm->data.yawRate;
-    }
-
-    zero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
-    zero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
-    zero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
-  }
-};
 
 #endif  // #ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_
 

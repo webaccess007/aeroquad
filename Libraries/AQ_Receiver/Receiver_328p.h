@@ -21,8 +21,11 @@
 #ifndef _AEROQUAD_RECEIVER_328p_H_
 #define _AEROQUAD_RECEIVER_328p_H_
 
+#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
+
 #include <WProgram.h>
 #include "Receiver.h"
+
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
@@ -31,20 +34,18 @@
 #define MINOFFWIDTH 12000
 #define MAXOFFWIDTH 24000
 
-#if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
-
-#include "Receiver_328p.h"
 #include "pins_arduino.h"
 #include <AQMath.h>
 #include <Axis.h>
-
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
   &PCMSK2
 };
+
 volatile static uint8_t PCintLast[3];
+
 // Channel data
 typedef struct {
   byte edge;
@@ -118,11 +119,11 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
   }
 }
 
-SIGNAL(PCINT0_vect) {
+ISR(PCINT0_vect, ISR_BLOCK) {
   measurePulseWidthISR(0, 8); // PORT B
 }
 
-SIGNAL(PCINT2_vect) {
+ISR(PCINT2_vect, ISR_BLOCK) {
   measurePulseWidthISR(2, 0); // PORT D
 }
 
@@ -130,45 +131,27 @@ SIGNAL(PCINT2_vect) {
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
 
-
-
-class Receiver_328p : public Receiver {
-public:  
-  Receiver_328p() {
+void initializeReceiver(int nbChannel = 6) {
+  initializeReceiverParam(nbChannel);
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    pinMode(receiverPin[channel], INPUT);
+    pinData[receiverPin[channel]].edge = FALLING_EDGE;
+    attachPinChangeInterrupt(receiverPin[channel]);
   }
+}
 
-  void initialize(void) {
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      pinMode(receiverPin[channel], INPUT);
-      pinData[receiverPin[channel]].edge = FALLING_EDGE;
-      attachPinChangeInterrupt(receiverPin[channel]);
-    }
+void readReceiver() {
+  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    byte pin = receiverPin[channel];
+    uint8_t oldSREG = SREG;
+    cli();
+    // Get receiver value read by pin change interrupt handler
+    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+    SREG = oldSREG;
+
+    receiverData[channel] = lastGoodWidth;
   }
-
-  void read(void) {
-    for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      byte pin = receiverPin[channel];
-      uint8_t oldSREG = SREG;
-      cli();
-      // Get receiver value read by pin change interrupt handler
-      uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-      SREG = oldSREG;
-
-      // Apply transmitter calibration adjustment
-      receiverData[channel] = (mTransmitter[channel] * lastGoodWidth) + bTransmitter[channel];
-      // Smooth the flight control transmitter inputs
-      transmitterCommandSmooth[channel] = filterSmooth(receiverData[channel], transmitterCommandSmooth[channel], transmitterSmooth[channel]);
-    }
-
-    // Reduce transmitter commands using xmitFactor and center around 1500
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
-      if (channel < THROTTLE)
-        transmitterCommand[channel] = ((transmitterCommandSmooth[channel] - transmitterZero[channel]) * xmitFactor) + transmitterZero[channel];
-      else
-        // No xmitFactor reduction applied for throttle, mode and
-        transmitterCommand[channel] = transmitterCommandSmooth[channel];
-  }
-};
+}
 
 #endif
 

@@ -24,49 +24,43 @@
 #include <Accelerometer.h>
 #include <Platform_CHR6DM.h>
 
-class Accelerometer_CHR6DM : public Accelerometer {
-private:
-  CHR6DM *chr6dm;
+CHR6DM *accelChr6dm;
   
-public:
-  Accelerometer_CHR6DM() {
-    accelScaleFactor = 0;
-    smoothFactor = 1.0;
+
+void initializeAccel() {
+  accelScaleFactor = 0;
+  accelSmoothFactor = 1.0;
+}
+
+void measureAccel() {
+  float accelADC[3];
+  accelADC[XAXIS] = accelChr6dm->data.ax - accelZero[XAXIS];
+  accelADC[YAXIS] = accelChr6dm->data.ay - accelZero[YAXIS];
+  accelADC[ZAXIS] = accelChr6dm->data.az - accelOneG;
+
+  meterPerSec[XAXIS] = filterSmooth(accelADC[XAXIS], meterPerSec[XAXIS], accelSmoothFactor); //to get around 1
+  meterPerSec[YAXIS] = filterSmooth(accelADC[YAXIS], meterPerSec[YAXIS], accelSmoothFactor);
+  meterPerSec[ZAXIS] = filterSmooth(accelADC[ZAXIS], meterPerSec[ZAXIS], accelSmoothFactor);
+}
+
+void calibrateAccel() {
+  float zeroXreads[FINDZERO];
+  float zeroYreads[FINDZERO];
+  float zeroZreads[FINDZERO];
+
+  for (int i=0; i<FINDZERO; i++) {
+    accelChr6dm->requestAndReadPacket();
+    zeroXreads[i] = accelChr6dm->data.ax;
+    zeroYreads[i] = accelChr6dm->data.ay;
+    zeroZreads[i] = accelChr6dm->data.az;
   }
 
-  void setChr6dm(CHR6DM *chr6dm) {
-    this->chr6dm = chr6dm;
-  }
-  
-  void measure(void) {
-    float accelADC[3];
-    accelADC[XAXIS] = chr6dm->data.ax - zero[XAXIS];
-    accelADC[YAXIS] = chr6dm->data.ay - zero[YAXIS];
-    accelADC[ZAXIS] = chr6dm->data.az - oneG;
-
-    meterPerSec[XAXIS] = filterSmooth(accelADC[XAXIS], meterPerSec[XAXIS], smoothFactor); //to get around 1
-    meterPerSec[YAXIS] = filterSmooth(accelADC[YAXIS], meterPerSec[YAXIS], smoothFactor);
-    meterPerSec[ZAXIS] = filterSmooth(accelADC[ZAXIS], meterPerSec[ZAXIS], smoothFactor);
-  }
-
-  void calibrate() {
-    float zeroXreads[FINDZERO];
-    float zeroYreads[FINDZERO];
-    float zeroZreads[FINDZERO];
-
-    for (int i=0; i<FINDZERO; i++) {
-        chr6dm->requestAndReadPacket();
-        zeroXreads[i] = chr6dm->data.ax;
-        zeroYreads[i] = chr6dm->data.ay;
-        zeroZreads[i] = chr6dm->data.az;
-    }
-
-    zero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
-    zero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
-    zero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
+  accelZero[XAXIS] = findMedianFloat(zeroXreads, FINDZERO);
+  accelZero[YAXIS] = findMedianFloat(zeroYreads, FINDZERO);
+  accelZero[ZAXIS] = findMedianFloat(zeroZreads, FINDZERO);
    
-    // store accel value that represents 1g
-    oneG = zero[ZAXIS];
-  }
-};
+  // store accel value that represents 1g
+  accelOneG = accelZero[ZAXIS];
+}
+
 #endif

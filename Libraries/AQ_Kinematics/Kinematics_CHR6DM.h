@@ -25,49 +25,34 @@
 #include <Platform_CHR6DM.h>
 #include <Gyroscope.h>
 
-class Kinematics_CHR6DM : public Kinematics {
-private:
-  float zeroRoll;
-  float zeroPitch;
-  CHR6DM *chr6dm;
-  Gyroscope* gyroscope;
+float zeroRoll;
+float zeroPitch;
+CHR6DM *kinematicsChr6dm;
 
-public:
-  Kinematics_CHR6DM() : Kinematics() {}
-  
-  void setChr6dm(CHR6DM *chr6dm) {
-    this->chr6dm = chr6dm;
-  }
-  
-  void setGyroscope(Gyroscope *gyroscope) {
-    this->gyroscope = gyroscope;
-  }
+void initializeKinematics(float hdgX, float hdgY) {
+  initializeBaseKinematicsParam(hdgX,hdgY);
+  calibrateKinematics();
+}
 
-  void initialize(float hdgX, float hdgY) {
-    calibrate();
-  }
-
-  void calculate(float rollRate,           float pitchRate,     float yawRate,       
-				 float longitudinalAccel,  float lateralAccel,  float verticalAccel, 
-				 float oneG,               float magX,          float magY,
-				 float G_Dt) {
+void calculateKinematics(float rollRate,           float pitchRate,     float yawRate,       
+				         float longitudinalAccel,  float lateralAccel,  float verticalAccel, 
+				         float oneG,               float magX,          float magY,
+				         float G_Dt) {
 				 
-    angle[ROLL]  =  chr6dm->data.roll - zeroRoll;
-    angle[PITCH] =  chr6dm->data.pitch - zeroPitch;
-    CHR_RollAngle = angle[ROLL]; //ugly since gotta access through accel class
-    CHR_PitchAngle = angle[PITCH];
-  }
+  kinematicsAngle[ROLL]  =  kinematicsChr6dm->data.roll - zeroRoll;
+  kinematicsAngle[PITCH] =  kinematicsChr6dm->data.pitch - zeroPitch;
+  CHR_RollAngle = kinematicsAngle[ROLL]; //ugly since gotta access through accel class
+  CHR_PitchAngle = kinematicsAngle[PITCH];
+}
   
-   void calibrate() {
-    zeroRoll = chr6dm->data.roll;
-    zeroPitch = chr6dm->data.pitch;
-  }
+ void calibrateKinematics() {
+  zeroRoll = kinematicsChr6dm->data.roll;
+  zeroPitch = kinematicsChr6dm->data.pitch;
+}
   
-  float getGyroUnbias(byte axis) {
-    return gyroscope->getRadPerSec(axis);
-  }
-
-};
+float getGyroUnbias(byte axis) {
+  return gyroRate[axis];
+}
 
 
 #endif
