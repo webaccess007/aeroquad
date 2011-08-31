@@ -22,7 +22,7 @@
 #define _AEROQUAD_DEVICE_I2C_H_
 
 // I2C functions
-#include <Wire.h>
+/*#include <Wire.h>
 #include <WProgram.h>
 
 void sendByteI2C(int deviceAddress, byte dataValue);
@@ -32,5 +32,5 @@ int readWordWaitI2C(int deviceAddress);
 int readReverseWordI2C(int deviceAddress);
 byte readWhoI2C(int deviceAddress);
 void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue);
-
+*/
 #endif

@@ -24,15 +24,15 @@
 #include <WProgram.h>
 #include <Axis.h>
 
-float gyroRate[3];
-float gyroZero[3];
-float gyroSmoothFactor;
-float gyroScaleFactor;
-float gyroHeading;
-unsigned long gyroLastMesuredTime;
+float gyroRate[3] = {0.0,0.0,0.0};
+float gyroZero[3] = {0.0,0.0,0.0};
+float gyroSmoothFactor = 0.0;
+float gyroScaleFactor = 0.0;
+float gyroHeading = 0.0;
+unsigned long gyroLastMesuredTime = 0;
   
 void initializeGyro();
-void measureGyro();
+void readGyro();
 void calibrateGyro();
 
 #endif

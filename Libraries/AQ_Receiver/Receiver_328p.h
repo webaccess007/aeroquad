@@ -26,7 +26,6 @@
 #include <WProgram.h>
 #include "Receiver.h"
 
-
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
 #define MINONWIDTH 950
@@ -38,12 +37,12 @@
 #include <AQMath.h>
 #include <Axis.h>
 
+
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
   &PCMSK2
 };
-
 volatile static uint8_t PCintLast[3];
 
 // Channel data
@@ -133,7 +132,7 @@ static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, Y
 
 void initializeReceiver(int nbChannel = 6) {
   initializeReceiverParam(nbChannel);
-  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for (byte channel = ROLL; channel < lastChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
     attachPinChangeInterrupt(receiverPin[channel]);
@@ -141,7 +140,7 @@ void initializeReceiver(int nbChannel = 6) {
 }
 
 void readReceiver() {
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for(byte channel = ROLL; channel < lastChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;
     cli();
@@ -149,8 +148,19 @@ void readReceiver() {
     uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
     SREG = oldSREG;
 
-    receiverData[channel] = lastGoodWidth;
+    // Apply receiver calibration adjustment
+    receiverData[channel] = (receiverSlope[channel] * lastGoodWidth) + receiverOffset[channel];
+    // Smooth the flight control receiver inputs
+    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }
+
+  // Reduce receiver commands using receiverXmitFactor and center around 1500
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    if (channel < THROTTLE)
+      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+    else
+      // No receiverXmitFactor reduction applied for throttle, mode and
+      receiverCommand[channel] = receiverCommandSmooth[channel];
 }
 
 #endif

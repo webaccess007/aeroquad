@@ -22,6 +22,110 @@
 #define _AEROQUAD_ACCELEROMETER_BMA180_H_
 
 #include <Accelerometer.h>
+
+		
+
+
+
+#define ACCEL_ADDRESS   0x80
+
+/******************************************************/
+
+void readAccel() {
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x02);
+  twiMaster.start(ACCEL_ADDRESS | I2C_READ);
+  
+  union {int value[3];
+       byte bytes[6];} rawAccel;
+  
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    rawAccel.bytes[axis*2]   = twiMaster.read(0);
+    rawAccel.bytes[axis*2+1] = twiMaster.read((axis*2+1) == 5);
+    meterPerSec[axis] = rawAccel.value[axis]>>2;
+  }
+}
+
+/******************************************************/
+
+void computeAccelBias() {
+
+  long  accelSum[3] = {0, 0, 0};
+  for (int samples = 0; samples < 800; samples++) {
+    readAccel();
+	for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+	  accelSum[axis] += meterPerSec[axis];
+	}
+    delayMicroseconds(2500);
+  }
+  
+  union {float value[3];
+         byte bytes[12];} accel;
+  
+
+  for (byte axis = 0; axis < 3; axis++) {
+    accel.value[axis] = (float(accelSum[axis])/800) * accelScaleFactor[axis];
+  }
+
+  runTimeAccelBias[XAXIS] = -accel.value[XAXIS];
+  runTimeAccelBias[YAXIS] = -accel.value[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - accel.value[ZAXIS];
+
+  accelOneG = accel.value[ZAXIS] + runTimeAccelBias[ZAXIS];
+}
+
+/******************************************************/
+
+void initializeAccel() {
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x10);
+  twiMaster.write(0xB6);  // Reset device
+
+  delay(10);
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x0D);
+  twiMaster.write(0x10);  // Enable writting to control registers
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x20);  // Register bw_tcs (bits 4-7)
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_READ);
+  byte data = twiMaster.read(1);
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x20);
+  twiMaster.write(data & 0x7F);  // Set low pass filter to 1200 Hz (value = 0111xxxx)
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x35);
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_READ);
+  data = twiMaster.read(1);
+  data &= 0xF1;
+  data |= 0x08;
+
+  twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
+  twiMaster.write(0x35);
+  twiMaster.write(data);  // Set range select bits for +/- 4g
+
+  delay(100);
+
+  computeAccelBias();
+}
+
+/******************************************************/
+
+void calibrateAccel() {
+  computeAccelBias();
+}
+
+
+#endif
+
+
+
+/**
 #include <Device_I2C.h>
 
 #define ACCEL_ADDRESS 0x40
@@ -112,6 +216,4 @@ void calibrateAccel() {
   measureAccel();
   accelOneG = -meterPerSec[ZAXIS];
 }
-
-
-#endif
+*/

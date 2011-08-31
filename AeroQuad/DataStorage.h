@@ -127,7 +127,7 @@ void initializeEEPROM(void) {
     
   receiverXmitFactor = 1.0;
   gyroSmoothFactor = 1.0;
-  accelSmoothFactor = 1.0;
+//  accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = 9.80665; // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
@@ -257,7 +257,8 @@ void writeEEPROM(void){
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
+//  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
+  writeFloat(0, ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
@@ -300,10 +301,10 @@ void initSensorsZeroFromEEPROM(void) {
   
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
-  accelZero[XAXIS] = readFloat(ACCEL_XAXIS_ZERO_ADR);
-  accelZero[YAXIS] = readFloat(ACCEL_YAXIS_ZERO_ADR);
-  accelZero[ZAXIS] = readFloat(ACCEL_ZAXIS_ZERO_ADR);
-  accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
+//  accelZero[XAXIS] = readFloat(ACCEL_XAXIS_ZERO_ADR);
+//  accelZero[YAXIS] = readFloat(ACCEL_YAXIS_ZERO_ADR);
+//  accelZero[ZAXIS] = readFloat(ACCEL_ZAXIS_ZERO_ADR);
+//  accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
 void storeSensorsZeroToEEPROM(void) {
@@ -315,10 +316,15 @@ void storeSensorsZeroToEEPROM(void) {
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);
-  writeFloat(accelZero[XAXIS], ACCEL_XAXIS_ZERO_ADR);
-  writeFloat(accelZero[YAXIS], ACCEL_YAXIS_ZERO_ADR);
-  writeFloat(accelZero[ZAXIS], ACCEL_ZAXIS_ZERO_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
+//  writeFloat(accelZero[XAXIS], ACCEL_XAXIS_ZERO_ADR);
+//  writeFloat(accelZero[YAXIS], ACCEL_YAXIS_ZERO_ADR);
+//  writeFloat(accelZero[ZAXIS], ACCEL_ZAXIS_ZERO_ADR);
+//  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
+  writeFloat(0, ACCEL_XAXIS_ZERO_ADR);
+  writeFloat(0, ACCEL_YAXIS_ZERO_ADR);
+  writeFloat(0, ACCEL_ZAXIS_ZERO_ADR);
+  writeFloat(0, ACCSMOOTH_ADR);
+
 }
 
 void initReceiverFromEEPROM(void) {

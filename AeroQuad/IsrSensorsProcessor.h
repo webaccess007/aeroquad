@@ -66,8 +66,8 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)
     timer0countIndex = 0;           // Indicate 1st count active
                                     // And execute sensor reads
 
-    measureAccel();
-    measureGyro();
+    readAccel();
+    readGyro();
     for (byte axis = 0; axis < LASTAXIS; axis++) {
       meterPerSecSum[axis] += meterPerSec[axis];
       gyroRateSum[axis] += gyroRate[axis];
@@ -119,8 +119,16 @@ void gaterSensorsSampleSumm() {
     gyroRateSum[axis] = 0;
   }
   gyroAccelSampleCount = 0;
-  
+
   sei();  // restart isr
+  
+  meterPerSecSample[XAXIS] = meterPerSecSample[XAXIS] * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSecSample[YAXIS] = meterPerSecSample[YAXIS] * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSecSample[ZAXIS] = meterPerSecSample[ZAXIS] * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS]; 
+      
+  gyroRateSample[ROLL]  = (gyroRateSample[ROLL]   - runTimeGyroBias[ROLL]) * gyroScaleFactor;
+  gyroRateSample[PITCH] = (runTimeGyroBias[PITCH] - gyroRateSample[PITCH]) * gyroScaleFactor;
+  gyroRateSample[YAW]   = (runTimeGyroBias[YAW]   - gyroRateSample[YAW])   * gyroScaleFactor;
 }
 
 

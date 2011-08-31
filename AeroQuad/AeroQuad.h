@@ -388,8 +388,8 @@ unsigned int isrFrameCounter = 1;
 unsigned int thisIsrFrame = 0;
 byte timer0countIndex;
 
-float meterPerSecSum[3];
-float meterPerSecSample[3];
+long meterPerSecSum[3];
+long meterPerSecSample[3];
 float gyroRateSum[3];
 float gyroRateSample[3];
 byte gyroAccelSampleCount;

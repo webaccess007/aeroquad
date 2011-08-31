@@ -97,7 +97,8 @@ void readSerialCommand() {
       break;
     case 'K': // Receive data filtering values
       gyroSmoothFactor = readFloatSerial();
-      accelSmoothFactor = readFloatSerial();
+//      accelSmoothFactor = readFloatSerial();
+                            readFloatSerial();  // no more used
       timeConstant = readFloatSerial();
       aref = readFloatSerial();
       break;
@@ -291,7 +292,8 @@ void sendSerialTelemetry() {
     break;
   case 'L': // Send data filtering values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(accelSmoothFactor);
+//    PrintValueComma(accelSmoothFactor);
+    PrintValueComma(0);  // no more used
     PrintValueComma(timeConstant);
     SERIAL_PRINTLN(aref);
     queryType = 'X';

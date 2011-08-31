@@ -134,12 +134,14 @@
  */
  
 #include <EEPROM.h>
-#include <Wire.h>
+#include <TwiMaster.h>
+TwiMaster twiMaster;
+
 #include "AeroQuad.h"
 #include <Axis.h>
 #include "PID.h"
 #include <AQMath.h>
-
+//#include <FourthOrderFilter.h>
 
 //********************************************************
 //********************************************************
@@ -258,8 +260,9 @@
     pinMode(LED3PIN, OUTPUT);
     digitalWrite(LED3PIN, LOW);
     
-    Wire.begin();
-    TWBR = 12;
+    twiMaster.init(false);
+//    Wire.begin();
+//    TWBR = 12;
   }
   
   /**
@@ -969,6 +972,8 @@ void setup() {
   
   // AKA use a new low pass filter called a Lag Filter uncomment only if using DCM LAG filters
   //  setupFilters(accel.accelOneG);
+
+//  setupFourthOrder();
 
   initIsrSensorsProcessor();
 
