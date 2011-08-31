@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.5 Beta 1 - July 2011
+  AeroQuad v3.0 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -24,7 +24,7 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 2.5
+#define VERSION 3.0
 
 #define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
@@ -51,28 +51,6 @@
   #define LED2PIN 12
   #define LED3PIN 12
 #endif
-
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
 
 // PID Variables
 struct PIDdata {
@@ -111,27 +89,6 @@ float smoothHeading;
 #define PITCHRATEPIN 3
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
-#define AZPIN 12 // Auto zero pin for IDG500 gyros
-
-// Motor control variables
-#define FRONT 0
-#define REAR 1
-#define RIGHT 2
-#define LEFT 3
-#define MOTORID1 0		
-#define MOTORID2 1		
-#define MOTORID3 2		
-#define MOTORID4 3		
-#define MOTORID5 4		
-#define MOTORID6 5
-#define MINCOMMAND 1000
-#define MAXCOMMAND 2000
-#if defined(plusConfig) || defined(XConfig)
-  #define LASTMOTOR 4
-#endif
-#if defined(HEXACOAXIAL) || defined(HEXARADIAL)
-  #define LASTMOTOR 6
-#endif
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -140,7 +97,7 @@ float smoothHeading;
 // If you don't have a DMM use the following:
 // AeroQuad Shield v1.7, aref = 3.0
 // AeroQuad Shield v1.6 or below, aref = 2.8
-float aref; // Read in from EEPROM
+float aref;
 
 // Flight Mode
 #define ACRO 0
@@ -148,14 +105,12 @@ float aref; // Read in from EEPROM
 byte flightMode;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
-#define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
+
 
 // Auto level setup
-//float levelAdjust[2] = {0.0,0.0};
+float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
-//int levelLimit; // Read in from EEPROM
-//int levelOff; // Read in from EEPROM
-// Scale to convert 1000-2000 PWM to +/- 45 degrees
+  // Scale to convert 1000-2000 PWM to +/- 45 degrees
 //float mLevelTransmitter = 0.09;
 //float bLevelTransmitter = -135;
 
@@ -171,9 +126,7 @@ float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-#if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float absoluteHeading = 0;;
-#endif
+//float absoluteHeading = 0;;
 float setHeading = 0;
 unsigned long headingTime = micros();
 byte headingHoldState = OFF;
@@ -199,24 +152,8 @@ float zDampening = 0.0;
 byte storeAltitude = OFF;
 byte altitudeHold = OFF;
 
-// Receiver variables
-#define TIMEOUT 25000
-#define MINCOMMAND 1000
-#define MIDCOMMAND 1500
-#define MAXCOMMAND 2000
-#define MINDELTA 200
-#define MINCHECK MINCOMMAND + 100
-#define MAXCHECK MAXCOMMAND - 100
-#define MINTHROTTLE MINCOMMAND + 100
-#define LEVELOFF 100
+//// Receiver variables
 int delta;
-
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
 
 // Flight angle variables
 float timeConstant;
@@ -236,15 +173,13 @@ HardwareSerial *binaryPort;
 /**************************************************************/
 /******************* Loop timing parameters *******************/
 /**************************************************************/
-/*
 #define RECEIVERLOOPTIME 100000  // 100ms, 10Hz
 #define COMPASSLOOPTIME 103000   // 103ms, ~10Hz
 #define ALTITUDELOOPTIME 50000   // 50ms x 2, 10Hz (alternates between temperature and pressure measurements)
 #define BATTERYLOOPTIME 100000   // 100ms, 10Hz
 #define CAMERALOOPTIME 20000     // 20ms, 50Hz
-#define FASTTELEMETRYTIME 15000  // 15ms, 67Hz
+#define FASTTELEMETRYTIME 10000  // 10ms, 100Hz
 #define TELEMETRYLOOPTIME 100000 // 100ms, 10Hz for slower computers/cables (more rough Configurator values)
-*/
 
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
@@ -253,19 +188,14 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop times
-//unsigned long oneHZpreviousTime;
+unsigned long oneHZpreviousTime;
 unsigned long tenHZpreviousTime;
 unsigned long twentyFiveHZpreviousTime;
 unsigned long fiftyHZpreviousTime;
 unsigned long hundredHZpreviousTime;
-// old times.
-//unsigned long receiverTime = 0;
-//unsigned long compassTime = 5000;
-//unsigned long altitudeTime = 10000;
-//unsigned long batteryTime = 15000;
-//unsigned long autoZeroGyroTime = 0;
+
 #ifdef CameraControl
-unsigned long cameraTime = 10000;
+  unsigned long cameraTime = 10000;
 #endif
 unsigned long fastTelemetryTime = 0;
 //unsigned long telemetryTime = 50000; // make telemetry output 50ms offset from receiver check
@@ -280,7 +210,6 @@ unsigned long fastTelemetryTime = 0;
                                   defined(ArduCopter)          || \
                                   defined(AeroQuadMega_CHR6DM) || \
                                   defined(APM_OP_CHR6DM))
-  #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial3.print
   #define SERIAL_PRINTLN    Serial3.println
   #define SERIAL_AVAILABLE  Serial3.available
@@ -288,7 +217,6 @@ unsigned long fastTelemetryTime = 0;
   #define SERIAL_FLUSH      Serial3.flush
   #define SERIAL_BEGIN      Serial3.begin
 #else
-  #define SERIAL_BAUD       115200
   #define SERIAL_PRINT      Serial.print
   #define SERIAL_PRINTLN    Serial.println
   #define SERIAL_AVAILABLE  Serial.available
@@ -307,7 +235,7 @@ byte telemetryLoop = ON;
 byte sensorLoop = ON;
 byte controlLoop = ON;
 #ifdef CameraControl
-byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
+  byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 #endif
 byte fastTransfer = OFF; // Used for troubleshooting
 byte testSignal = LOW;
@@ -329,6 +257,7 @@ typedef struct {
   float offset;
   float smooth_factor;
 } t_NVR_Receiver;
+
 typedef struct {    
   t_NVR_PID ROLL_PID_GAIN_ADR;
   t_NVR_PID LEVELROLL_PID_GAIN_ADR;
@@ -346,16 +275,16 @@ typedef struct {
   float XMITFACTOR_ADR;
   float GYROSMOOTH_ADR;
   float ACCSMOOTH_ADR;
-  float LEVELPITCHCAL_ADR;
-  float LEVELROLLCAL_ADR;
-  float LEVELZCAL_ADR;
+  float ACCEL_XAXIS_ZERO_ADR;
+  float ACCEL_YAXIS_ZERO_ADR;
+  float ACCEL_ZAXIS_ZERO_ADR;
   float FILTERTERM_ADR;
   float HEADINGSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
   float MINACRO_ADR;
-  float ACCEL1G_ADR;
+  float ACCEL_1G_ADR;
 //  float ALTITUDE_PGAIN_ADR;
   float ALTITUDE_MAX_THROTTLE_ADR;
   float ALTITUDE_MIN_THROTTLE_ADR;
@@ -375,11 +304,11 @@ typedef struct {
   float GYRO_YAW_ZERO_ADR;
 } t_NVR_Data;  
 
+
 float nvrReadFloat(int address); // defined in DataStorage.h
 void nvrWriteFloat(float value, int address); // defined in DataStorage.h
 void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
 void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
-
 
 #define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
 #define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
@@ -387,39 +316,72 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
+// defined in DataStorage.h
+void readEEPROM(void); 
+void initSensorsZeroFromEEPROM(void);
+void storeSensorsZeroToEEPROM(void);
+void initReceiverFromEEPROM(void);
+//////////////////////////////////////////////////////
 
-// external dunction defined
-float arctan2(float y, float x); // defined in AQMath.h
-void readEEPROM(void); // defined in DataStorage.h
-void readPilotCommands(void); // defined in FlightCommand.pde
-void readSensors(void); // defined in Sensors.pde
-void processFlightControlXMode(void); // defined in FlightControl.pde
-void processFlightControlPlusMode(void); // defined in FlightControl.pde
-void readSerialCommand(void);  //defined in SerialCom.pde
-void sendSerialTelemetry(void); // defined in SerialCom.pde
-void printInt(int data); // defined in SerialCom.pde
-float readFloatSerial(void); // defined in SerialCom.pde
-void sendBinaryFloat(float); // defined in SerialCom.pde
-void sendBinaryuslong(unsigned long); // defined in SerialCom.pde
-void fastTelemetry(void); // defined in SerialCom.pde
-void comma(void); // defined in SerialCom.pde
-void processAltitudeHold(void); // defined in FlightControl.pde
+// defined in FlightCommand.pde
+void readPilotCommands(void); 
+//////////////////////////////////////////////////////
+
+// defined in FlightControl.pde Flight control needs
+int motorAxisCommandRoll = 0;
+int motorAxisCommandPitch = 0;
+int motorAxisCommandYaw = 0;
+
+#if defined quadXConfig || defined quadPlusConfig || defined triConfig || defined quadY4Config
+  int motorMaxCommand[4];
+  int motorMinCommand[4];
+  int motorConfiguratorCommand[4];
+#elif defined hexXConfig || defined hexPlusConfig || defined hexY6Config
+  int motorMaxCommand[6];
+  int motorMinCommand[6];
+  int motorConfiguratorCommand[6];
+#elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig) 
+  int motorMaxCommand[8];
+  int motorMinCommand[8];
+  int motorConfiguratorCommand[8];
+#endif
+
+
+
+void calculateFlightError();
+void processHeading();
+void processAltitudeHold();
+void processCalibrateESC();
+void processFlightControl();
+void processAltitudeHold();
+//////////////////////////////////////////////////////
+
+//defined in SerialCom.pde
+void readSerialCommand(void);
+void sendSerialTelemetry(void);
+void printInt(int data);
+float readFloatSerial(void);
+void sendBinaryFloat(float);
+void sendBinaryuslong(unsigned long);
+void fastTelemetry(void);
+void comma(void);
+//////////////////////////////////////////////////////
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-float findMode(float *data, int arraySize); // defined in Sensors.pde
+  float findMode(float *data, int arraySize); // defined in Sensors.pde
 #else
-int findMode(int *data, int arraySize); // defined in Sensors.pde
+  int findMode(int *data, int arraySize); // defined in Sensors.pde
 #endif
 
 // FUNCTION: return the number of bytes currently free in RAM      
-extern int  __bss_end; // used by freemem 
-extern int  *__brkval; // used by freemem
-int freemem(){
-    int free_memory;
-    if((int)__brkval == 0)
-        free_memory = ((int)&free_memory) - ((int)&__bss_end);
-    else
-        free_memory = ((int)&free_memory) - ((int)__brkval);
-    return free_memory;
-}
+//extern int  __bss_end; // used by freemem 
+//extern int  *__brkval; // used by freemem
+//int freemem(){
+//    int free_memory;
+//    if((int)__brkval == 0)
+//        free_memory = ((int)&free_memory) - ((int)&__bss_end);
+//    else
+//        free_memory = ((int)&free_memory) - ((int)__brkval);
+//    return free_memory;
+//}
 
