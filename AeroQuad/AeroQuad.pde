@@ -221,8 +221,6 @@ TwiMaster twiMaster;
 #endif
 
 #ifdef AeroQuad_v18
-  #include <Device_I2C.h>
-  
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
   
@@ -233,7 +231,7 @@ TwiMaster twiMaster;
   #define RECEIVER_328P
   
   // Motor declaration
-  #define MOTOR_PWM_Timer
+  #define MOTOR_PWM_328P_Timer
   
   // heading mag hold declaration
   #ifdef HeadingMagHold
@@ -787,8 +785,10 @@ TwiMaster twiMaster;
 //  #include <Motors_PWM_Tri.h>
 #if defined MOTOR_PWM
   #include <Motors_PWM.h>
-#elif defined MOTOR_PWM_Timer
-  #include <Motors_PWM_Timer.h>
+#elif defined MOTOR_PWM_328P_Timer
+  #include <Motors_PWMtimer_328.h>
+#elif defined MOTOR_PWM_MEGA_Timer
+  #include <Motors_PWMtimer_MEGA.h>  
 #elif defined MOTOR_APM
   #include <Motors_APM.h>
 #elif defined MOTOR_I2C
@@ -1007,8 +1007,12 @@ void loop () {
   deltaTime = currentTime - previousTime;
   
   // Main scheduler loop set for 100hz
-  if (deltaTime >= 10000) {
 
+//  if (deltaTime >= 10000) {
+  if (((isrFrameCounter % BACKGROUND_COUNT) == 0) && (isrFrameCounter != thisIsrFrame)) {
+    
+    thisIsrFrame = isrFrameCounter;
+    
     #ifdef DEBUG_LOOP
       testSignal ^= HIGH;
       digitalWrite(LEDPIN, testSignal);
@@ -1019,7 +1023,7 @@ void loop () {
     // ================================================================
     // 100hz task loop
     // ================================================================
-    if (frameCounter %   1 == 0) {  //  100 Hz tasks
+//    if (frameCounter %   1 == 0) {  //  100 Hz tasks
       #ifdef DEBUG_LOOP
         digitalWrite(11, HIGH);
       #endif
@@ -1098,12 +1102,14 @@ void loop () {
       #ifdef DEBUG_LOOP
         digitalWrite(11, LOW);
       #endif
-    }
+//    }
 
     // ================================================================
     // 50hz task loop
     // ================================================================
-    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+//    if (frameCounter %   2 == 0) {  //  50 Hz tasks
+    if (thisIsrFrame % RECEIVER_COUNT == 0) {
+  
       #ifdef DEBUG_LOOP
         digitalWrite(10, HIGH);
       #endif

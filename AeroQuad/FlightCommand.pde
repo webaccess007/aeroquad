@@ -24,12 +24,12 @@
 void readPilotCommands() {
   readReceiver();
   // Read quad configuration commands from transmitter when throttle down
-  if (receiverData[THROTTLE] < MINCHECK) {
+  if (receiverCommand[THROTTLE] < MINCHECK) {
     zeroIntegralError();
     throttleAdjust = 0;
     //receiver->adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
-    if (receiverData[YAW] < MINCHECK && armed == ON) {
+    if (receiverCommand[YAW] < MINCHECK && armed == ON) {
       armed = OFF;
       commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -37,7 +37,7 @@ void readPilotCommands() {
       #endif
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
+    if ((receiverCommand[YAW] < MINCHECK) && (receiverCommand[ROLL] > MAXCHECK) && (receiverCommand[PITCH] < MINCHECK)) {
       calibrateGyro(); // defined in Gyro.h
       calibrateAccel(); // defined in Accel.h
       storeSensorsZeroToEEPROM();
@@ -51,7 +51,7 @@ void readPilotCommands() {
       //#endif
     }   
     // Arm motors (left stick lower right corner)
-    if (receiverData[YAW] > MAXCHECK && armed == OFF && safetyCheck == ON) {
+    if (receiverCommand[YAW] > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -64,24 +64,24 @@ void readPilotCommands() {
       //altitude.measureGround();
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiverData[YAW] > MINCHECK) safetyCheck = ON; 
+    if (receiverCommand[YAW] > MINCHECK) safetyCheck = ON; 
   }
   
   // Get center value of roll/pitch/yaw channels when enough throttle to lift off
-  if (receiverData[THROTTLE] < 1300) {
-    receiverTrim[ROLL]  = receiverData[ROLL];
-    receiverTrim[PITCH] = receiverData[PITCH];
-    receiverTrim[YAW]   = receiverData[YAW];
-    //receiver->setZero(ROLL, receiverData[ROLL]);
-    //receiver->setZero(PITCH, receiverData[PITCH]);
-    //receiver->setZero(YAW, receiverData[YAW]);
+  if (receiverCommand[THROTTLE] < 1300) {
+//    receiverTrim[ROLL]  = receiverCommand[ROLL];
+//    receiverTrim[PITCH] = receiverCommand[PITCH];
+//    receiverTrim[YAW]   = receiverCommand[YAW];
+    //receiver->setZero(ROLL, receiverCommand[ROLL]);
+    //receiver->setZero(PITCH, receiverCommand[PITCH]);
+    //receiver->setZero(YAW, receiverCommand[YAW]);
   }
   
   #ifdef RateModeOnly
     flightMode = ACRO;
   #else
     // Check Mode switch for Acro or Stable
-    if (receiverData[MODE] > 1500) {
+    if (receiverCommand[MODE] > 1500) {
       if (flightMode == ACRO) {
         #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
           digitalWrite(LED2PIN, HIGH);
@@ -111,11 +111,11 @@ void readPilotCommands() {
   #endif
   
   #ifdef AltitudeHold
-   if (receiverData[AUX] < 1750) {
+   if (receiverCommand[AUX] < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
          holdAltitude = baroAltitude;
-         holdThrottle = receiverData[THROTTLE];
+         holdThrottle = receiverCommand[THROTTLE];
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
          //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this

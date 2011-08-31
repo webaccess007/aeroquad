@@ -39,15 +39,15 @@
 
 int lastChannel;
 
-float receiverXmitFactor;
-int receiverData[MAX_NB_CHANNEL];
-int receiverTrim[3];
-int receiverZero[3];
+//float receiverXmitFactor;
+//int receiverData[MAX_NB_CHANNEL];
+//int receiverTrim[3];
+//int receiverZero[3];
 int receiverCommand[MAX_NB_CHANNEL];
-int receiverCommandSmooth[MAX_NB_CHANNEL];
-float receiverSlope[MAX_NB_CHANNEL];
-float receiverOffset[MAX_NB_CHANNEL];
-float receiverSmoothFactor[MAX_NB_CHANNEL];
+//int receiverCommandSmooth[MAX_NB_CHANNEL];
+//float receiverSlope[MAX_NB_CHANNEL];
+//float receiverOffset[MAX_NB_CHANNEL];
+//float receiverSmoothFactor[MAX_NB_CHANNEL];
   
 
 void initializeReceiverParam(int nbChannel = 6) {
@@ -58,10 +58,12 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[THROTTLE] = 1000;
   receiverCommand[MODE] = 1000;
   receiverCommand[AUX] = 1000;
+  receiverCommand[AUX+1] = 1000;
+  receiverCommand[AUX+2] = 1000;
 	
   lastChannel = nbChannel;
 	
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+/*  for (byte channel = ROLL; channel < lastChannel; channel++)
     receiverCommandSmooth[channel] = 1.0;
   for (byte channel = ROLL; channel < THROTTLE; channel++)
     receiverZero[channel] = 1500;
@@ -72,15 +74,17 @@ void initializeReceiverParam(int nbChannel = 6) {
     receiverOffset[channel] = 1;
   for (byte channel = ROLL; channel < lastChannel; channel++)
     receiverSmoothFactor[channel] = 1; 
+*/	
 }
-  
+
+
 void readReceiver();
 void setChannelValue(byte channel,int value);
   
 // return the smoothed & scaled number of radians/sec in stick movement - zero centered
-const float getReceiverSIData(byte channel) {
-  return ((receiverCommand[channel] - receiverZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
-}
+//const float getReceiverSIData(byte channel) {
+//  return ((receiverCommand[channel] - receiverZero[channel]) * (2.5 * PWM2RAD));  // +/- 2.5RPS 50% of full rate
+//}
 
 #endif
 

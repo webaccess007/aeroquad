@@ -125,18 +125,18 @@ void initializeEEPROM(void) {
         PID[i].typePID = NOTYPE;
   }
     
-  receiverXmitFactor = 1.0;
+//  receiverXmitFactor = 1.0;
   gyroSmoothFactor = 1.0;
 //  accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = 9.80665; // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
-  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiverSlope[channel] = 1.0;
-    receiverOffset[channel] = 0.0;
-    receiverSmoothFactor[channel] = 1.0;
-  }
-  receiverSmoothFactor[YAW] = 0.5;
+//  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+//    receiverSlope[channel] = 1.0;
+//    receiverOffset[channel] = 0.0;
+//    receiverSmoothFactor[channel] = 1.0;
+//  }
+//  receiverSmoothFactor[YAW] = 0.5;
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -255,16 +255,20 @@ void writeEEPROM(void){
     writeFloat(0.0F, MAGZMIN_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
-  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
+//  writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
+  writeFloat(0, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
 //  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
   writeFloat(0, ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
-    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
-    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
+    writeFloat(0,  RECEIVER_DATA[channel].slope);
+    writeFloat(0, RECEIVER_DATA[channel].offset);
+    writeFloat(0, RECEIVER_DATA[channel].smooth_factor);
+//    writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
+//    writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
+//    writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
   writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
@@ -328,12 +332,12 @@ void storeSensorsZeroToEEPROM(void) {
 }
 
 void initReceiverFromEEPROM(void) {
-  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
+//  receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
-    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
-    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
-  }
+//  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+//    receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
+//    receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
+//    receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);
+//  }
 }
 

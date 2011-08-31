@@ -99,12 +99,28 @@ ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)
 
 void initIsrSensorsProcessor() {
   
-  TCCR0A = 0x00;                    // Normal port operation, OC0A, OC0B disconnected
-
-  timer0countIndex = 0;
-  OCR0A = TCNT0 + TIMER0_COUNT0;
   
-  TIMSK0 |= (1<<OCIE0A);            // Enable Timer/Counter0 Output Compare A Match Interrupt
+  #if defined (__AVR_ATmega328P__)
+    EICRA = 0x03;  // Set INT0 interrupt request on rising edge
+    EIMSK = 0x01;  // Enable External Interrupt 0
+  #endif
+  
+  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    TCCR0A = 0x00;                    // Normal port operation, OC0A, OC0B disconnected
+  
+    timer0countIndex = 0;
+    OCR0A = TCNT0 + TIMER0_COUNT0;
+    
+    TIMSK0 |= (1<<OCIE0A);            // Enable Timer/Counter0 Output Compare A Match Interrupt
+  #endif
+  
+  
+//  TCCR0A = 0x00;                    // Normal port operation, OC0A, OC0B disconnected
+//
+//  timer0countIndex = 0;
+//  OCR0A = TCNT0 + TIMER0_COUNT0;
+//  
+//  TIMSK0 |= (1<<OCIE0A);            // Enable Timer/Counter0 Output Compare A Match Interrupt
 }
 
 

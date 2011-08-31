@@ -103,15 +103,17 @@ void readSerialCommand() {
       aref = readFloatSerial();
       break;
     case 'M': // Receive transmitter smoothing values
-      receiverXmitFactor = readFloatSerial();
+//      receiverXmitFactor = readFloatSerial();
+                             readFloatSerial();    // @todo Ted remover this
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiverSmoothFactor[channel] = readFloatSerial();
+//        receiverSmoothFactor[channel] = readFloatSerial();
+    
       }
       break;
     case 'O': // Receive transmitter calibration values
       for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        receiverSlope[channel] = readFloatSerial();
-        receiverOffset[channel] = readFloatSerial();
+        /*receiverSlope[channel] = */readFloatSerial();
+        /*receiverOffset[channel] = */readFloatSerial();
       }
       break;
     case 'W': // Write all user configurable values to EEPROM
@@ -299,17 +301,17 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
-    PrintValueComma(receiverXmitFactor);
+    /*PrintValueComma(receiverXmitFactor);*/PrintValueComma(1);
     for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverSmoothFactor[axis]);
+      /*PrintValueComma(receiverSmoothFactor[axis]);*/PrintValueComma(1);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
     for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverSlope[axis]);
-      PrintValueComma(receiverOffset[axis]);
+      /*PrintValueComma(receiverSlope[axis]);*/PrintValueComma(1);
+      /*PrintValueComma(receiverOffset[axis]);*/PrintValueComma(1);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -375,9 +377,9 @@ void sendSerialTelemetry() {
 #endif
     break;
   case 'T': // Send processed transmitter values *** UPDATE ***
-    PrintValueComma(receiverXmitFactor);
+    /*PrintValueComma(receiverXmitFactor);*/PrintValueComma(1);
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(receiverData[axis]);
+      PrintValueComma(receiverCommand[axis]);
     }
     PrintValueComma(motorAxisCommandRoll);
     PrintValueComma(motorAxisCommandPitch);
@@ -389,13 +391,13 @@ void sendSerialTelemetry() {
     break;
   case 'U': // Send smoothed receiver with Transmitter Factor applied values
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiverData[channel]);
+      PrintValueComma(receiverCommand[channel]);
     }
     SERIAL_PRINTLN();
     break;
   case 'V': // Send receiver status
     for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiverData[channel]);
+      PrintValueComma(receiverCommand[channel]);
     }
     SERIAL_PRINTLN();
     break;
