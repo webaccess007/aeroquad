@@ -1,63 +1,39 @@
-/*
-  AeroQuad v3.0 - April 2011
-  www.AeroQuad.com 
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
-  An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
+#define I2C_ESC
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+int  motorAxisCommand[3];
+int  motorCommand[LASTMOTOR];
+byte motorCommandI2C[LASTMOTOR];
+int  minCommand[LASTMOTOR];
+int  maxCommand[LASTMOTOR];
+int  remoteMotorCommand[LASTMOTOR];
+byte sendMotorCommands = 0;
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
-*/
+#define MOTORBASE 0x29
 
-
-#ifndef _AEROQUAD_MOTORS_I2C_H_
-#define _AEROQUAD_MOTORS_I2C_H_
-
-#include <WProgram.h>
-
-#include "Motors.h"
-
-#define MOTORBASE 0x28            // I2C controller base address
-#define MOTOR_ADDR_0  MOTORBASE + 1  // define I2C controller addresses per your configuration
-#define MOTOR_ADDR_1  MOTORBASE + 3  // these addresses are for Phifun controllers
-#define MOTOR_ADDR_2  MOTORBASE + 2  // as installed on jihlein's homebrew AeroQuad 3.0
-#define MOTOR_ADDR_3  MOTORBASE + 4  // inspired frame
-#define MOTOR_ADDR_4  MOTORBASE + 5
-#define MOTOR_ADDR_5  MOTORBASE + 6
-
-
-byte motorAddress[6];
-  
-void initializeMotors(NB_Motors numbers) {
-  motorAddress[MOTOR1] = MOTOR_ADDR_0;
-  motorAddress[MOTOR2] = MOTOR_ADDR_1;
-  motorAddress[MOTOR3] = MOTOR_ADDR_2;
-  motorAddress[MOTOR4] = MOTOR_ADDR_3;
-  motorAddress[MOTOR5] = MOTOR_ADDR_4;
-  motorAddress[MOTOR6] = MOTOR_ADDR_5;
-
-  numberOfMotors = numbers;
-  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
-    sendByteI2C(motorAddress[motor], 0);
+void commandAllMotors(int motorCommand) {
+  byte temp = constrain((motorCommand - 1000) / 4, 0, 250);
+  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+	motorCommandI2C[motor] = temp;
+  sendMotorCommands = 1;
 }
 
-void writeMotors() {
-  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
-    sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
+void initializeMotors(void) {
+   for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+ 	motorCommandI2C[motor] = 0;
+  sendMotorCommands = 1;
 }
 
-void commandAllMotors(int command) {
-  for (byte motor = MOTOR1; motor < numberOfMotors; motor++)
-    sendByteI2C(motorAddress[motor], constrain((motorCommand[motor] - 1000) / 4, 0, 255));
+void writeMotors(void) {
+  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+	motorCommandI2C[motor] = constrain((motorCommand[motor] - 1000) / 4, 0, 250);
+  sendMotorCommands = 1;
 }
-  
-#endif
+
+void pulseMotors(byte quantity) {
+  for (byte i = 0; i < quantity; i++) {
+  commandAllMotors(MINCOMMAND + 100);
+  delay(250);
+  commandAllMotors(MINCOMMAND);
+  delay(250);
+  }
+}

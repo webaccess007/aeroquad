@@ -1,5 +1,5 @@
 int receiverData[LASTCHANNEL];
-
+  
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
@@ -13,11 +13,32 @@ typedef struct {
   byte edge;
   unsigned long riseTime;
   unsigned long fallTime;
-  unsigned int lastGoodWidth;
+  unsigned int  lastGoodWidth;
 } tPinTimingData;
-volatile static tPinTimingData pinData[LASTCHANNEL];
+volatile static tPinTimingData pinData[9];
 
-ISR(PCINT2_vect, ISR_BLOCK) {
+// Attaches PCINT to Arduino Pin
+void attachPinChangeInterrupt(uint8_t pin) {
+  uint8_t bit = digitalPinToBitMask(pin);
+  uint8_t port = digitalPinToPort(pin);
+  volatile uint8_t *pcmask;
+
+  // map pin to PCIR register
+  if (port == NOT_A_PORT) {
+    return;
+  }
+  else {
+    port -= 2;
+    pcmask = port_to_pcmask[port];
+  }
+  // set the mask
+  *pcmask |= bit;
+  // enable the interrupt
+  PCICR |= 0x01 << port;
+}
+
+// ISR which records time of rising or falling edge of signal
+static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
   uint8_t bit;
   uint8_t curr;
   uint8_t mask;
@@ -25,24 +46,22 @@ ISR(PCINT2_vect, ISR_BLOCK) {
   uint32_t currentTime;
   uint32_t time;
 
-  curr = *portInputRegister(11);
-  mask = curr ^ PCintLast[0];
-  PCintLast[0] = curr;
-
+  // get the pin states for the indicated port.
+  curr = *portInputRegister(port+2);
+  mask = curr ^ PCintLast[port];
+  PCintLast[port] = curr;
   // mask is pins that have changed. screen out non pcint pins.
-  if ((mask &= PCMSK2) == 0) {
+  if ((mask &= *port_to_pcmask[port]) == 0) {
     return;
   }
-
   currentTime = micros();
-
   // mask is pcint pins that have changed.
   for (uint8_t i=0; i < 8; i++) {
     bit = 0x01 << i;
     if (bit & mask) {
-      pin = i;
+      pin = pinoffset + i;
       // for each pin changed, record time of change
-      if (bit & PCintLast[0]) {
+      if (bit & PCintLast[port]) {
         time = currentTime - pinData[pin].fallTime;
         pinData[pin].riseTime = currentTime;
         if ((time >= MINOFFWIDTH) && (time <= MAXOFFWIDTH))
@@ -62,17 +81,23 @@ ISR(PCINT2_vect, ISR_BLOCK) {
   }
 }
 
-static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+ISR(PCINT0_vect, ISR_BLOCK) {
+  measurePulseWidthISR(0, 8); // PORT B
+}
+
+ISR(PCINT2_vect, ISR_BLOCK) {
+  measurePulseWidthISR(2, 0); // PORT D
+}
+
+// defines arduino pins used for receiver in arduino pin numbering schema
+static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+
 
 void initializeReceiver() {
-  DDRK = 0;
-  PORTK = 0;
-  PCMSK2 |= 0x3F;
-  PCICR |= 0x1 << 2;
-
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
+    attachPinChangeInterrupt(receiverPin[channel]);
   }
 }
 
@@ -86,6 +111,6 @@ void readReceiver(void) {
     SREG = oldSREG;
 
     receiverData[channel] = lastGoodWidth;
-  }
+ }
 }
 
