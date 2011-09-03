@@ -55,7 +55,6 @@
 #include <EEPROM.h>
 
 #include <TwiMaster.h>
-TwiMaster twiMaster;
 
 #include "AeroQuad.h"
 #include "PID.h"
@@ -118,9 +117,9 @@ union {float value[3];
 unsigned int isrFrameCounter = 1;
 unsigned int thisIsrFrame = 0;
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+//#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   byte timer0countIndex;
-#endif
+//#endif
 
 //////////////////////////////////
 
@@ -131,7 +130,7 @@ void setup() {
   SERIAL_BEGIN(BAUD);
   Serial.println();
 
-  twiMaster.init(false);         // Internal Pull Ups disabled
+  TwiMaster_init(false);         // Internal Pull Ups disabled
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
 
@@ -202,19 +201,19 @@ void setup() {
   
   ////////////////////////////////////////////////////////////////////////////////
   
-  #if defined (__AVR_ATmega328P__)
-    EICRA = 0x03;  // Set INT0 interrupt request on rising edge
-    EIMSK = 0x01;  // Enable External Interrupt 0
-  #endif
-  
-  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+//  #if defined (__AVR_ATmega328P__)
+//    EICRA = 0x03;  // Set INT0 interrupt request on rising edge
+//    EIMSK = 0x01;  // Enable External Interrupt 0
+//  #endif
+//  
+//  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     TCCR0A = 0x00;                    // Normal port operation, OC0A, OC0B disconnected
   
     timer0countIndex = 0;
     OCR0A = TCNT0 + TIMER0_COUNT0;
     
     TIMSK0 |= (1<<OCIE0A);            // Enable Timer/Counter0 Output Compare A Match Interrupt
-  #endif
+//  #endif
   
   //////////////////////////////////////////////////////////////////////////////// 
 }
@@ -306,52 +305,52 @@ void loop () {
   }
 }
 
-#if defined (__AVR_ATmega328P__)
-  ////////////////////////////////////////////////////////////////////////////////
-  // Interrupt Service Routine - INT0
-  ////////////////////////////////////////////////////////////////////////////////
-  ISR(INT0_vect, ISR_NOBLOCK)
-  {  
-    readAccel();
-    
-    readGyro();
-    
-    #if defined(HMC5843) | defined(HMC5883)
-      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
-        readCompass();
-        newMagData = 1;
-      }
-    #endif
-    
-    #if defined(BMP085)
-      if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0)
-      {
-        if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
-        else if (isrFrameCounter == (ISR_FRAME_COUNT-1)) readPressureRequestTemperature();
-        else readPressureRequestPressure();
-      }
-    #endif
-    
-    isrFrameCounter++;
-    if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
-    
-    #if defined(I2C_ESC)
-      // If using I2C ESCs, check for updated motor commands and
-      //   write them out if present.
-      if (sendMotorCommands == 1)
-      {
-        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-        {
-          twiMaster.start(MOTORBASE + motor | I2C_WRITE);
-          twiMaster.write(motorCommandI2C[motor]);
-        }
-        sendMotorCommands == 0;
-      }
-    #endif
-  }
-#endif
+//#if defined (__AVR_ATmega328P__)
+//  ////////////////////////////////////////////////////////////////////////////////
+//  // Interrupt Service Routine - INT0
+//  ////////////////////////////////////////////////////////////////////////////////
+//  ISR(INT0_vect, ISR_NOBLOCK)
+//  {  
+//    readAccel();
+//    
+//    readGyro();
+//    
+//    #if defined(HMC5843) | defined(HMC5883)
+//      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
+//        readCompass();
+//        newMagData = 1;
+//      }
+//    #endif
+//    
+//    #if defined(BMP085)
+//      if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0)
+//      {
+//        if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
+//        else if (isrFrameCounter == (ISR_FRAME_COUNT-1)) readPressureRequestTemperature();
+//        else readPressureRequestPressure();
+//      }
+//    #endif
+//    
+//    isrFrameCounter++;
+//    if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
+//    
+//    #if defined(I2C_ESC)
+//      // If using I2C ESCs, check for updated motor commands and
+//      //   write them out if present.
+//      if (sendMotorCommands == 1)
+//      {
+//        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+//        {
+//          twiMaster.start(MOTORBASE + motor | I2C_WRITE);
+//          twiMaster.write(motorCommandI2C[motor]);
+//        }
+//        sendMotorCommands == 0;
+//      }
+//    #endif
+//  }
+//#endif
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+//#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   ////////////////////////////////////////////////////////////////////////////////
   // Interrupt Service Routine - TIMER0_COMPA
   //   Due to the limitations of the 8 bit counter, this ISR fires twice
@@ -411,5 +410,5 @@ void loop () {
       #endif
     }
   }
-#endif
+//#endif
 

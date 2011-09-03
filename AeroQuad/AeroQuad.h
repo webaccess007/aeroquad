@@ -122,8 +122,8 @@ float smoothHeading;
 
 #if defined(quadXConfig)
   #define FRONT_LEFT  0
-  #define FRONT_RIGHT 1
-  #define REAR_RIGHT  2
+  #define FRONT_RIGHT 2
+  #define REAR_RIGHT  1
   #define REAR_LEFT   3
   
   #define FIRSTMOTOR  0
