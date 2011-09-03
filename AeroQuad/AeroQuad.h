@@ -124,7 +124,7 @@ byte headingHoldConfig;
 //float headingScaleFactor;
 float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-//float heading = 0; // measured heading from yaw gyro (process variable)
+float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 //float absoluteHeading = 0;;
 float setHeading = 0;
@@ -328,10 +328,10 @@ void readPilotCommands(void);
 //////////////////////////////////////////////////////
 
 // defined in FlightControl.pde Flight control needs
-unsigned long lastSampleTime;
-float accelSample[3] = {0.0,0.0,0.0};
-float gyroSample[3] = {0.0,0.0,0.0};
-byte sampleCount = 0;
+//unsigned long lastSampleTime;
+//float accelSample[3] = {0.0,0.0,0.0};
+//float gyroSample[3] = {0.0,0.0,0.0};
+//byte sampleCount = 0;
 
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
