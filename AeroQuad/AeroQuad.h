@@ -328,10 +328,10 @@ void readPilotCommands(void);
 //////////////////////////////////////////////////////
 
 // defined in FlightControl.pde Flight control needs
-//unsigned long lastSampleTime;
-//float accelSample[3] = {0.0,0.0,0.0};
-//float gyroSample[3] = {0.0,0.0,0.0};
-//byte sampleCount = 0;
+unsigned long lastSampleTime;
+float accelSample[3] = {0.0,0.0,0.0};
+float gyroSample[3] = {0.0,0.0,0.0};
+byte sampleCount = 0;
 
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
