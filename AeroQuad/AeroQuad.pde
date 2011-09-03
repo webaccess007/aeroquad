@@ -30,14 +30,14 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
+#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
 //#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -45,7 +45,7 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
@@ -54,7 +54,7 @@
 //#define hexY6Config
 //#define octoX8Congig
 //#define octoPlusCongig  // not yet implemented
-#define octoXCongig
+//#define octoXCongig
 
 //
 // *******************************************************************************************************************************
@@ -174,12 +174,22 @@
     setAccelAref(aref);
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -209,12 +219,22 @@
     setAccelAref(aref);
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -262,12 +282,22 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 1000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -310,12 +340,22 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 1000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -347,12 +387,22 @@
     setAccelAref(aref);
   }
   
+  #define DELAY_BETWEEN_READING 2000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -414,12 +464,22 @@
     TWBR = 12;
   }
   
+  #define DELAY_BETWEEN_READING 1000
+  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -468,13 +528,21 @@
     
     Wire.begin();
   }
-  
+
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -527,14 +595,22 @@
      gyroPlatformWii = &platformWii;
      accelPlatformWii = &platformWii;
   }
-  
+
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    platformWii.measure();
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      platformWii.measure();
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -582,14 +658,22 @@
     gyroPlatformWii = &platformWii;
     accelPlatformWii = &platformWii;    
   }
-  
+
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    platformWii.measure();
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      platformWii.measure();
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -653,10 +737,17 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    
-    chr6dm.read();
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      chr6dm.read();
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
   }
 #endif
 
@@ -724,10 +815,18 @@
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    
-    chr6dm.read();
-    measureGyro();
-    measureAccel();
+    if (deltaTime >= 10000) {
+      chr6dm.read();
+      lastSampleTime = currentTime;
+      measureGyro();
+      measureAccel();
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] += meterPerSec[i];
+        gyroSample[i] += gyroRate[i];
+      }
+      sampleCount++;
+    }
+  }sureAccel();
   }
 #endif
 
@@ -991,6 +1090,9 @@ void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
   
+  if (sensorLoop == ON) {
+    measureCriticalSensors();
+  }
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
 
@@ -1013,16 +1115,14 @@ void loop () {
       hundredHZpreviousTime = currentTime;
       
       if (sensorLoop == ON) {
-        measureCriticalSensors();
-        
         // ****************** Calculate Absolute Angle *****************
         #if defined HeadingMagHold && defined FlightAngleMARG
-          calculateKinematics(gyroRate[ROLL],                       
-                              gyroRate[PITCH],                      
-                              gyroRate[YAW],                        
-                              meterPerSec[XAXIS],                   
-                              meterPerSec[YAXIS],                   
-                              meterPerSec[ZAXIS],                   
+          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                              gyroSample[YAXIS]/sampleCount,                      
+                              gyroSample[ZAXIS]/sampleCount,                        
+                              accelSample[XAXIS]/sampleCount,                  
+                              accelSample[YAXIS]/sampleCount,                  
+                              accelSample[ZAXIS]/sampleCount,                  
                               getMagnetometerRawData(XAXIS),                      
                               getMagnetometerRawData(YAXIS),                     
                               getMagnetometerRawData(ZAXIS),
@@ -1030,12 +1130,12 @@ void loop () {
         #endif
       
         #if defined FlightAngleARG
-          calculateKinematics(gyroRate[ROLL],                       
-                              gyroRate[PITCH],                      
-                              gyroRate[YAW],                        
-                              meterPerSec[XAXIS],                   
-                              meterPerSec[YAXIS],                   
-                              meterPerSec[ZAXIS],                   
+          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                              gyroSample[YAXIS]/sampleCount,                      
+                              gyroSample[ZAXIS]/sampleCount,                        
+                              accelSample[XAXIS]/sampleCount,                  
+                              accelSample[YAXIS]/sampleCount,                  
+                              accelSample[ZAXIS]/sampleCount,                  
                               0.0,                                            
                               0.0,                                            
                               0.0,
@@ -1043,12 +1143,12 @@ void loop () {
         #endif
 
         #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          calculateKinematics(gyroRate[ROLL],                       
-                              gyroRate[PITCH],                      
-                              gyroRate[YAW],                        
-                              meterPerSec[XAXIS],                   
-                              meterPerSec[YAXIS],                   
-                              meterPerSec[ZAXIS],                   
+          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                              gyroSample[YAXIS]/sampleCount,                      
+                              gyroSample[ZAXIS]/sampleCount,                        
+                              accelSample[XAXIS]/sampleCount,                  
+                              accelSample[YAXIS]/sampleCount,                  
+                              accelSample[ZAXIS]/sampleCount,                   
                               accelOneG,                              
                               getHdgXY(XAXIS),                        
                               getHdgXY(YAXIS),
@@ -1056,17 +1156,22 @@ void loop () {
         #endif
         
         #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          calculateKinematics(gyroRate[ROLL],                        
-                              gyroRate[PITCH],                       
-                              gyroRate[YAW],                         
-                              meterPerSec[XAXIS],                    
-                              meterPerSec[YAXIS],                    
-                              meterPerSec[ZAXIS],                    
+          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                              gyroSample[YAXIS]/sampleCount,                      
+                              gyroSample[ZAXIS]/sampleCount,                        
+                              accelSample[XAXIS]/sampleCount,                  
+                              accelSample[YAXIS]/sampleCount,                  
+                              accelSample[ZAXIS]/sampleCount,                   
                               accel->getOneG(),                               
                               0.0,                                             
                               0.0,
                               G_Dt);
         #endif
+        for (int i = 0; i < LASTAXIS;i++) {
+          accelSample[i] = 0.0;
+          gyroSample[i] = 0.0;
+        }
+        sampleCount = 0.0;
       }
       
       // Combines external pilot commands and measured sensor data to generate motor commands

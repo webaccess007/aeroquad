@@ -24,17 +24,17 @@
 
 #include <WProgram.h>
 
-float magMax[3];
-float magMin[3];
+float magMax[3] = {0.0,0.0,0.0};
+float magMin[3] = {0.0,0.0,0.0};
   
-float hdgX;
-float hdgY;
+float hdgX = 0.0;
+float hdgY = 0.0;
 
-float measuredMagX;
-float measuredMagY;
-float measuredMagZ;
-float magScale[3];
-float magOffset[3];
+float measuredMagX = 0.0;
+float measuredMagY = 0.0;
+float measuredMagZ = 0.0;
+float magScale[3] = {0.0,0.0,0.0};
+float magOffset[3] = {0.0,0.0,0.0};
 
 void initializeMagnetometer();
 void measureMagnetometer(float roll, float pitch);

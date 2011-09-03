@@ -24,11 +24,11 @@
 #include <WProgram.h>
 #include <Axis.h>
 
-float accelScaleFactor;
-float accelSmoothFactor;
-float accelOneG;
-float meterPerSec[3];
-float accelZero[3];
+float accelScaleFactor = 0.0;
+float accelSmoothFactor = 0.0;
+float accelOneG = 0.0;
+float meterPerSec[3] = {0.0,0.0,0.0};
+float accelZero[3] = {0.0,0.0,0.0};
   
 void initializeAccel();
 void calibrateAccel();

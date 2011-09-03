@@ -25,9 +25,9 @@
 
 double baroAltitude = 0.0; 
 double baroRawAltitude = 0.0;
-float groundTemperature; // remove later
-float groundPressure; // remove later
-float groundAltitude;
+float groundTemperature = 0.0; // remove later
+float groundPressure = 0.0; // remove later
+float groundAltitude = 0.0;
 float baroSmoothFactor = 0.02;
   
 // **********************************************************************

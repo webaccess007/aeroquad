@@ -37,19 +37,18 @@
 #define LEVELOFF 100
 #define MAX_NB_CHANNEL 8
 
-int lastChannel;
+int lastChannel = 0;
 
-float receiverXmitFactor;
-int receiverData[MAX_NB_CHANNEL];
-int receiverTrim[3];
-int receiverZero[3];
-int receiverCommand[MAX_NB_CHANNEL];
-int receiverCommandSmooth[MAX_NB_CHANNEL];
-float receiverSlope[MAX_NB_CHANNEL];
-float receiverOffset[MAX_NB_CHANNEL];
-float receiverSmoothFactor[MAX_NB_CHANNEL];
+float receiverXmitFactor = 0.0;
+int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+int receiverTrim[3] = {0,0,0};
+int receiverZero[3] = {0,0,0};
+int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
   
-
 void initializeReceiverParam(int nbChannel = 6) {
   
   receiverCommand[ROLL] = 1500;
@@ -58,6 +57,8 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[THROTTLE] = 1000;
   receiverCommand[MODE] = 1000;
   receiverCommand[AUX] = 1000;
+  receiverCommand[AUX+1] = 1000;
+  receiverCommand[AUX+2] = 1000;
 	
   lastChannel = nbChannel;
 	

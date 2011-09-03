@@ -124,7 +124,7 @@ byte headingHoldConfig;
 //float headingScaleFactor;
 float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading = 0; // measured heading from yaw gyro (process variable)
+//float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
 //float absoluteHeading = 0;;
 float setHeading = 0;
@@ -188,11 +188,11 @@ unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 unsigned long deltaTime = 0;
 // sub loop times
-unsigned long oneHZpreviousTime;
-unsigned long tenHZpreviousTime;
-unsigned long twentyFiveHZpreviousTime;
-unsigned long fiftyHZpreviousTime;
-unsigned long hundredHZpreviousTime;
+unsigned long oneHZpreviousTime = 0;
+unsigned long tenHZpreviousTime = 0;
+unsigned long twentyFiveHZpreviousTime = 0;
+unsigned long fiftyHZpreviousTime = 0;
+unsigned long hundredHZpreviousTime = 0;
 
 #ifdef CameraControl
   unsigned long cameraTime = 10000;
@@ -328,22 +328,27 @@ void readPilotCommands(void);
 //////////////////////////////////////////////////////
 
 // defined in FlightControl.pde Flight control needs
+unsigned long lastSampleTime;
+float accelSample[3] = {0.0,0.0,0.0};
+float gyroSample[3] = {0.0,0.0,0.0};
+byte sampleCount = 0;
+
 int motorAxisCommandRoll = 0;
 int motorAxisCommandPitch = 0;
 int motorAxisCommandYaw = 0;
 
 #if defined quadXConfig || defined quadPlusConfig || defined triConfig || defined quadY4Config
-  int motorMaxCommand[4];
-  int motorMinCommand[4];
-  int motorConfiguratorCommand[4];
+  int motorMaxCommand[4] = {0,0,0,0};
+  int motorMinCommand[4] = {0,0,0,0};
+  int motorConfiguratorCommand[4] = {0,0,0,0};
 #elif defined hexXConfig || defined hexPlusConfig || defined hexY6Config
-  int motorMaxCommand[6];
-  int motorMinCommand[6];
-  int motorConfiguratorCommand[6];
+  int motorMaxCommand[6] = {0,0,0,0,0,0};
+  int motorMinCommand[6] = {0,0,0,0,0,0};
+  int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
 #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig) 
-  int motorMaxCommand[8];
-  int motorMinCommand[8];
-  int motorConfiguratorCommand[8];
+  int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
+  int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
+  int motorConfiguratorCommand[8] = {0,0,0,0,0,0,0,0};
 #endif
 
 
@@ -357,14 +362,14 @@ void processAltitudeHold();
 //////////////////////////////////////////////////////
 
 //defined in SerialCom.pde
-void readSerialCommand(void);
-void sendSerialTelemetry(void);
+void readSerialCommand();
+void sendSerialTelemetry();
 void printInt(int data);
-float readFloatSerial(void);
+float readFloatSerial();
 void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
-void fastTelemetry(void);
-void comma(void);
+void fastTelemetry();
+void comma();
 //////////////////////////////////////////////////////
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)

@@ -50,13 +50,13 @@
 
 #include "Kinematics.h"
 
-float kpAcc;                // proportional gain governs rate of convergence to accelerometer
-float kiAcc;                // integral gain governs rate of convergence of gyroscope biases
-float kpMag;                // proportional gain governs rate of convergence to magnetometer
-float kiMag;                // integral gain governs rate of convergence of gyroscope biases
-float halfT;                // half the sample period
-float q0, q1, q2, q3;       // quaternion elements representing the estimated orientation
-float exInt, eyInt, ezInt;  // scaled integral error
+float kpAcc = 0.0;                					// proportional gain governs rate of convergence to accelerometer
+float kiAcc = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
+float kpMag = 0.0;                					// proportional gain governs rate of convergence to magnetometer
+float kiMag = 0.0;                					// integral gain governs rate of convergence of gyroscope biases
+float halfT = 0.0;                					// half the sample period
+float q0 = 0.0, q1 = 0.0, q2 = 0.0, q3 = 0.0;       // quaternion elements representing the estimated orientation
+float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
 
 ////////////////////////////////////////////////////////////////////////////////
 // margUpdate

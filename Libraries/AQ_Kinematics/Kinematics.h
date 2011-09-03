@@ -30,11 +30,11 @@
 #define MARG 4
 
 // This class is responsible for calculating vehicle attitude
-byte kinematicsType;
-float kinematicsAngle[3];
-float gyroAngle[2];
-float correctedRateVector[3];
-float earthAccel[3];
+byte kinematicsType = 0;
+float kinematicsAngle[3] = {0.0,0.0,0.0};
+float gyroAngle[2] = {0.0,0.0};
+float correctedRateVector[3] = {0.0,0.0,0.0};
+float earthAccel[3] = {0.0,0.0,0.0};
 
 void initializeBaseKinematicsParam(float hdgX, float hdgY) {
   for (byte axis = ROLL; axis < LASTAXIS; axis++)

@@ -30,10 +30,10 @@
   #define BUZZERPIN 49
 #endif
 
-byte state, firstAlarm;
-float diode; // raw voltage goes through diode on Arduino
-float batteryScaleFactor;
-long currentBatteryTime, previousBatteryTime;
+byte state = 0, firstAlarm = 0;
+float diode = 0.0; // raw voltage goes through diode on Arduino
+float batteryScaleFactor = 0.0;
+long currentBatteryTime = 0, previousBatteryTime = 0;
 
 void initializeBatteryMonitor(float diodeValue) {
   float R1   = 15000;

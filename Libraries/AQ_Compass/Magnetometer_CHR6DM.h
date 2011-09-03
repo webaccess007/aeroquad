@@ -27,7 +27,7 @@
 #include <Platform_CHR6DM.h>
 
 CHR6DM *compassChr6dm;
-float absoluteHeading = 0;
+float absoluteHeading = 0.0;
 
 void initializeMagnetometer() {}
 

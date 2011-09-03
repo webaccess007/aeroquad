@@ -55,8 +55,8 @@
 #define LEDDELAY 200
 
 
-float diode; //Schottky diode on APM board
-float batteryScaleFactor;
+float diode = 0.0; //Schottky diode on APM board
+float batteryScaleFactor = 0.0;
 
 void ledCW(void){
   digitalWrite(RL_LED, HIGH);

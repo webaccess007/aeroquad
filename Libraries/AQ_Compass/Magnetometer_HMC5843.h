@@ -28,7 +28,7 @@
 
 #define COMPASS_ADDRESS 0x1E
 
-float magCalibration[3];
+float magCalibration[3] = {0.0,0.0,0.0};
   
 
 void initializeMagnetometer() {

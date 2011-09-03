@@ -25,7 +25,6 @@
 #include <Platform_CHR6DM.h>
 
 CHR6DM *accelChr6dm;
-  
 
 void initializeAccel() {
   accelScaleFactor = 0;

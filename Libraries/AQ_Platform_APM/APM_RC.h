@@ -31,10 +31,10 @@
 #define MAX_PULSEWIDTH 2100
 
 // Variable definition for Input Capture interrupt
-volatile unsigned int ICR4_old;
-volatile unsigned char PPM_Counter=0;
+volatile unsigned int ICR4_old =  0;
+volatile unsigned char PPM_Counter = 0;
 volatile uint16_t PWM_RAW[8] = {2400,2400,2400,2400,2400,2400,2400,2400};
-volatile unsigned char radio_status=0;
+volatile unsigned char radio_status = 0;
 
 /****************************************************
    Input Capture Interrupt ICP4 => PPM signal read

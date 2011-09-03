@@ -43,10 +43,10 @@
   #define MOTORPIN4    5   
   #define MOTORPIN5    6  
   
-volatile uint8_t atomicPWM_PIN5_lowState;
-volatile uint8_t atomicPWM_PIN5_highState;
-volatile uint8_t atomicPWM_PIN6_lowState;
-volatile uint8_t atomicPWM_PIN6_highState;
+volatile uint8_t atomicPWM_PIN5_lowState = 0;
+volatile uint8_t atomicPWM_PIN5_highState = 0;
+volatile uint8_t atomicPWM_PIN6_lowState = 0;
+volatile uint8_t atomicPWM_PIN6_highState = 0;
   
 void initializeSoftPWM() {
   TCCR0A = 0; // normal counting mode

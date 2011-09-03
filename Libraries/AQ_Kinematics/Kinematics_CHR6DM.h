@@ -25,8 +25,8 @@
 #include <Platform_CHR6DM.h>
 #include <Gyroscope.h>
 
-float zeroRoll;
-float zeroPitch;
+float zeroRoll = 0.0;
+float zeroPitch = 0.0;
 CHR6DM *kinematicsChr6dm;
 
 void initializeKinematics(float hdgX, float hdgY) {
