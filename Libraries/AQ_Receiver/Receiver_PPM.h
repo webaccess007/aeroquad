@@ -79,7 +79,7 @@ void initializeReceiver(int nbChannel = 6) {
   attachInterrupt(0, rxInt, RISING);
 }
 
-void readReceiver(void) {
+void readReceiver() {
   
   for(byte channel = ROLL; channel < lastChannel; channel++) {
     uint8_t oldSREG;

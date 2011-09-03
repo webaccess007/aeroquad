@@ -219,7 +219,7 @@ void readEEPROM(void) {
   #endif*/
 }
 
-void writeEEPROM(void){
+void writeEEPROM(){
   cli(); // Needed so that APM sensor data doesn't overflow
   writePID(ROLL, ROLL_PID_GAIN_ADR);
   writePID(PITCH, PITCH_PID_GAIN_ADR);
@@ -306,7 +306,7 @@ void initSensorsZeroFromEEPROM(void) {
   accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
-void storeSensorsZeroToEEPROM(void) {
+void storeSensorsZeroToEEPROM() {
   // Store gyro data to EEPROM
   writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
   writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
@@ -321,7 +321,7 @@ void storeSensorsZeroToEEPROM(void) {
   writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 }
 
-void initReceiverFromEEPROM(void) {
+void initReceiverFromEEPROM() {
   receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
   for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {

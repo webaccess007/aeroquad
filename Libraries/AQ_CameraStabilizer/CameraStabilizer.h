@@ -47,22 +47,22 @@ The high time shall be 1500?s, so the OCRxy register is set to 3000. A change of
  tick every 0.5?s. If the prescaler was changed, the OCRxy register value would
  be different. 
 */
-int mode;
-float mCameraPitch;
-float mCameraRoll;    
-float mCameraYaw;
-int centerPitch;
-int centerRoll;
-int centerYaw;
-int servoMinPitch;
-int servoMinRoll;
-int servoMinYaw;
-int servoMaxPitch;
-int servoMaxRoll;
-int servoMaxYaw;
-int servoPitch;                // 1000 - 2000 where we are or will move to next  
-int servoRoll;
-int servoYaw;
+int mode = 0;
+float mCameraPitch = 0.0;
+float mCameraRoll = 0.0;    
+float mCameraYaw = 0.0;
+int centerPitch = 0;
+int centerRoll = 0;
+int centerYaw = 0;
+int servoMinPitch = 0;
+int servoMinRoll = 0;
+int servoMinYaw = 0;
+int servoMaxPitch = 0;
+int servoMaxRoll = 0;
+int servoMaxYaw = 0;
+int servoPitch = 0;                // 1000 - 2000 where we are or will move to next  
+int servoRoll = 0;
+int servoYaw = 0;
   
 void _initialize();
 void move ();

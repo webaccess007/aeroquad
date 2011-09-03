@@ -25,8 +25,6 @@
 
 #define ACCEL_ADDRESS 0x53
 
-
-
 void initializeAccel() {
   accelScaleFactor = G_2_MPS2(4.0/1024.0);  		// +/- 2G at 10bits of ADC
   accelSmoothFactor = 1.0;

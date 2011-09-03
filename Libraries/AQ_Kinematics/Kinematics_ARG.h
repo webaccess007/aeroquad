@@ -51,15 +51,15 @@
 
 #include <AQMath.h>
 
-float Kp;                   // proportional gain governs rate of convergence to accelerometer/magnetometer
-float Ki;                   // integral gain governs rate of convergence of gyroscope biases
-float halfT;                // half the sample period
-float q0, q1, q2, q3;       // quaternion elements representing the estimated orientation
-float exInt, eyInt, ezInt;  // scaled integral error
+float Kp = 0.0;                   					// proportional gain governs rate of convergence to accelerometer/magnetometer
+float Ki = 0.0;                   					// integral gain governs rate of convergence of gyroscope biases
+float halfT = 0.0;                					// half the sample period
+float q0 = 0.0, q1 = 0.0, q2 = 0.0, q3 = 0.0;       // quaternion elements representing the estimated orientation
+float exInt = 0.0, eyInt = 0.0, ezInt = 0.0;  		// scaled integral error
   
-float previousEx;
-float previousEy;
-float previousEz;
+float previousEx = 0.0;
+float previousEy = 0.0;
+float previousEz = 0.0;
   
 ////////////////////////////////////////////////////////////////////////////////
 // argUpdate

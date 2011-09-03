@@ -25,8 +25,8 @@
 
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 
-int gyroChannel[3];
-float gyroAref;
+int gyroChannel[3] = {0.0,0.0,0.0};
+float gyroAref = 0.0;
   
 
 void setGyroAref(float _aref) {
