@@ -26,7 +26,7 @@
 
 float gyroRate[3] = {0.0,0.0,0.0};
 float gyroZero[3] = {0.0,0.0,0.0};
-float gyroSmoothFactor = 0.0;
+float gyroSmoothFactor = 1.0;
 float gyroScaleFactor = 0.0;
 float gyroHeading = 0.0;
 unsigned long gyroLastMesuredTime = 0;

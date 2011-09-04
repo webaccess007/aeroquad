@@ -41,8 +41,6 @@
 void initializeAccel() {
   
   accelScaleFactor = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range
-  accelSmoothFactor = 1.0;
-
   
   if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) // page 52 of datasheet
     Serial.println("Accelerometer not found!");
