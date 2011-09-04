@@ -28,7 +28,6 @@ Platform_Wii *accelPlatformWii;
 
 void initializeAccel() {
   accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2 
-  accelSmoothFactor = 1.0;
 }
 
 void measureAccel(void) {

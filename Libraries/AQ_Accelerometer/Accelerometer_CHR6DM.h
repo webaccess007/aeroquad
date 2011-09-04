@@ -27,8 +27,6 @@
 CHR6DM *accelChr6dm;
 
 void initializeAccel() {
-  accelScaleFactor = 0;
-  accelSmoothFactor = 1.0;
 }
 
 void measureAccel() {

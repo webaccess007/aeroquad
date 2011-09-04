@@ -27,7 +27,6 @@ float accelAref;
   
 void initializeAccel() {
   accelScaleFactor = G_2_MPS2((3.0/1024.0) / 0.300);  // force aref to 3.0 for v1.7 shield
-  accelSmoothFactor     = 1.0;
 }
 
 void setAccelAref(float aref) {

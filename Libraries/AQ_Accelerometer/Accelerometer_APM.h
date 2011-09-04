@@ -25,7 +25,6 @@
 
 void initializeAccel() {
   accelScaleFactor = G_2_MPS2((3.3/4096) / 0.330);
-  accelSmoothFactor = 1.0;
 }
   
 void measureAccel() {
