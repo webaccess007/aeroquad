@@ -30,7 +30,7 @@ void readPilotCommands() {
     if (receiverData[YAW] < (MINCHECK - MIDCOMMAND) && armed == ON) {
       armed = OFF;
       for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-        minCommand[motor] = MINCOMMAND;
+        commandAllMotors(MINCOMMAND);
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
     if ((receiverData[YAW]   < MINCHECK - MIDCOMMAND) && 

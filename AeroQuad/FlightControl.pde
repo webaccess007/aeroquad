@@ -188,15 +188,11 @@ void flightControl(void) {
     }
   }
 
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    writeMotors(); // Defined in Motors.h
-  }
+  if (armed == ON && safetyCheck == ON)
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
+    commandAllMotors(MINCOMMAND);
 }
 #endif
 
@@ -263,12 +259,12 @@ void flightControl(void) {
     }
   }
 
-  // *********************** Command Motors **********************
   if (armed == ON && safetyCheck == ON)
-    writeMotors(); 
-  else
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
     commandAllMotors(MINCOMMAND);
-  }
+}
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -330,15 +326,11 @@ void flightControl(void) {
     }
   }
 
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    writeMotors(); // Defined in Motors.h
-  }
+  if (armed == ON && safetyCheck == ON)
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
+    commandAllMotors(MINCOMMAND);
 }
 #endif
 
@@ -412,16 +404,12 @@ void flightControl(void) {
     }
   }
 
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    writeMotors(); // Defined in Motors.h
-  }
-} 
+  if (armed == ON && safetyCheck == ON)
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
+    commandAllMotors(MINCOMMAND);
+}
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -494,16 +482,12 @@ void flightControl(void) {
     }
   }
 
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    writeMotors(); // Defined in Motors.h
-  }
-} 
+  if (armed == ON && safetyCheck == ON)
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
+    commandAllMotors(MINCOMMAND);
+}
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -576,14 +560,10 @@ void flightControl(void) {
     }
   }
 
-  // ESC Calibration
-  if (armed == OFF) {
-    processCalibrateESC();
-  }
-
-  // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
-    writeMotors(); // Defined in Motors.h
-  }
-} 
+  if (armed == ON && safetyCheck == ON)
+    writeMotors();
+    
+  if (armed == OFF && escsCalibrating == OFF)
+    commandAllMotors(MINCOMMAND);
+}
 #endif

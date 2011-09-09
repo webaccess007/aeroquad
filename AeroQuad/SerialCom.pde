@@ -29,15 +29,14 @@
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
-#if !defined(I2C_ESC)
-  bool validateCalibrateCommand()
-  {
-    if ((readFloatSerial() == 123.45) & (armed == OFF))  // use a specific float value to validate full throttle call is being sent
-      return true;
-    else
-      return false;
-  }
-#endif
+
+bool validateCalibrateCommand(void)
+{
+  if (readFloatSerial() == 123.45 && armed == OFF)  // use a specific float value to validate full throttle call is being sent
+    return true;
+  else
+    return false;
+}
 
 void readSerialPID(unsigned char PIDid) {
   struct PIDdata* pid = &PID[PIDid];
@@ -107,28 +106,50 @@ void readSerialCommand() {
       
     #if !defined(I2C_ESC)
       case '1': // Calibrate ESCS's by setting MAXCOMMAND on all motors
-      	if (validateCalibrateCommand)
+      	if (validateCalibrateCommand())
+        {
+          SERIAL_PRINTLN("Setting MAXCOMMAND");
+          escsCalibrating = ON;
           commandAllMotors(MAXCOMMAND);
+        }
         break;
         
-      case '2': // Calibrate ESC's by setting MINICOMMAND on all motors
-      	if (validateCalibrateCommand);
+      case '2': // Calibrate ESC's by setting MINCOMMAND on all motors
+      	if (validateCalibrateCommand())
+        {
+          SERIAL_PRINTLN("Setting MINCOMMAND");
           commandAllMotors(MINCOMMAND);
+        }
         break;
         
       case '3': // Test ESC calibration
-        if (validateCalibrateCommand)
-          commandAllMotors(constrain(readFloatSerial(), MINCOMMAND, MAXCOMMAND));
-        break;
-    #endif
-        
-    case '5': // Send individual motor commands (motor, command)
-      if (validateCalibrateCommand) {
-        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+        if (validateCalibrateCommand())
         {
-          remoteMotorCommand[motor] = readFloatSerial();
-          motorCommand[motor] = constrain(remoteMotorCommand[motor], MINCOMMAND, MAXCOMMAND);
+          SERIAL_PRINTLN("Setting Test Command");
+          commandAllMotors(constrain(readFloatSerial(), MINCOMMAND, MINCOMMAND + 200));
         }
+        break;
+      #endif
+           
+    case '4': // Turn off ESC calibration
+      if (validateCalibrateCommand())
+      {
+	  SERIAL_PRINTLN("ESC Calibration Off");
+       escsCalibrating = OFF;
+      }
+      break;
+      
+    case '5': // Send individual motor commands (motor, command)
+      if (validateCalibrateCommand())
+      {
+        escsCalibrating = ON;
+        
+        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+          remoteMotorCommand[motor] = readFloatSerial();
+        
+        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+          motorCommand[motor] = constrain(remoteMotorCommand[motor], 1000, 1200);
+          
         writeMotors();
       }
       break;
@@ -241,18 +262,48 @@ void sendSerialTelemetry() {
   #endif
   
   case 'm': // Send Motor Commands 1 thru 4
-    #if (LASTMOTOR == 4)
-      PrintValueComma(motorCommand[0]);
-      PrintValueComma(motorCommand[1]);
-      PrintValueComma(motorCommand[2]);
-      SERIAL_PRINTLN(motorCommand[3]);
-    #else
-      PrintValueComma(motorCommand[0]);
-      PrintValueComma(motorCommand[1]);
-      PrintValueComma(motorCommand[2]);
-      PrintValueComma(motorCommand[3]);
-      PrintValueComma(motorCommand[4]);
-      SERIAL_PRINTLN(motorCommand[5]);
+    #if defined(__AVR_ATmega328P__) && !defined(I2C_ESC)
+      #if (LASTMOTOR == 4)
+        PrintValueComma(int(OCR2B)*16);
+        PrintValueComma(int(OCR1A)*16);
+        PrintValueComma(int(OCR1B)*16);
+        SERIAL_PRINTLN(int(OCR2A)*16);
+      #elif (LASTMOTOR == 6)
+        PrintValueComma(int(OCR2B)*16);
+        PrintValueComma(int(OCR1A)*16);
+        PrintValueComma(int(OCR1B)*16);
+        PrintValueComma(int(OCR2A)*16);
+        PrintValueComma(int(PWM_MOTOR4PIN_highState)*8);
+        SERIAL_PRINTLN(int(PWM_MOTOR5PIN_highState)*8);
+      #endif
+    #elif (defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)) && !defined(I2C_ESC)
+      #if (LASTMOTOR == 4)
+        PrintValueComma(int(OCR3B)/2);
+        PrintValueComma(int(OCR3C)/2);
+        PrintValueComma(int(OCR3A)/2);
+        SERIAL_PRINTLN(int(OCR4A)/2);
+      #elif (LASTMOTOR == 6)
+        PrintValueComma(int(OCR3B)/2);
+        PrintValueComma(int(OCR3C)/2);
+        PrintValueComma(int(OCR3A)/2);
+        PrintValueComma(int(OCR4A)/2);
+        PrintValueComma(int(OCR4B)/2);
+        SERIAL_PRINTLN(int(OCR4C)/2);
+      #elif (LASTMOTOR ==8)
+        PrintValueComma(int(OCR3B)/2);
+        PrintValueComma(int(OCR3C)/2);
+        PrintValueComma(int(OCR3A)/2);
+        PrintValueComma(int(OCR4A)/2);
+        PrintValueComma(int(OCR4B)/2);
+        PrintValueComma(int(OCR4C)/2);
+        PrintValueComma(int(OCR1A)/2);
+        SERIAL_PRINTLN(int(OCR1B)/2);
+      #endif
+    #elif defined(I2C_ESC)
+      for (byte motor = FIRSTMOTOR; motor < LASTMOTOR -1; motor++)
+        PrintValueComma(motorCommandI2C[motor] * 4 + 1000);
+        
+      SERIAL_PRINTLN(motorCommandI2C[LASTMOTOR] * 4 + 1000);
     #endif
     break;
   
@@ -318,6 +369,7 @@ void sendSerialTelemetry() {
     
   case '=': // Send Free Form Debug
     // What are you looking at?  And why?
+    SERIAL_PRINTLN((int)armed);
     break;
   }
 }
