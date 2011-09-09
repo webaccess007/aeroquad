@@ -26,28 +26,31 @@ void readPilotCommands() {
   // Read quad configuration commands from transmitter when throttle down
   if (receiverData[THROTTLE] < MINCHECK) {
     zeroIntegralError();
-    throttleAdjust = 0;
     // Disarm motors (left stick lower left corner)
-    if (receiverData[YAW] < MINCHECK && armed == ON) {
+    if (receiverData[YAW] < (MINCHECK - MIDCOMMAND) && armed == ON) {
       armed = OFF;
-      commandAllMotors(MINCOMMAND);
+      for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+        minCommand[motor] = MINCOMMAND;
     }    
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((receiverData[YAW] < MINCHECK) && (receiverData[ROLL] > MAXCHECK) && (receiverData[PITCH] < MINCHECK)) {
+    if ((receiverData[YAW]   < MINCHECK - MIDCOMMAND) && 
+        (receiverData[ROLL]  > MAXCHECK - MIDCOMMAND) && 
+        (receiverData[PITCH] < MINCHECK - MIDCOMMAND))
+    {
       computeGyroBias();
       computeAccelBias();
       zeroIntegralError();
       pulseMotors(3);
     }   
     // Arm motors (left stick lower right corner)
-    if (receiverData[YAW] > MAXCHECK && armed == OFF && safetyCheck == ON) {
+    if (receiverData[YAW] > (MAXCHECK - MIDCOMMAND) && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       armed = ON;
       for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
         minCommand[motor] = MINTHROTTLE;
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiverData[YAW] > MINCHECK) 
+    if (receiverData[YAW] > (MINCHECK - MIDCOMMAND)) 
     {
       safetyCheck = ON; 
     }
@@ -57,7 +60,7 @@ void readPilotCommands() {
     flightMode = ACRO;
   #else
     // Check Mode switch for Acro or Stable
-    if (receiverData[MODE] > 1500) {
+    if (receiverData[MODE] > MIDCOMMAND) {
       if (flightMode == ACRO) {
         #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2) || defined(AeroQuadMega_Wii)
           digitalWrite(LED2PIN, HIGH);
@@ -73,26 +76,6 @@ void readPilotCommands() {
       #endif
       flightMode = ACRO;
     }
-  #endif
-  
-  #ifdef AltitudeHold
-   if (receiver.getRaw(AUX) < 1750) {
-     if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-       if (storeAltitude == ON) {
-         holdAltitude = altitude.getData();
-         holdThrottle = receiver.getData(THROTTLE);
-         PID[ALTITUDE].integratedError = 0;
-         PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
-         storeAltitude = OFF;
-       }
-       altitudeHold = ON;
-     }
-     // note, Panic will stay set until Althold is toggled off/on
-   } 
-   else {
-     storeAltitude = ON;
-     altitudeHold = OFF;
-   }
   #endif
 }
 

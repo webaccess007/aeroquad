@@ -29,32 +29,38 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_Mini_FFIMUV2  // AeroQuad Mini Shield, Arduino Pro Mini, FFIMUv2
-#define AeroQuad_v18           // Arduino 2009 with AeroQuad Shield v1.8 or greater
+//#define AeroQuad_v18           // Arduino 2009 with AeroQuad Shield v1.8 or greater
 //#define AeroQuad_Mini          // Arduino Pro Mini with AeroQuad Mini Shield v1.0
-//#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
 
 /****************************************************************************
+ ************************* Define Interrupt Source **************************
+ ************************** 328p Processor Only *****************************
+ ****************************************************************************/
+ 
+//#define isrSourceIsITG3200  // Experimental, requires shield modifications
+ 
+ /****************************************************************************
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
 //#define quadPlusConfig
 #define quadXConfig
 //#define y4Config
-//#define hexPlusConfig
-//#define hexXConfig
-//#define y6Config
+//#define hexPlusConfig  // Only available for Mega Platforms or Platforms with I2C ESCs
+//#define hexXConfig     // Only available for Mega Platforms or Platforms with I2C ESCs
+//#define y6Config       // Only available for Mega Platforms or Platforms with I2C ESCs
 
 // *******************************************************************************************************************************
 // Define how many channels that are connected from your R/C receiver
-// Please note that the flight software currently only supports 6 channels, additional channels will be supported in the future
-// Additionally 8 receiver channels are only available when not using the Arduino Uno
+// Please note that the flight software currently only supports 6 channels
 // *******************************************************************************************************************************
 #define LASTCHANNEL 6
-//#define LASTCHANNEL 8
 
 #include <EEPROM.h>
 
 #include <TwiMaster.h>
+TwiMaster twiMaster;
 
 #include "AeroQuad.h"
 #include "PID.h"
@@ -67,35 +73,53 @@
   //#include "BMP085.h"
   #include <ITG3200.h>
   #include <HMC5883.h>
-  #include <Motors_PWMtimer_328_Gyro.h>
-  //#include <Motors_I2C.h>
-  #include <RX_PCINT_328_Gyro.h>
+  #if defined(isrSourceIsITG3200)
+    #include <RX_PCINT_328_Gyro.h>
+    #include <Motors_PWMtimer_328_Gyro.h>
+    //#include <Motors_I2C.h>
+  #else
+    #include <RX_PCINT_328.h>
+    #include <Motors_PWMtimer_328.h>
+    //#include <Motors_I2C.h>
+  #endif
 #endif
 
 #ifdef AeroQuad_v18
   #include <BMA180.h>
   #include <ITG3200.h>
-  #include <Motors_PWMtimer_328.h>
-  //#include <Motors_I2C.h>
-  #include <RX_PCINT_328.h>
+  #if defined(isrSourceIsITG3200)
+    #include <RX_PCINT_328_Gyro.h>
+    #include <Motors_PWMtimer_328_Gyro.h>
+    //#include <Motors_I2C.h>
+  #else
+    #include <RX_PCINT_328.h>
+    #include <Motors_PWMtimer_328.h>
+    //#include <Motors_I2C.h>
+  #endif
 #endif
 
 #ifdef AeroQuad_Mini
   #include <ADXL345.h>
   #include <ITG3200.h>
-  #include <Motors_PWMtimer_328_Gyro.h>
-  //#include <Motors_I2C.h>
-  #include <RX_PCINT_328_Gyro.h>
+  #if defined(isrSourceIsITG3200)
+    #include <RX_PCINT_328_Gyro.h>
+    #include <Motors_PWMtimer_328_Gyro.h>
+    //#include <Motors_I2C.h>
+  #else
+    #include <RX_PCINT_328.h>
+    #include <Motors_PWMtimer_328.h>
+    //#include <Motors_I2C.h>
+  #endif
 #endif
 
 #ifdef AeroQuadMega_v2
   #include <BMA180.h>
-  #include <BMP085.h>
+  //#include <BMP085.h>
   #include <ITG3200.h>
   #include <HMC5843.h>
+  #include <RX_PCINT_Mega.h>
   #include <Motors_PWMtimer_Mega.h>
   //#include <Motors_I2C.h>
-  #include <RX_PCINT_Mega.h>
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -117,9 +141,9 @@ union {float value[3];
 unsigned int isrFrameCounter = 1;
 unsigned int thisIsrFrame = 0;
 
-//#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if !(defined(isrSourceIsITG3200) && defined (__AVR_ATmega328P__))
   byte timer0countIndex;
-//#endif
+#endif
 
 //////////////////////////////////
 
@@ -127,10 +151,10 @@ unsigned int thisIsrFrame = 0;
 // ********************** Setup AeroQuad **********************
 // ************************************************************
 void setup() {
-  SERIAL_BEGIN(BAUD);
+  SERIAL_BEGIN(SERIAL_BAUD);
   Serial.println();
 
-  TwiMaster_init(false);         // Internal Pull Ups disabled
+  twiMaster.init(false);         // Internal Pull Ups disabled
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, LOW);
 
@@ -166,23 +190,6 @@ void setup() {
 
   initializeAHRS();
 
-  // Integral Limit for attitude mode
-  // This overrides default set in readEEPROM()
-  // Set for 1/2 max attitude command (+/-0.75 radians)
-  // Rate integral not used for now
-  PID[LEVELROLL].windupGuard = 0.375;
-  PID[LEVELPITCH].windupGuard = 0.375;
-
-  // Optional Sensors
-  #ifdef AltitudeHold
-    altitude.initialize();
-  #endif
-  
-  // Battery Monitor
-  #ifdef BattMonitor
-    batteryMonitor.initialize();
-  #endif
-  
   #if defined(BinaryWrite) || defined(BinaryWritePID)
     #ifdef OpenlogBinaryWrite
       binaryPort = &Serial1;
@@ -193,7 +200,6 @@ void setup() {
     #endif 
   #endif
   
-  previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
   safetyCheck = 0;
 
@@ -201,19 +207,17 @@ void setup() {
   
   ////////////////////////////////////////////////////////////////////////////////
   
-//  #if defined (__AVR_ATmega328P__)
-//    EICRA = 0x03;  // Set INT0 interrupt request on rising edge
-//    EIMSK = 0x01;  // Enable External Interrupt 0
-//  #endif
-//  
-//  #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #if (defined(isrSourceIsITG3200) && defined (__AVR_ATmega328P__))
+    EICRA = 0x03;  // Set INT0 interrupt request on rising edge
+    EIMSK = 0x01;  // Enable External Interrupt 0
+  #else
     TCCR0A = 0x00;                    // Normal port operation, OC0A, OC0B disconnected
   
     timer0countIndex = 0;
     OCR0A = TCNT0 + TIMER0_COUNT0;
     
     TIMSK0 |= (1<<OCIE0A);            // Enable Timer/Counter0 Output Compare A Match Interrupt
-//  #endif
+  #endif
   
   //////////////////////////////////////////////////////////////////////////////// 
 }
@@ -221,7 +225,7 @@ void setup() {
 void loop () {
   if (((isrFrameCounter % BACKGROUND_COUNT) == 0) && (isrFrameCounter != thisIsrFrame))
   {
-//    long t1 = micros();
+    //long t1 = micros();
     
     thisIsrFrame = isrFrameCounter;
     
@@ -300,57 +304,54 @@ void loop () {
       readSerialCommand();
       sendSerialTelemetry();
     }
-
-//    Serial.println(micros()-t1);
+    //Serial.println(micros()-t1);
   }
 }
 
-//#if defined (__AVR_ATmega328P__)
-//  ////////////////////////////////////////////////////////////////////////////////
-//  // Interrupt Service Routine - INT0
-//  ////////////////////////////////////////////////////////////////////////////////
-//  ISR(INT0_vect, ISR_NOBLOCK)
-//  {  
-//    readAccel();
-//    
-//    readGyro();
-//    
-//    #if defined(HMC5843) | defined(HMC5883)
-//      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
-//        readCompass();
-//        newMagData = 1;
-//      }
-//    #endif
-//    
-//    #if defined(BMP085)
-//      if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0)
-//      {
-//        if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
-//        else if (isrFrameCounter == (ISR_FRAME_COUNT-1)) readPressureRequestTemperature();
-//        else readPressureRequestPressure();
-//      }
-//    #endif
-//    
-//    isrFrameCounter++;
-//    if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
-//    
-//    #if defined(I2C_ESC)
-//      // If using I2C ESCs, check for updated motor commands and
-//      //   write them out if present.
-//      if (sendMotorCommands == 1)
-//      {
-//        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-//        {
-//          twiMaster.start(MOTORBASE + motor | I2C_WRITE);
-//          twiMaster.write(motorCommandI2C[motor]);
-//        }
-//        sendMotorCommands == 0;
-//      }
-//    #endif
-//  }
-//#endif
-
-//#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if (defined(isrSourceIsITG3200) && defined (__AVR_ATmega328P__))
+  ////////////////////////////////////////////////////////////////////////////////
+  // Interrupt Service Routine - INT0
+  ////////////////////////////////////////////////////////////////////////////////
+  ISR(INT0_vect, ISR_NOBLOCK)
+  {  
+    readAccel();
+    
+    readGyro();
+    
+    #if defined(HMC5843) | defined(HMC5883)
+      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
+        readCompass();
+        newMagData = 1;
+      }
+    #endif
+    
+    #if defined(BMP085)
+      if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0)
+      {
+        if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
+        else if (isrFrameCounter == (ISR_FRAME_COUNT-1)) readPressureRequestTemperature();
+        else readPressureRequestPressure();
+      }
+    #endif
+    
+    isrFrameCounter++;
+    if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
+    
+    #if defined(I2C_ESC)
+      // If using I2C ESCs, check for updated motor commands and
+      //   write them out if present.
+      if (sendMotorCommands == 1)
+      {
+        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+        {
+          twiMaster.start(MOTORBASE + motor | I2C_WRITE);
+          twiMaster.write(motorCommandI2C[motor]);
+        }
+        sendMotorCommands == 0;
+      }
+    #endif
+  }
+#else
   ////////////////////////////////////////////////////////////////////////////////
   // Interrupt Service Routine - TIMER0_COMPA
   //   Due to the limitations of the 8 bit counter, this ISR fires twice
@@ -367,6 +368,21 @@ void loop () {
     {
       OCR0A = TCNT0 + TIMER0_COUNT1;  // Load 2nd count
       timer0countIndex = 1;           // Indicate 2nd count active
+      
+      #if defined(I2C_ESC)
+        // If using I2C ESCs, check for updated motor commands and
+        //   write them out if present.
+        if (sendMotorCommands == 1)
+        {
+          for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+          {
+            twiMaster.start(MOTORBASE + motor | I2C_WRITE);
+            twiMaster.write(motorCommandI2C[motor]);
+          }
+          sendMotorCommands == 0;
+        }
+      #endif
+      
       return;                         // And return from ISR
     }
     else {                            // Else 2nd count complete
@@ -394,21 +410,8 @@ void loop () {
       
       isrFrameCounter++;
       if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
-      
-      #if defined(I2C_ESC)
-        // If using I2C ESCs, check for updated motor commands and
-        //   write them out if present.
-        if (sendMotorCommands == 1)
-        {
-          for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-          {
-            twiMaster.start(MOTORBASE + motor | I2C_WRITE);
-            twiMaster.write(motorCommandI2C[motor]);
-          }
-          sendMotorCommands == 0;
-        }
-      #endif
     }
   }
-//#endif
+#endif
+
 

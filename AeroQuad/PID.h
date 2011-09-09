@@ -18,47 +18,57 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// Modified from http://www.arduino.cc/playground/Main/BarebonesPIDForEspresso
-float updatePID(float targetPosition, float currentPosition, struct PIDdata *PIDparameters) {
+/******************************************************/
+
+// PID Variables
+struct PIDdata {
+  boolean firstPass;
+  float   P, I, D;
+  float   iTerm;
+  float   windupGuard;
+  float   lastState;
+} PID[LAST_PID];
+
+/******************************************************/
+
+float updatePID(float command, float state, float deltaT, struct PIDdata *PIDparameters) {
   float error;
   float dTerm;
-  // AKA PID experiments
-  float deltaPIDTime = (currentTime - PIDparameters->previousPIDTime) / 1000000.0;
 
-  PIDparameters->previousPIDTime = currentTime;  // AKA PID experiments
-  error = targetPosition - currentPosition;
-
-// AKA PID experiments
-// special case of +/- PI
-/*
-  if (PIDparameters->typePID == TYPEPI) {
-    if (error >= PI) error -= (2*PI);
-    if (error < -PI) error += (2*PI);
-  }
-*/    
-  
-  if (PIDparameters->firstPass) { // AKA PID experiments
+  if (PIDparameters->firstPass) {
     PIDparameters->firstPass = false;
-    return (constrain(error, -PIDparameters->windupGuard, PIDparameters->windupGuard));
+    PIDparameters->lastState = state;
   }
 
-  PIDparameters->integratedError += error * deltaPIDTime;
-  PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);
-  
-  dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastPosition) / (deltaPIDTime * 100); // dT fix from Honk
+  error = command - state;
 
-  PIDparameters->lastPosition = currentPosition;
+  PIDparameters->iTerm += error * deltaT;
+  PIDparameters->iTerm = constrain(PIDparameters->iTerm, -PIDparameters->windupGuard, PIDparameters->windupGuard);
   
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->integratedError)) + dTerm;
+  dTerm = (state - PIDparameters->lastState) / deltaT;
+
+  PIDparameters->lastState = state;
+  
+  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->iTerm)) - (PIDparameters->D * dTerm);
 }
+
+/******************************************************/
+
+void setIntegralError(byte IDPid, float value)
+{
+  PID[IDPid].iTerm = value;
+}
+
+/******************************************************/
 
 void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (byte axis = ROLL; axis < LASTLEVELAXIS; axis++) {
-    PID[axis].integratedError = 0;
-    PID[axis].previousPIDTime = currentTime;
+  for (byte axis = ROLL; axis < LAST_PID; axis++) {
+    setIntegralError(axis, 0.0);
   }
 }
+
+/******************************************************/
 
 
 

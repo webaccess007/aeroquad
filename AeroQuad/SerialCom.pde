@@ -29,30 +29,24 @@
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
-bool validateCalibrateCommand(byte command)
-{
-  if (readFloatSerial() == 123.45) {// use a specific float value to validate full throttle call is being sent
-    armed = OFF;
-    calibrateESC = command;
-    return true;
-  } else {
-    calibrateESC = 0;
-    testCommand = 1000;
-    return false;
+#if !defined(I2C_ESC)
+  bool validateCalibrateCommand()
+  {
+    if ((readFloatSerial() == 123.45) & (armed == OFF))  // use a specific float value to validate full throttle call is being sent
+      return true;
+    else
+      return false;
   }
-}
+#endif
 
 void readSerialPID(unsigned char PIDid) {
   struct PIDdata* pid = &PID[PIDid];
   pid->P = readFloatSerial();
   pid->I = readFloatSerial();
   pid->D = readFloatSerial();
-  pid->lastPosition = 0;
-  pid->integratedError = 0;
-  if (PIDid == HEADING)
-    pid->typePID = TYPEPI;
-  else
-    pid->typePID = NOTYPE;
+  pid->windupGuard = readFloatSerial();
+  pid->lastState = 0;
+  pid->iTerm = 0;
   pid->firstPass = true;
 }
 
@@ -63,154 +57,81 @@ void readSerialCommand() {
     queryType = SERIAL_READ();
     switch (queryType) {
     
-    case 'A': // Receive roll and pitch gyro PID
-      readSerialPID(ROLL);
-      readSerialPID(PITCH);
+    case 'A':  // Receive Roll Rate PID values
+      readSerialPID(ROLL_RATE_PID);
+      break;
+    
+    case 'B':  // Receive Pitch Rate PID values
+      readSerialPID(PITCH_RATE_PID);
+      break;
+      
+    case 'C':  // Receive Yaw Rate PID values
+      readSerialPID(YAW_RATE_PID);
+      break;
+      
+    case 'D':  // Receive minAcro value
       minAcro = readFloatSerial();
       break;
       
-    case 'C': // Receive yaw PID
-      readSerialPID(YAW);
-      readSerialPID(HEADING);
-      headingHoldConfig = readFloatSerial();
-      heading = 0;
-      relativeHeading = 0;
-      headingHold = 0;
+    case 'E':  // Receive Roll Attitude PID values
+      readSerialPID(ROLL_ATT_PID);
       break;
       
-    case 'E': // Receive roll and pitch auto level PID
-      readSerialPID(LEVELROLL);
-      readSerialPID(LEVELPITCH);
-      readSerialPID(LEVELGYROROLL);
-      readSerialPID(LEVELGYROPITCH);
-      windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
+    case 'F':  // Receive Pitch Attitude PID values
+      readSerialPID(PITCH_ATT_PID);
       break;
       
-    case 'G': // *** Spare ***
-      // Spare command
+    case 'G':  // Receive Heading PID values
+      readSerialPID(HEADING_PID);
       break;
-      
-    case 'I': // Receiver altitude hold PID
-#ifdef AltitudeHold
-      readSerialPID(ALTITUDE);
-      PID[ALTITUDE].windupGuard = readFloatSerial();
-      minThrottleAdjust = readFloatSerial();
-      maxThrottleAdjust = readFloatSerial();
-      altitude.setSmoothFactor(readFloatSerial());
-      readSerialPID(ZDAMPENING);
-#endif
-      break;
-      
-    case 'K': // Receive data filtering values
-      float temp;
-      temp = readFloatSerial(); // HJI gyro.setSmoothFactor(readFloatSerial());
-      temp = readFloatSerial(); // HJI accel.setSmoothFactor(readFloatSerial());
-      temp = readFloatSerial(); // HJI timeConstant = readFloatSerial();
-      aref = readFloatSerial();
-      break;
-      
-    case 'M': // Receive transmitter smoothing values
-      temp = readFloatSerial(); // HJI receiver.setXmitFactor(readFloatSerial());
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        temp = readFloatSerial(); // receiver.setSmoothFactor(channel, readFloatSerial());
-      }
-      break;
-      
-    case 'O': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
-        temp = readFloatSerial(); // HJI receiver.setTransmitterSlope(channel, readFloatSerial());
-        temp = readFloatSerial(); // HJI receiver.setTransmitterOffset(channel, readFloatSerial());
-      }
-      break;
-      
-    case 'W': // Write all user configurable values to EEPROM
-      writeEEPROM(); // defined in DataStorage.h
-      zeroIntegralError();
-      break;
-      
-    case 'Y': // Initialize EEPROM with default values
+
+    case 'I': // Initialize EEPROM with default values
       initializeEEPROM();
       computeGyroBias();
       computeAccelBias();
       zeroIntegralError();
       break;
       
-    case '1': // Calibrate ESCS's by setting Throttle high on all channels
-    	validateCalibrateCommand(1);
-      break;
-      
-    case '2': // Calibrate ESC's by setting Throttle low on all channels
-    	validateCalibrateCommand(2);
-      break;
-      
-    case '3': // Test ESC calibration
-      if (validateCalibrateCommand(3))
-      {
-        testCommand = readFloatSerial();
-      }
-      break;
-      
-    case '4': // Turn off ESC calibration
-      if (validateCalibrateCommand(4))
-      {
-	      calibrateESC = 0;
-	      testCommand = 1000;
-      }
-      break;
-      
-    case '5': // Send individual motor commands (motor, command)
-      if (validateCalibrateCommand(5)) {
-        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-          remoteMotorCommand[motor] = readFloatSerial();
-      }
-      break;
-      
-    case 'a': // fast telemetry transfer
-      if (readFloatSerial() == 1.0)
-        fastTransfer = ON;
-      else
-        fastTransfer = OFF;
-      break;
-      
-    case 'b': // calibrate gyros
+    case 'K': // calibrate gyros
       computeGyroBias();
       break;
       
-    case 'c': // calibrate accels
+    case 'L': // calibrate accels
       computeAccelBias();
+      break;     
+
+    case 'W': // Write all user configurable values to EEPROM
+      writeEEPROM(); // defined in DataStorage.h
+      zeroIntegralError();
       break;
       
-    case 'd': // *** Spare ***
-      // Spare command
-      break;
-      
-    case 'f': // calibrate magnetometer
-      #ifdef HeadingMagHold
-        for (byte axis = XAXIS; axis < LASTAXIS; axis++)
-       {
-          compass.setMagCal(axis, readFloatSerial(), readFloatSerial());
+    #if !defined(I2C_ESC)
+      case '1': // Calibrate ESCS's by setting MAXCOMMAND on all motors
+      	if (validateCalibrateCommand)
+          commandAllMotors(MAXCOMMAND);
+        break;
+        
+      case '2': // Calibrate ESC's by setting MINICOMMAND on all motors
+      	if (validateCalibrateCommand);
+          commandAllMotors(MINCOMMAND);
+        break;
+        
+      case '3': // Test ESC calibration
+        if (validateCalibrateCommand)
+          commandAllMotors(constrain(readFloatSerial(), MINCOMMAND, MAXCOMMAND));
+        break;
+    #endif
+        
+    case '5': // Send individual motor commands (motor, command)
+      if (validateCalibrateCommand) {
+        for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
+        {
+          remoteMotorCommand[motor] = readFloatSerial();
+          motorCommand[motor] = constrain(remoteMotorCommand[motor], MINCOMMAND, MAXCOMMAND);
         }
-      #endif
+        writeMotors();
+      }
       break;
-      
-    case '~': //  read Camera values
-      #ifdef Camera
-        camera.setMode(readFloatSerial());
-        camera.setCenterPitch(readFloatSerial());
-        camera.setCenterRoll(readFloatSerial());
-        camera.setCenterYaw(readFloatSerial());
-        camera.setmCameraPitch(readFloatSerial());
-        camera.setmCameraRoll(readFloatSerial());
-        camera.setmCameraYaw(readFloatSerial());
-        camera.setServoMinPitch(readFloatSerial());
-        camera.setServoMinRoll(readFloatSerial());
-        camera.setServoMinYaw(readFloatSerial());
-        camera.setServoMaxPitch(readFloatSerial());
-        camera.setServoMaxRoll(readFloatSerial());
-        camera.setServoMaxYaw(readFloatSerial());
-      #endif
-      break;
-      
     }
     digitalWrite(LEDPIN, HIGH);
   }
@@ -246,278 +167,158 @@ void PrintValueComma(unsigned long val)
   comma();
 }
 
-void PrintPID(unsigned char IDPid)
+void printPID(unsigned char IDPid)
 {
   PrintValueComma(PID[IDPid].P);
   PrintValueComma(PID[IDPid].I);
   PrintValueComma(PID[IDPid].D);
+  SERIAL_PRINTLN(PID[IDPid].windupGuard);
 }
 
 void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   
-  case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(flightAngle->getData(ROLL));
-    //SERIAL_PRINT(degrees(flightAngle->getData(YAW)));
-    //SERIAL_PRINTLN();
-    //printFreeMemory();
-    //queryType = 'X';
+  case 'a':  // Send Roll Rate PID values
+    printPID(ROLL_RATE_PID);
+    queryType = 'x';
     break;
     
-  case 'B': // Send roll and pitch gyro PID values
-    PrintPID(ROLL);
-    PrintPID(PITCH);
+  case 'b':  // Send Pitch Rate PID values
+    printPID(PITCH_RATE_PID);
+    queryType = 'x';
+    break;
+    
+  case 'c':  // Send Yaw Rate PID values
+    printPID(YAW_RATE_PID);
+    queryType = 'x';
+    break;
+    
+  case 'd':  // Send minAcro
     SERIAL_PRINTLN(minAcro);
-    queryType = 'X';
+    queryType = 'x';
     break;
     
-  case 'D': // Send yaw PID values
-    PrintPID(YAW);
-    PrintPID(HEADING);
-    SERIAL_PRINTLN((int)headingHoldConfig);
-    queryType = 'X';
+  case 'e':  // Send Roll Attiude PID values
+    printPID(ROLL_ATT_PID);
+    queryType = 'x';
     break;
     
-  case 'F': // Send roll and pitch auto level PID values
-    PrintPID(LEVELROLL);
-    PrintPID(LEVELPITCH);
-    PrintPID(LEVELGYROROLL);
-    PrintPID(LEVELGYROPITCH);
-    SERIAL_PRINTLN(windupGuard);
-    queryType = 'X';
+  case 'f':  // Send Pitch Attitude PID values
+    printPID(PITCH_ATT_PID);
+    queryType = 'x';
     break;
     
-  case 'H': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
+  case 'g':  // Send Heading PID values
+    printPID(HEADING_PID);
+    queryType = 'x';
     break;
     
-  case 'J': // Altitude Hold
-    #ifdef AltitudeHold
-      PrintPID(ALTITUDE);
-      PrintValueComma(PID[ALTITUDE].windupGuard);
-      PrintValueComma(minThrottleAdjust);
-      PrintValueComma(maxThrottleAdjust);
-      PrintValueComma(altitude.getSmoothFactor());
-      PrintPID(ZDAMPENING);
+  case 'h': // Send Filtered Accels
+    PrintValueComma(filteredAccel.value[XAXIS]);
+    PrintValueComma(filteredAccel.value[YAXIS]);
+    SERIAL_PRINTLN(filteredAccel.value[ZAXIS]);
+    break;
+    
+  case 'i': // Send Rate Gyros
+    PrintValueComma(gyro.value[ROLL]  * 57.3);
+    PrintValueComma(gyro.value[PITCH] * 57.3);
+    SERIAL_PRINTLN(gyro.value[YAW]    * 57.3);
+    break;
+    
+  case 'j': // Send Attitudes
+    PrintValueComma(angle.value[ROLL]  * 57.3);
+    PrintValueComma(angle.value[PITCH] * 57.3);
+    SERIAL_PRINTLN(angle.value[YAW]    * 57.3);
+    break;
+    
+  #if defined(HMC5843) | defined(HMC5883)
+  case 'k': // Send Raw Mag
+    PrintValueComma(mag.value[XAXIS]);
+    PrintValueComma(mag.value[YAXIS]);
+    SERIAL_PRINTLN(mag.value[ZAXIS]);
+    break;
+  #endif
+  
+  case 'm': // Send Motor Commands 1 thru 4
+    #if (LASTMOTOR == 4)
+      PrintValueComma(motorCommand[0]);
+      PrintValueComma(motorCommand[1]);
+      PrintValueComma(motorCommand[2]);
+      SERIAL_PRINTLN(motorCommand[3]);
     #else
-      for(byte i=0; i<10; i++)
-      {
-        PrintValueComma(0);
-      }
+      PrintValueComma(motorCommand[0]);
+      PrintValueComma(motorCommand[1]);
+      PrintValueComma(motorCommand[2]);
+      PrintValueComma(motorCommand[3]);
+      PrintValueComma(motorCommand[4]);
+      SERIAL_PRINTLN(motorCommand[5]);
     #endif
-    SERIAL_PRINTLN();
-    queryType = 'X';
+    break;
+  
+  case 'n': // Send Motor Axis Commands
+    PrintValueComma(motorAxisCommand[ROLL]);
+    PrintValueComma(motorAxisCommand[PITCH]);
+    SERIAL_PRINTLN(motorAxisCommand[YAW]);
     break;
     
-  case 'L': // Send data filtering values
-    PrintValueComma(1); // HJI gyro.getSmoothFactor());
-    PrintValueComma(1); // HJI accel.getSmoothFactor());
-    PrintValueComma(1); // HJI timeConstant);
-    SERIAL_PRINTLN(aref);
-    queryType = 'X';
+  case 'r': // Send Receiver Commands 1 thru 5
+    PrintValueComma(receiverData[ROLL]);
+    PrintValueComma(receiverData[PITCH]);
+    PrintValueComma(receiverData[YAW]);
+    PrintValueComma(receiverData[THROTTLE]);
+    SERIAL_PRINTLN(receiverData[MODE]);
+    
+  case 'x': // Stop sending messages
     break;
-    
-  case 'N': // Send transmitter smoothing values
-    PrintValueComma(1); // HJI receiver.getXmitFactor());
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
-    {
-      PrintValueComma(1); // HJI receiver.getSmoothFactor(axis));
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-    
-  case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
-    {
-      PrintValueComma(1); // HJI receiver.getTransmitterSlope(axis));
-      PrintValueComma(0); // HJI receiver.getTransmitterOffset(axis));
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-    
-  case 'Q': // Send sensor data
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-    {
-      PrintValueComma(gyro.value[axis]);
-    }
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++)
-    {
-      PrintValueComma(filteredAccel.value[axis]);
-    }
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++)
-    {
-      #if defined(HMC5843) | defined(HMC5883)
-        PrintValueComma(mag.value[axis]);
-      #else
-        PrintValueComma(0);
-      #endif
-    }
-    PrintValueComma(degrees(angle.value[ROLL]));
-    PrintValueComma(degrees(angle.value[PITCH]));
-    SERIAL_PRINTLN (degrees(angle.value[YAW]));
-    
-//    Serial.write(gyro.bytes, 12);
-//    Serial.write(filteredAccel.bytes, 12);
-//    Serial.write(mag.bytes, 12);
-//    Serial.write(angle.bytes, 12);
 
-    break;
-    
-  case 'R': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
-    break;
-    
-  case 'S': // Send all flight data
-    PrintValueComma(deltaTime);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      PrintValueComma(gyro.value[axis]); // HJI gyro.getFlightData(axis));
-    for (byte axis = ROLL; axis < LASTAXIS; axis++)
-      PrintValueComma(filteredAccel.value[axis]); // HJI accel.getFlightData(axis));
-    #ifdef BattMonitor
-      PrintValueComma(batteryMonitor.getData());
-    #else
-      PrintValueComma(0);
-    #endif
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++)
-      PrintValueComma(motorCommand[motor]);
-    PrintValueComma((int)armed);
-    if (flightMode == STABLE)
-      PrintValueComma(2000);
-    if (flightMode == ACRO)
-      PrintValueComma(1000);
-    PrintValueComma(angle.value[YAW]); // HJI gyro.getHeading());
-    #ifdef AltitudeHold
-      PrintValueComma(altitude.getData());
-      SERIAL_PRINTLN((int)altitudeHold);
-    #else
-      PrintValueComma(0);
-      SERIAL_PRINTLN('0');
-    #endif
-    break;
-    
-  case 'T': // Send processed transmitter values *** UPDATE ***
-    PrintValueComma(1); // HJI receiver.getXmitFactor());
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(receiverData[axis]);
-    }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-      PrintValueComma(motorAxisCommand[axis]);
-    }
-    SERIAL_PRINTLN();
-    break;
-    
-  case 'U': // Send smoothed receiver with Transmitter Factor applied values
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiverData[channel]);
-    }
-    SERIAL_PRINTLN();
-    break;
-  case 'V': // Send receiver status
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-      PrintValueComma(receiverData[channel]);
-    }
-    SERIAL_PRINTLN();
-    break;
-    
-  case 'X': // Stop sending messages
-    break;
-  case 'Z': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
-    break;
-    
-  case '6': // Report remote commands
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      PrintValueComma(remoteMotorCommand[motor]);
-    }
-    SERIAL_PRINTLN();
-    queryType = 'X';
-    break;
-    
-  case '!': // Send flight software version
+  case 'z': // Send flight software version
     SERIAL_PRINTLN(VERSION, 1);
-    queryType = 'X';
-    break;
-    
-  case '#': // Send software configuration
-    // Determine which hardware is used to define max/min sensor values for Configurator plots
     #if defined(AeroQuad_v18)
-      PrintValueComma(2);
+      SERIAL_PRINTLN("V18");
     #elif defined(AeroQuadMega_v2)
-      PrintValueComma(3);
+      SERIAL_PRINTLN("V2");
     #elif defined(AeroQuad_Mini) | defined(AeroQuad_Mini_FFIMUV2)
-      PrintValueComma(2);
+      SERIAL_PRINTLN("Mini");
     #endif
-    // Determine which motor flight configuration for Configurator GUI
     #if defined(quadPlusConfig)
-      PrintValueComma('0');
+      SERIAL_PRINTLN("Quad +");
     #elif defined(quadXConfig)
-      PrintValueComma('1');
-    #elif defined(HEXACOAXIAL)
-      PrintValueComma('2');
-    #elif defined(HEXARADIAL)
-      PrintValueComma('3');
-    #endif
-    PrintValueComma(LASTCHANNEL);
-    SERIAL_PRINTLN(LASTMOTOR);
-    queryType = 'X';
-    break;
-    
-  case 'e': // *** Spare ***
-    // Spare telemetry
-    //PrintValueComma(0);
-    //SERIAL_PRINTLN(0);
-    //queryType = 'X';
-    break;
-    
-  case 'g': // Send magnetometer cal values
-    #ifdef HeadingMagHold
-      // dirty trick to disable compiler loop unrolling
-      //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-      for (byte axis = XAXIS; axis < 99; axis++) {
-        if(axis == LASTAXIS)
-          break;
-        PrintValueComma(compass.getMagMax(axis));
-        PrintValueComma(compass.getMagMin(axis));
-      }
-      SERIAL_PRINTLN();
+      SERIAL_PRINTLN("Quad X");
+    #elif defined(y4Config)
+      SERIAL_PRINTLN("Y4");
+    #elif defined(hexPlusConfig)
+      SERIAL_PRINTLN("Hex +");
+    #elif defined(hexXConfig)
+      SERIAL_PRINTLN("Hex X");
+    #elif defined(y6Config)
+      SERIAL_PRINTLN("Y6");
     #endif
     queryType = 'X';
     break;
     
-  case '`': // Send Camera values
-    #ifdef Camera
-      PrintValueComma(camera.getMode());
-      PrintValueComma(camera.getCenterPitch());
-      PrintValueComma(camera.getCenterRoll());
-      PrintValueComma(camera.getCenterYaw());
-      PrintValueComma(camera.getmCameraPitch(), 2);
-      PrintValueComma(camera.getmCameraRoll(), 2);
-      PrintValueComma(camera.getmCameraYaw(), 2);
-      PrintValueComma(camera.getServoMinPitch());
-      PrintValueComma(camera.getServoMinRoll());
-      PrintValueComma(camera.getServoMinYaw());
-      PrintValueComma(camera.getServoMaxPitch());
-      PrintValueComma(camera.getServoMaxRoll());
-      SERIAL_PRINTLN(camera.getServoMaxYaw());
-    #else
-      for (byte index=0; index < 13; index++)
-        PrintValueComma(0);
-      SERIAL_PRINTLN();
-    #endif
-    break;
+  #if !defined(I2C_ESC)
+    case '6': // Report remote commands
+      #if (LASTMOTOR == 4)
+        PrintValueComma(remoteMotorCommand[0]);
+        PrintValueComma(remoteMotorCommand[1]);
+        PrintValueComma(remoteMotorCommand[2]);
+        SERIAL_PRINTLN(remoteMotorCommand[3]);
+      #else
+        PrintValueComma(remoteMotorCommand[0]);
+        PrintValueComma(remoteMotorCommand[1]);
+        PrintValueComma(remoteMotorCommand[2]);
+        PrintValueComma(remoteMotorCommand[3]);
+        PrintValueComma(remoteMotorCommand[4]);
+        SERIAL_PRINTLN(remoteMotorCommand[5]);
+      #endif
+      queryType = 'X';
+      break;
+  #endif
     
+  case '=': // Send Free Form Debug
+    // What are you looking at?  And why?
+    break;
   }
 }
 
@@ -548,90 +349,6 @@ void comma() {
   SERIAL_PRINT(',');
 }
 
-void printInt(int data) {
-  byte msb, lsb;
 
-  msb = data >> 8;
-  lsb = data & 0xff;
 
-  binaryPort->print(msb, BYTE);
-  binaryPort->print(lsb, BYTE);
-}
 
-void sendBinaryFloat(float data) {
-  union binaryFloatType {
-    byte floatByte[4];
-    float floatVal;
-  } binaryFloat;
-
-  binaryFloat.floatVal = data;
-  binaryPort->print(binaryFloat.floatByte[3], BYTE);
-  binaryPort->print(binaryFloat.floatByte[2], BYTE);
-  binaryPort->print(binaryFloat.floatByte[1], BYTE);
-  binaryPort->print(binaryFloat.floatByte[0], BYTE);
-}
-
-void sendBinaryuslong(unsigned long data) {
-  union binaryuslongType {
-    byte uslongByte[4];
-    unsigned long uslongVal;
-  } binaryuslong;
-
-  binaryuslong.uslongVal = data;
-  binaryPort->print(binaryuslong.uslongByte[3], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[2], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[1], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[0], BYTE);
-}
-
-#ifdef BinaryWrite
-void fastTelemetry(void)
-{
-  // **************************************************************
-  // ***************** Fast Transfer Of Sensor Data ***************
-  // **************************************************************
-  // AeroQuad.h defines the output rate to be 10ms
-  // Since writing to UART is done by hardware, unable to measure data rate directly
-  // Through analysis:  115200 baud = 115200 bits/second = 14400 bytes/second
-  // If float = 4 bytes, then 3600 floats/second
-  // If 10 ms output rate, then 36 floats/10ms
-  // Number of floats written using sendBinaryFloat is 15
-
-  if (armed == ON) {
-    #ifdef OpenlogBinaryWrite
-       printInt(21845); // Start word of 0x5555
-       sendBinaryuslong(currentTime);
-//        printInt((int)flightMode);
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-//        sendBinaryFloat(accel.accelOneG);
-       #ifdef HeadingMagHold
-//          sendBinaryFloat(compass.hdgX);
-//          sendBinaryFloat(compass.hdgY);
-           sendBinaryFloat(compass.getRawData(XAXIS));
-           sendBinaryFloat(compass.getRawData(YAXIS));
-           sendBinaryFloat(compass.getRawData(ZAXIS));
-       #else
-         sendBinaryFloat(0.0);
-         sendBinaryFloat(0.0);
-//          sendBinaryFloat(0.0);
-       #endif
-//        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-       printInt(32767); // Stop word of 0x7FFF
-    #else
-       printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro.getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel.getData(axis));
-       for (byte axis = ROLL; axis < LASTAXIS; axis++)
-       #ifdef HeadingMagHold
-         sendBinaryFloat(compass.getRawData(axis));
-       #else
-         sendBinaryFloat(0);
-       #endif
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getGyroUnbias(axis));
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(flightAngle->getData(axis));
-       printInt(32767); // Stop word of 0x7FFF
-    #endif
-  }
-}
-#endif
