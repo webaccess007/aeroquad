@@ -29,9 +29,9 @@
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
 //#define AeroQuad_Mini_FFIMUV2  // AeroQuad Mini Shield, Arduino Pro Mini, FFIMUv2
-//#define AeroQuad_v18           // Arduino 2009 with AeroQuad Shield v1.8 or greater
+#define AeroQuad_v18           // Arduino 2009 with AeroQuad Shield v1.8 or greater
 //#define AeroQuad_Mini          // Arduino Pro Mini with AeroQuad Mini Shield v1.0
-#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
 
 /****************************************************************************
  ************************* Define Interrupt Source **************************

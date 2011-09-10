@@ -68,6 +68,7 @@
 
 /******************************************************/
 
+boolean escsCalibrating = OFF;
 int motorAxisCommand[3];
 int motorCommand[LASTMOTOR];
 int minCommand[LASTMOTOR];
