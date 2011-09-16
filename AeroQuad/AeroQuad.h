@@ -192,12 +192,13 @@ unsigned long receiverPreviousTime = 0;
 unsigned long receiverDeltaTime = 0;
 unsigned long serialCommPreviousTime = 0;
 unsigned long serialCommDeltaTime = 0;
+unsigned long altitudeProcessPreviousTime = 0;
+unsigned long altitudeProcessDeltaTime = 0;
+
 
 #ifdef AltitudeHold
   unsigned long baroReadPreviousTime = 0;
   unsigned long baroReadDeltaTime = 0;
-  unsigned long altitudeProcessPreviousTime = 0;
-  unsigned long altitudeProcessDeltaTime = 0;
 #endif  
 #ifdef HeadingMagHold
   unsigned long magReadPreviousTime = 0;

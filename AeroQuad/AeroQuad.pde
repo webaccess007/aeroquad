@@ -31,11 +31,11 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Congig
 //#define octoPlusCongig  // not yet implemented
 //#define octoXCongig
@@ -63,8 +63,8 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
@@ -1053,9 +1053,9 @@ void setup() {
 
   receiverPreviousTime = micros();
   serialCommPreviousTime = micros();
+  altitudeProcessPreviousTime = micros();
   #ifdef AltitudeHold
     baroReadPreviousTime = micros();  
-    altitudeProcessPreviousTime = micros();;  
   #endif
   #ifdef HeadingMagHold
     magReadPreviousTime = micros();  
@@ -1094,7 +1094,6 @@ void loop () {
   currentTime = micros();
   
   flightControlDeltaTime = currentTime - flightControlPreviousTime;
-  
   
   measureCriticalSensors();
   
@@ -1174,63 +1173,56 @@ void loop () {
   // ================================================================
   // 50hz task loop
   // ================================================================
-  receiverDeltaTime = currentTime - receiverPreviousTime;
   serialCommDeltaTime = currentTime - serialCommPreviousTime;
-  #ifdef AltitudeHold
-    baroReadDeltaTime = currentTime - baroReadPreviousTime;  
-    altitudeProcessDeltaTime = currentTime - altitudeProcessPreviousTime;  
-  #endif
-  #ifdef HeadingMagHold
-    magReadDeltaTime = currentTime - magReadPreviousTime;  
-  #endif
-  #ifdef BattMonitor
-    batteryReadDeltaTime = currentTime - batteryReadPreviousTime;  
-  #endif
-  #ifdef MAX7456_OSD
-    osdReadDeltaTime = currentTime - osdReadPreviousTime;
-  #endif
-
+  altitudeProcessDeltaTime = currentTime - altitudeProcessPreviousTime; 
+  receiverDeltaTime = currentTime - receiverPreviousTime;
   if (receiverDeltaTime >= 50000) {    // 50hz
     receiverPreviousTime = currentTime;
     readPilotCommands();
+  }
+  else if (altitudeProcessDeltaTime >= 10000) {    // 10hz
+    G_Dt = (currentTime - altitudeProcessPreviousTime) / 1000000.0;
+    altitudeProcessPreviousTime = currentTime;
+    processAltitudeHold();
   }
   else if (serialCommDeltaTime >= 50000) {    // 50hz
     serialCommPreviousTime = currentTime;
     readSerialCommand(); // defined in SerialCom.pde
     sendSerialTelemetry(); // defined in SerialCom.pde
   }
+
   #ifdef AltitudeHold
-    else if (baroReadDeltaTime >= 50000) {    // 50hz
+    baroReadDeltaTime = currentTime - baroReadPreviousTime;  
+    if (baroReadDeltaTime >= 50000) {    // 50hz
       G_Dt = (currentTime - baroReadPreviousTime) / 1000000.0;
       baroReadPreviousTime = currentTime;
       measureBaro(); // defined in altitude.h
     }
-    else if (altitudeProcessDeltaTime >= 10000) {    // 10hz
-      G_Dt = (currentTime - altitudeProcessPreviousTime) / 1000000.0;
-      altitudeProcessPreviousTime = currentTime;
-      processAltitudeHold();
-    }
   #endif
   #ifdef HeadingMagHold
-    else if (magReadDeltaTime >= 10000) {    // 10hz
+    magReadDeltaTime = currentTime - magReadPreviousTime;  
+    if (magReadDeltaTime >= 10000) {    // 10hz
       G_Dt = (currentTime - magReadPreviousTime) / 1000000.0;
       magReadPreviousTime = currentTime;
       measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
     }
   #endif
   #ifdef BattMonitor
-    else if (batteryReadDeltaTime >= 10000) {    // 10hz
+    batteryReadDeltaTime = currentTime - batteryReadPreviousTime;
+    if (batteryReadDeltaTime >= 10000) {    // 10hz
       G_Dt = (currentTime - batteryReadPreviousTime) / 1000000.0;
       batteryReadPreviousTime = currentTime;
       measureBatteryVoltage(armed);
     }
   #endif
   #ifdef MAX7456_OSD
-     else if (osdReadDeltaTime >= 10000) {    // 10hz
+    osdReadDeltaTime = currentTime - osdReadPreviousTime;
+    if (osdReadDeltaTime >= 10000) {    // 10hz
        osdPreviousTime = currentTime;
        updateOSD();
      }
   #endif   
+  
   
   // ================================================================
   // 25hz task loop
