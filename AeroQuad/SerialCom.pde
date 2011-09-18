@@ -342,7 +342,7 @@ void sendSerialTelemetry() {
     //queryType = 'X';
     break;
   case 'S': // Send all flight data
-    PrintValueComma(flightControlDeltaTime);
+    PrintValueComma(deltaTime);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(gyroRate[axis]);
     for (byte axis = ROLL; axis < LASTAXIS; axis++)

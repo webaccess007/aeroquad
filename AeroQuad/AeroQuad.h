@@ -103,7 +103,7 @@ float aref;
 #define ACRO 0
 #define STABLE 1
 byte flightMode;
-//unsigned long frameCounter = 0; // main loop executive frame counter
+unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 
@@ -184,38 +184,15 @@ HardwareSerial *binaryPort;
 float G_Dt = 0.002;
 // Offset starting times so that events don't happen at the same time
 // main loop times
-
+unsigned long previousTime = 0;
 unsigned long currentTime = 0;
-unsigned long flightControlPreviousTime = 0;
-unsigned long flightControlDeltaTime = 0;
-unsigned long receiverPreviousTime = 0;
-unsigned long receiverDeltaTime = 0;
-unsigned long serialCommPreviousTime = 0;
-unsigned long serialCommDeltaTime = 0;
-unsigned long altitudeProcessPreviousTime = 0;
-unsigned long altitudeProcessDeltaTime = 0;
-
-
-#ifdef AltitudeHold
-  unsigned long baroReadPreviousTime = 0;
-  unsigned long baroReadDeltaTime = 0;
-#endif  
-#ifdef HeadingMagHold
-  unsigned long magReadPreviousTime = 0;
-  unsigned long magReadDeltaTime = 0;
-#endif
-#ifdef BattMonitor
-  unsigned long batteryReadPreviousTime = 0;
-  unsigned long batteryReadDeltaTime = 0;
-#endif
-#ifdef MAX7456_OSD
-  unsigned long osdPreviousTime = 0;
-  unsigned long osdDeltaTime = 0;
-#endif
-
-
-
-
+unsigned long deltaTime = 0;
+// sub loop times
+unsigned long oneHZpreviousTime = 0;
+unsigned long tenHZpreviousTime = 0;
+unsigned long twentyFiveHZpreviousTime = 0;
+unsigned long fiftyHZpreviousTime = 0;
+unsigned long hundredHZpreviousTime = 0;
 
 #ifdef CameraControl
   unsigned long cameraTime = 10000;
@@ -253,6 +230,10 @@ unsigned long fastTelemetryTime = 0;
 /**************************************************************/
 // Enable/disable control loops for debug
 //#define DEBUG
+byte receiverLoop = ON;
+byte telemetryLoop = ON;
+byte sensorLoop = ON;
+byte controlLoop = ON;
 #ifdef CameraControl
   byte cameraLoop = ON; // Note: stabilization camera software is still under development, moved to Arduino Mega
 #endif
