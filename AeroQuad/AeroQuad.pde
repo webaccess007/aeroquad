@@ -30,8 +30,8 @@
 
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
-#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
@@ -45,11 +45,11 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
-//#define triConfig
+#define triConfig
 //#define quadY4Config
 //#define hexY6Config
 //#define octoX8Congig
@@ -65,7 +65,7 @@
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 //#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 
@@ -282,23 +282,19 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 1000
-  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
-      lastSampleTime = currentTime;
-      measureGyro();
-      measureAccel();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += meterPerSec[i];
-        gyroSample[i] += gyroRate[i];
-      }
-      sampleCount++;
+    measureGyro();
+    measureAccel();
+    for (int i = 0; i < LASTAXIS;i++) {
+      accelSample[i] += meterPerSec[i];
+      gyroSample[i] += gyroRate[i];
     }
+    sampleCount++;
   }
+
 #endif
 
 #ifdef AeroQuad_Mini
@@ -340,22 +336,18 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 1000
   
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
-      lastSampleTime = currentTime;
-      measureGyro();
-      measureAccel();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += meterPerSec[i];
-        gyroSample[i] += gyroRate[i];
-      }
-      sampleCount++;
+    measureGyro();
+    measureAccel();
+    for (int i = 0; i < LASTAXIS;i++) {
+      accelSample[i] += meterPerSec[i];
+      gyroSample[i] += gyroRate[i];
     }
+    sampleCount++;
   }
 #endif
 
@@ -464,23 +456,19 @@
     TWBR = 12;
   }
   
-  #define DELAY_BETWEEN_READING 1000
-  
   /**
    * Measure critical sensors
    */
   void measureCriticalSensors() {
-    if ((currentTime - lastSampleTime) > DELAY_BETWEEN_READING) {
-      lastSampleTime = currentTime;
-      measureGyro();
-      measureAccel();
-      for (int i = 0; i < LASTAXIS;i++) {
-        accelSample[i] += meterPerSec[i];
-        gyroSample[i] += gyroRate[i];
-      }
-      sampleCount++;
+    measureGyro();
+    measureAccel();
+    for (int i = 0; i < LASTAXIS;i++) {
+      accelSample[i] += meterPerSec[i];
+      gyroSample[i] += gyroRate[i];
     }
+    sampleCount++;
   }
+
 #endif
 
 #ifdef ArduCopter
@@ -869,9 +857,9 @@
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-//#if defined triConfig 
-//  #include <Motors_PWM_Tri.h>
-#if defined MOTOR_PWM
+#if defined triConfig 
+  #include <Motors_Tri.h>
+#elif defined MOTOR_PWM
   #include <Motors_PWM.h>
 #elif defined MOTOR_PWM_Timer
   #include <Motors_PWM_Timer.h>
@@ -981,8 +969,8 @@ void setup() {
   initPlatform();
   
   // Configure motors
-  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config)
-     initializeMotors(); 
+  #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
+     initializeMotors(FOUR_Motors); 
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors); 
   #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoXPlusCongig)
@@ -991,10 +979,8 @@ void setup() {
 
 
   // Setup receiver pins for pin change interrupts
-  if (receiverLoop == ON) {
-    initializeReceiver(LASTCHANNEL);
-    initReceiverFromEEPROM();
-  }
+  initializeReceiver(LASTCHANNEL);
+  initReceiverFromEEPROM();
        
   // Initialize sensors
   // If sensors have a common initialization routine
@@ -1090,9 +1076,8 @@ void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
   
-  if (sensorLoop == ON) {
-    measureCriticalSensors();
-  }
+  measureCriticalSensors();
+  
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
 
@@ -1114,70 +1099,60 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
-      if (sensorLoop == ON) {
-        // ****************** Calculate Absolute Angle *****************
-        #if defined HeadingMagHold && defined FlightAngleMARG
-          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
-                              gyroSample[YAXIS]/sampleCount,                      
-                              gyroSample[ZAXIS]/sampleCount,                        
-                              accelSample[XAXIS]/sampleCount,                  
-                              accelSample[YAXIS]/sampleCount,                  
-                              accelSample[ZAXIS]/sampleCount,                  
-                              getMagnetometerRawData(XAXIS),                      
-                              getMagnetometerRawData(YAXIS),                     
-                              getMagnetometerRawData(ZAXIS),
-                              G_Dt);
-        #endif
-      
-        #if defined FlightAngleARG
-          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
-                              gyroSample[YAXIS]/sampleCount,                      
-                              gyroSample[ZAXIS]/sampleCount,                        
-                              accelSample[XAXIS]/sampleCount,                  
-                              accelSample[YAXIS]/sampleCount,                  
-                              accelSample[ZAXIS]/sampleCount,                  
-                              0.0,                                            
-                              0.0,                                            
-                              0.0,
-                              G_Dt);
-        #endif
-
-        #if defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
-                              gyroSample[YAXIS]/sampleCount,                      
-                              gyroSample[ZAXIS]/sampleCount,                        
-                              accelSample[XAXIS]/sampleCount,                  
-                              accelSample[YAXIS]/sampleCount,                  
-                              accelSample[ZAXIS]/sampleCount,                   
-                              accelOneG,                              
-                              getHdgXY(XAXIS),                        
-                              getHdgXY(YAXIS),
-                              G_Dt);
-        #endif
-        
-        #if !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-          calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
-                              gyroSample[YAXIS]/sampleCount,                      
-                              gyroSample[ZAXIS]/sampleCount,                        
-                              accelSample[XAXIS]/sampleCount,                  
-                              accelSample[YAXIS]/sampleCount,                  
-                              accelSample[ZAXIS]/sampleCount,                   
-                              accel->getOneG(),                               
-                              0.0,                                             
-                              0.0,
-                              G_Dt);
-        #endif
-        for (int i = 0; i < LASTAXIS;i++) {
-          accelSample[i] = 0.0;
-          gyroSample[i] = 0.0;
-        }
-        sampleCount = 0.0;
+      // ****************** Calculate Absolute Angle *****************
+      #if defined HeadingMagHold && defined FlightAngleMARG
+        calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                            gyroSample[YAXIS]/sampleCount,                      
+                            gyroSample[ZAXIS]/sampleCount,                        
+                            accelSample[XAXIS]/sampleCount,                  
+                            accelSample[YAXIS]/sampleCount,                  
+                            accelSample[ZAXIS]/sampleCount,                  
+                            getMagnetometerRawData(XAXIS),                      
+                            getMagnetometerRawData(YAXIS),                     
+                            getMagnetometerRawData(ZAXIS),
+                            G_Dt);
+      #elif defined FlightAngleARG
+        calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                            gyroSample[YAXIS]/sampleCount,                      
+                            gyroSample[ZAXIS]/sampleCount,                        
+                            accelSample[XAXIS]/sampleCount,                  
+                            accelSample[YAXIS]/sampleCount,                  
+                            accelSample[ZAXIS]/sampleCount,                  
+                            0.0,                                            
+                            0.0,                                            
+                            0.0,
+                            G_Dt);
+      #elif defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
+        calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                            gyroSample[YAXIS]/sampleCount,                      
+                            gyroSample[ZAXIS]/sampleCount,                        
+                            accelSample[XAXIS]/sampleCount,                  
+                            accelSample[YAXIS]/sampleCount,                  
+                            accelSample[ZAXIS]/sampleCount,                   
+                            accelOneG,                              
+                            getHdgXY(XAXIS),                        
+                            getHdgXY(YAXIS),
+                            G_Dt);
+      #elif !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
+        calculateKinematics(gyroSample[XAXIS]/sampleCount,                  
+                            gyroSample[YAXIS]/sampleCount,                      
+                            gyroSample[ZAXIS]/sampleCount,                        
+                            accelSample[XAXIS]/sampleCount,                  
+                            accelSample[YAXIS]/sampleCount,                  
+                            accelSample[ZAXIS]/sampleCount,                   
+                            accel->getOneG(),                               
+                            0.0,                                             
+                            0.0,
+                            G_Dt);
+      #endif
+      for (int i = 0; i < LASTAXIS;i++) {
+        accelSample[i] = 0.0;
+        gyroSample[i] = 0.0;
       }
+      sampleCount = 0.0;
       
       // Combines external pilot commands and measured sensor data to generate motor commands
-      if (controlLoop == ON) {
-        processFlightControl();
-      } 
+      processFlightControl();
 
       #ifdef BinaryWrite
         if (fastTransfer == ON) {
@@ -1203,14 +1178,10 @@ void loop () {
       fiftyHZpreviousTime = currentTime;
       
       // Reads external pilot commands and performs functions based on stick configuration
-      if (receiverLoop == ON) { 
-        readPilotCommands(); // defined in FlightCommand.pde
-      }
+      readPilotCommands(); // defined in FlightCommand.pde
       
       #ifdef AltitudeHold
-        if (sensorLoop == ON) {
-          measureBaro(); // defined in altitude.h
-        }
+        measureBaro(); // defined in altitude.h
       #endif
 
       #ifdef DEBUG_LOOP
@@ -1218,27 +1189,7 @@ void loop () {
       #endif
     }
 
-    // ================================================================
-    // 25hz task loop
-    // ================================================================
-    if (frameCounter %   4 == 0) {  //  25 Hz tasks
-      #ifdef DEBUG_LOOP    
-        digitalWrite(9, HIGH);
-      #endif
-      
-      G_Dt = (currentTime - twentyFiveHZpreviousTime) / 1000000.0;
-      twentyFiveHZpreviousTime = currentTime;
-      
-      if (sensorLoop == ON) {
-        #if defined(AltitudeHold)
-          measureBaro(); // defined in altitude.h
-        #endif
-      }
-      
-      #ifdef DEBUG_LOOP
-        digitalWrite(9, LOW);
-      #endif
-    }
+    
     
     // ================================================================
     // 10hz task loop
@@ -1251,20 +1202,17 @@ void loop () {
       G_Dt = (currentTime - tenHZpreviousTime) / 1000000.0;
       tenHZpreviousTime = currentTime;
 
-      if (sensorLoop == ON) {
-        #if defined(HeadingMagHold)
-          measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
-        #endif
-        #if defined(BattMonitor)
-          measureBatteryVoltage(armed);
-        #endif
-        processAltitudeHold();
-      }
+      #if defined(HeadingMagHold)
+        measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
+      #endif
+      #if defined(BattMonitor)
+        measureBatteryVoltage(armed);
+      #endif
+      processAltitudeHold();
+
       // Listen for configuration commands and reports telemetry
-      if (telemetryLoop == ON) {
-        readSerialCommand(); // defined in SerialCom.pde
-        sendSerialTelemetry(); // defined in SerialCom.pde
-      }
+      readSerialCommand(); // defined in SerialCom.pde
+      sendSerialTelemetry(); // defined in SerialCom.pde
       
       #ifdef MAX7456_OSD
         updateOSD();
