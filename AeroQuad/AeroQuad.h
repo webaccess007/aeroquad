@@ -38,8 +38,6 @@
 #define TIMER0_COUNT0          250   // For 8 bit system timer with prescaler = 64
 #define TIMER0_COUNT1          250   // 16E6/64/500 = 500, 250 + 250 = 500
 
-#define dt 0.01       // dt for 100 Hz loop
-
 #define ON 1
 #define OFF 0
 
@@ -189,30 +187,27 @@ typedef struct {
   float MINACRO_ADR;
 } t_NVR_Data;
 
-float nvrReadFloat(int address); // defined in DataStorage.h
-void nvrWriteFloat(float value, int address); // defined in DataStorage.h
-void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);
-void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
+// external function defined
+float nvrReadFloat(int address);                               // defined in DataStorage.h
+void nvrWriteFloat(float value, int address);                  // defined in DataStorage.h
+void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom);   // defined in DataStorage.h
+void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);  // defined in DataStorage.h
+void readEEPROM(void);                                         // defined in DataStorage.h
+void readPilotCommands(void);                                  // defined in FlightCommand.pde
+void processAltitudeHold(void);                                // defined in FlightControl.pde
+void comma(void);                                              // defined in SerialCom.pde
+void fastTelemetry(void);                                      // defined in SerialCom.pde
+void printInt(int data);                                       // defined in SerialCom.pde
+float readFloatSerial(void);                                   // defined in SerialCom.pde
+void readSerialCommand(void);                                  // defined in SerialCom.pde
+void sendBinaryFloat(float);                                   // defined in SerialCom.pde
+void sendBinaryuslong(unsigned long);                          // defined in SerialCom.pde
+void sendSerialTelemetry(void);                                // defined in SerialCom.pde
 
 #define GET_NVR_OFFSET(param) ((int)&(((t_NVR_Data*) 0)->param))
 #define readFloat(addr) nvrReadFloat(GET_NVR_OFFSET(addr))
 #define writeFloat(value, addr) nvrWriteFloat(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
-
-// external function defined
-float arctan2(float y, float x);       // defined in AQMath.h
-void readEEPROM(void);                 // defined in DataStorage.h
-void readPilotCommands(void);          // defined in FlightCommand.pde
-void processAltitudeHold(void);        // defined in FlightControl.pde
-void comma(void);                      // defined in SerialCom.pde
-void fastTelemetry(void);              // defined in SerialCom.pde
-void printInt(int data);               // defined in SerialCom.pde
-float readFloatSerial(void);           // defined in SerialCom.pde
-void readSerialCommand(void);          // defined in SerialCom.pde
-void sendBinaryFloat(float);           // defined in SerialCom.pde
-void sendBinaryuslong(unsigned long);  // defined in SerialCom.pde
-void sendSerialTelemetry(void);        // defined in SerialCom.pde
-
 
 

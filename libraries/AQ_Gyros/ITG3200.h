@@ -1,13 +1,40 @@
 #define ITG3200
 
-#ifdef AeroQuad_Mini_6DOF
+/******************************************************/
+
+#ifdef AeroQuad_Mini
   #define GYRO_ADDRESS   0xD0
 #else
   #define GYRO_ADDRESS   0xD2
 #endif
+
+/******************************************************/
+
+#define LOW_PASS_FILTER 0x18  // 256 Hz Low pass filter, 8 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x19  // 188 Hz Low pass filter, 1 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x1A  //  98 Hz Low pass filter, 1 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x1B  //  42 Hz Low pass filter, 1 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x1C  //  20 Hz Low pass filter, 1 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x1D  //  10 Hz Low pass filter, 1 kHz internal sample rate
+//#define LOW_PASS_FILTER 0x1E  //   5 Hz Low pass filter, 1 kHz internal sample rate
+
+#ifdef ITG3200_1000HZ
+  #if (LOW_PASS_FILTER == 0x18)
+    #define SAMPLE_RATE_DIVISOR 0x07  // 1000 Hz = 8000/(7 + 1)
+  #else
+    #define SAMPLE_RATE_DIVISOR 0x00  // 1000 Hz = 1000/(0 + 1)
+  #endif
+#else
+  #if (LOW_PASS_FILTER == 0x18)
+    #define SAMPLE_RATE_DIVISOR 0x0F  // 500 Hz = 8000/(15 + 1)
+  #else
+    #define SAMPLE_RATE_DIVISOR 0x01  // 500 Hz = 1000/(1 + 1)
+  #endif
+#endif
+
+/******************************************************/
 
 #define gyroScaleFactor radians(1.0/14.375)  //  ITG3200 14.375 LSBs per °/sec
-
 
 /******************************************************/
 
@@ -55,12 +82,12 @@ void initializeGyro(void) {
   twiMaster.write(0x01);
 
   twiMaster.start(GYRO_ADDRESS | I2C_WRITE);  // internal sample rate 8000 Hz
-  twiMaster.write(0x16);                      // 256 Hz low pass filter
-  twiMaster.write(0x18);                      // +/- 2000 DPS range
+  twiMaster.write(0x16);                      // low pass filter as defined above
+  twiMaster.write(LOW_PASS_FILTER);           // +/- 2000 DPS range
 
   twiMaster.start(GYRO_ADDRESS | I2C_WRITE);  // sample rate divisor
-  twiMaster.write(0x15);                      // 500 Hz = 8000 Hz/(divider+1)
-  twiMaster.write(0x0F);                      // divider = 15
+  twiMaster.write(0x15);                      // as defined above
+  twiMaster.write(SAMPLE_RATE_DIVISOR);
 
   twiMaster.start(GYRO_ADDRESS | I2C_WRITE);  // int active high
   twiMaster.write(0x17);                      // push-pull drive

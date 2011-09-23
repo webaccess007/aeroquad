@@ -38,7 +38,7 @@ void computeAccelBias() {
   runTimeAccelBias[YAXIS] =  -accel.value[YAXIS];
   runTimeAccelBias[ZAXIS] = -9.8065 - accel.value[ZAXIS];
 
-  oneG = accel.value[ZAXIS] + runTimeAccelBias[ZAXIS];
+  oneG = abs(accel.value[ZAXIS] + runTimeAccelBias[ZAXIS]);
   sei();
 }
 

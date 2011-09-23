@@ -6,7 +6,13 @@
 
 /******************************************************/
 
-byte motorCommandI2C[LASTMOTOR];
+#if (LASTMOTOR == 4)
+  byte motorCommandI2C[LASTMOTOR] = {0, 0, 0, 0};
+#endif
+
+#if (LASTMOTOR == 6)
+  byte motorCommandI2C[LASTMOTOR] = {0, 0, 0, 0, 0, 0};
+#endif
 
 /******************************************************/
 

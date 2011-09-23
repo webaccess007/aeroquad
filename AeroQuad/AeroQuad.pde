@@ -47,9 +47,13 @@
 //#define quadPlusConfig
 #define quadXConfig
 //#define y4Config
-//#define hexPlusConfig  // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
-//#define hexXConfig     // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
-//#define y6Config       // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
+//#define hexPlusConfig          // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
+//#define hexXConfig             // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
+//#define y6Config               // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
+//#define octoPlusConfig         // Incomplete, do not use Only available for Mega Platforms
+//#define octoXConfig            // Incomplete, do not use Only available for Mega Platforms
+//#define quadCoaxialPlusCOnfig  // Incomplete, do not use Only available for Mega Platforms
+//#define quadCoaxialXConfig     // Incomplete, do not use Only available for Mega Platforms
 
 #if defined(isrSourceIsITG3200)
   #define LASTCHANNEL 5
@@ -70,7 +74,7 @@ TwiMaster twiMaster;
 
 #ifdef AeroQuad_Mini_FFIMUV2
   #include <BMA180.h>
-  //#include "BMP085.h"
+  //#include <BMP085.h>
   #include <ITG3200.h>
   #include <HMC5883.h>
   #if defined(isrSourceIsITG3200)
@@ -84,8 +88,8 @@ TwiMaster twiMaster;
   #endif
 #endif
 
-#ifdef AeroQuad_v18
-  #include <BMA180.h>
+#ifdef AeroQuad_Mini
+  #include <ADXL345.h>
   #include <ITG3200.h>
   #if defined(isrSourceIsITG3200)
     #include <RX_PCINT_328_Gyro.h>
@@ -98,8 +102,8 @@ TwiMaster twiMaster;
   #endif
 #endif
 
-#ifdef AeroQuad_Mini
-  #include <ADXL345.h>
+#ifdef AeroQuad_v18
+  #include <BMA180.h>
   #include <ITG3200.h>
   #if defined(isrSourceIsITG3200)
     #include <RX_PCINT_328_Gyro.h>
@@ -128,7 +132,6 @@ TwiMaster twiMaster;
 //////////////////////////////////
 
 float verticalVelocity;
-float pressureAltitude;
 
 union {float value[3];
         byte bytes[12];} angle;
@@ -268,14 +271,14 @@ void loop () {
       {
         if (thisIsrFrame == ALTITUDE_COUNT)
         {
-          uncompensatedPressureAverage = uncompensatedPressureSummedSamples / (SUM_COUNT-1);
+          uncompensatedPressureAverage.value = uncompensatedPressureSummedSamples / (SUM_COUNT-1);
           calculateTemperature();
         }
         else
         {
-          uncompensatedPressureAverage = uncompensatedPressureSummedSamples / SUM_COUNT;
+          uncompensatedPressureAverage.value = uncompensatedPressureSummedSamples / SUM_COUNT;
         } 
-        pressureAltitude = calculatePressure();
+        pressureAltitude.value = calculatePressure();
       }
     #endif      
       

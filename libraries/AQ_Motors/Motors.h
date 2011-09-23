@@ -16,8 +16,8 @@
   #define REAR_RIGHT  2
   #define REAR_LEFT   3
 
-  #define FIRSTMOTOR  0
-  #define LASTMOTOR   4
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  4
 #endif
 
 #if defined(y4Config)
@@ -26,8 +26,8 @@
   #define UPPER_REAR  2
   #define LOWER_REAR  3
 
-  #define FIRSTMOTOR  0
-  #define LASTMOTOR   4
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  4
 #endif
 
 #if defined(hexPlusConfig)
@@ -38,8 +38,8 @@
   #define REAR_LEFT   4
   #define FRONT_LEFT  5
 
-  #define FIRSTMOTOR  0
-  #define LASTMOTOR   6
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  6
 #endif
 
 #if defined(hexXConfig)
@@ -50,8 +50,8 @@
   #define REAR_LEFT   4
   #define LEFT        5
 
-  #define FIRSTMOTOR  0
-  #define LASTMOTOR   6
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  6
 #endif
 
 #if defined(y6Config)
@@ -64,6 +64,62 @@
 
   #define FIRSTMOTOR  0
   #define LASTMOTOR   6
+#endif
+
+#if defined(octoPlusConfig)
+  #define FRONT       0
+  #define FRONT_RIGHT 1
+  #define RIGHT       2
+  #define REAR_RIGHT  3
+  #define REAR        4
+  #define REAR_LEFT   5
+  #define LEFT        6
+  #define FRONT_LEFT  7
+
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  8
+#endif
+
+#if defined(octoXConfig)
+  #define FRONT_LEFT  0
+  #define FRONT_RIGHT 1
+  #define RIGHT_FRONT 2
+  #define RIGHT_REAR  3
+  #define REAR_RIGHT  4
+  #define REAR_LEFT   5
+  #define LEFT_REAR   6
+  #define LEFT_FRONT  7
+
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  8
+#endif
+
+#if defined(quadCoaxialPlusConfig)
+  #define UPPER_FRONT 0
+  #define UPPER_RIGHT 1
+  #define UPPER_REAR  2
+  #define UPPER_LEFT  3
+  #define LOWER_FRONT 4
+  #define LOWER_RIGHT 5
+  #define LOWER_REAR  6
+  #define LOWER_LEFT  7
+
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  8
+#endif
+
+#if defined(quadCoaxialXConfig)
+  #define UPPER_FRONT_LEFT  0
+  #define UPPER_FRONT_RIGHT 1
+  #define UPPER_REAR_RIGHT  2
+  #define UPPER_REAR_LEFT   3
+  #define LOWER_FRONT_LEFT  4
+  #define LOWER_FRONT_RIGHT 5
+  #define LOWER_REAR_RIGHT  6
+  #define LOWER_REAR_LEFT   7
+
+  #define FIRSTMOTOR 0
+  #define LASTMOTOR  8
 #endif
 
 /******************************************************/

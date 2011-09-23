@@ -61,14 +61,27 @@ float sum1;
 float sum2;
 float sum3;
 float vzEst = 0;
+
+unsigned int margCurrentTime;
+unsigned int margPreviousTime;
+boolean margFirstPass = 1;
   
 ////////////////////////////////////////////////////////////////////////////////
 // Marg Update
 ////////////////////////////////////////////////////////////////////////////////
 
 void AHRSupdate() {
-  halfT = dt/2;
-
+  if (margFirstPass == 1)
+  {
+    margCurrentTime  = micros();
+    margPreviousTime = margCurrentTime;
+    margFirstPass    = 0;
+  }
+  
+  margCurrentTime = micros();
+  halfT = float((margCurrentTime-margPreviousTime))/2000000;
+  margPreviousTime = margCurrentTime;
+    
   // normalize the measurements
   accelMagnitude = sqrt(filteredAccel.value[XAXIS]*filteredAccel.value[XAXIS] +\
                         filteredAccel.value[YAXIS]*filteredAccel.value[YAXIS] +\
@@ -94,16 +107,18 @@ void AHRSupdate() {
   
   #define CUTOFF_LIMIT 1.0  // Cutoff limit in MPS^2, might want to consider an EEPROM value for this
   
-  if(abs(accelMagnitude - oneG) < CUTOFF_LIMIT)
+  if (abs(accelMagnitude - oneG) < CUTOFF_LIMIT)
   {
     exAcc = (vy*az - vz*ay);
     eyAcc = (vz*ax - vx*az);
     ezAcc = (vx*ay - vy*ax);
     kiAcc = 0.005;
+    digitalWrite(INITIALIZED_LED, ON);
   }
   else
   {
     kiAcc = 0.0;
+    digitalWrite(INITIALIZED_LED, OFF);
   }
   
   #if defined(HMC5843) | defined(HMC5883)
@@ -204,17 +219,17 @@ void AHRSupdate() {
       angle.value[YAW]   =  atan2(dcm[3], dcm[0]);
     #else
       if (gz > radians(1.0) || gz < radians(-1.0))
-        angle.value[YAW] += gz * dt;
+        angle.value[YAW] += gz * halfT * 2;
     #endif
     
     matrixMultiply(3, 3, 1, earthAccel.value, dcm, accel.value);
     earthAccel.value[ZAXIS] = oneG - earthAccel.value[ZAXIS];
     
-    integrator1 = integrator1 + earthAccel.value[ZAXIS] * dt;
+    integrator1 = integrator1 + earthAccel.value[ZAXIS] * halfT * 2;
     sum1 = integrator1 + vzEst;
-    integrator2 = integrator2 + sum1 * dt;
+    integrator2 = integrator2 + sum1 * halfT * 2;
     sum2 = integrator2 + hEst;
-    sum3 = sum2 - pressureAltitude;
+    sum3 = sum2 - pressureAltitude.value;
     hEst = sum2 + sum3 * kHest;
     vzEst = sum1 + sum3 * kVz;
   #else
@@ -224,7 +239,7 @@ void AHRSupdate() {
       angle.value[YAW]   =  atan2(2 * (q1q2 + q0q3), q0q0 + q1q1 - q2q2 - q3q3);
     #else
       if (gz > radians(1.0) || gz < radians(-1.0))
-        angle.value[YAW] += gz * dt;
+        angle.value[YAW] += gz * halfT * 2;
     #endif
   #endif
 }

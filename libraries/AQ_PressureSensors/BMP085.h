@@ -16,7 +16,6 @@ long tmp;
 
 //long  temperature = 0;
 float tmpFloat;
-long  uncompensatedPressureAverage;
 long  uncompensatedPressureSum = 0;
 long  uncompensatedPressureSummedSamples;
 
@@ -25,6 +24,12 @@ union {unsigned int value;
 
 union {        long value;
                byte bytes[4]; } uncompensatedPressure;
+
+union {        long value;
+               byte bytes[4]; } uncompensatedPressureAverage;
+
+union {       float value;
+               byte bytes[4]; } pressureAltitude;
 
 /******************************************************/
 
@@ -136,7 +141,7 @@ float calculatePressure() {
   x2 = (b1 * (b6 * b6 >> 12)) / 65536;
   x3 = ((x1 + x2) + 2) >> 2;
   b4 = (ac4 * (long)(x3 + 32768)) / 32768;
-  b7 = ((long)(uncompensatedPressureAverage >> (8-OSS)) - b3) * (50000 >> OSS);
+  b7 = ((long)(uncompensatedPressureAverage.value >> (8-OSS)) - b3) * (50000 >> OSS);
   p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
   x1 = (p >> 8) * (p >> 8);
   x1 = (x1 * 3038) / 65536;

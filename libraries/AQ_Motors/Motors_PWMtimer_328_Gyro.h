@@ -60,9 +60,9 @@ void writeMotors(void) {
   OCR1B = motorCommand[2] / 16;
   OCR2A = motorCommand[3] / 16;
   #if (LASTMOTOR == 6)
-    PWM_MOTOR4PIN_highState = int(motorCommand[4] / 8) * 2;
+    PWM_MOTOR4PIN_highState = int(motorCommand[4] / 16) * 2;
 	PWM_MOTOR4PIN_lowState  = 255 - PWM_MOTOR4PIN_highState;
-	PWM_MOTOR5PIN_highState = int(motorCommand[5] / 8) * 2;
+	PWM_MOTOR5PIN_highState = int(motorCommand[5] / 16) * 2;
     PWM_MOTOR5PIN_lowState  = 255 - PWM_MOTOR5PIN_highState;
   #endif
 }

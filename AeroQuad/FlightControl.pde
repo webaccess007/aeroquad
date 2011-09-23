@@ -27,17 +27,33 @@
 #define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
 
+unsigned int fcCurrentTime;
+unsigned int fcPreviousTime;
+float fcDt;
+boolean fcFirstPass = 1;
+
 void calculateFlightError(void)
 {
+  if (fcFirstPass == 1)
+  {
+    fcCurrentTime  = micros();
+    fcPreviousTime = fcCurrentTime;
+    fcFirstPass    = 0;
+  }
+  
+  fcCurrentTime = micros();
+  fcDt = float(fcCurrentTime-fcPreviousTime)/1000000;
+  fcPreviousTime = fcCurrentTime;
+
   if (flightMode == ACRO) {
-    motorAxisCommand[ROLL]  = updatePID(receiverData[ROLL]  * PWM2RAD,  gyro.value[ROLL],  dt, &PID[ROLL_RATE_PID]);
-    motorAxisCommand[PITCH] = updatePID(receiverData[PITCH] * PWM2RAD, -gyro.value[PITCH], dt, &PID[PITCH_RATE_PID]);
+    motorAxisCommand[ROLL]  = updatePID(receiverData[ROLL]  * PWM2RAD,  gyro.value[ROLL],  fcDt, &PID[ROLL_RATE_PID]);
+    motorAxisCommand[PITCH] = updatePID(receiverData[PITCH] * PWM2RAD, -gyro.value[PITCH], fcDt, &PID[PITCH_RATE_PID]);
   }
   else {
-    float rollAttitudeCmd  = updatePID(receiverData[ROLL]  * ATTITUDE_SCALING,  angle.value[ROLL],  dt, &PID[ROLL_ATT_PID]);
-    float pitchAttitudeCmd = updatePID(receiverData[PITCH] * ATTITUDE_SCALING, -angle.value[PITCH], dt, &PID[PITCH_ATT_PID]);
-    motorAxisCommand[ROLL]  = updatePID(rollAttitudeCmd,   gyro.value[ROLL],  dt, &PID[ROLL_RATE_PID]);
-    motorAxisCommand[PITCH] = updatePID(pitchAttitudeCmd, -gyro.value[PITCH], dt, &PID[PITCH_RATE_PID]);
+    float rollAttitudeCmd  = updatePID(receiverData[ROLL]  * ATTITUDE_SCALING,  angle.value[ROLL],  fcDt, &PID[ROLL_ATT_PID]);
+    float pitchAttitudeCmd = updatePID(receiverData[PITCH] * ATTITUDE_SCALING, -angle.value[PITCH], fcDt, &PID[PITCH_ATT_PID]);
+    motorAxisCommand[ROLL]  = updatePID(rollAttitudeCmd,   gyro.value[ROLL],  fcDt, &PID[ROLL_RATE_PID]);
+    motorAxisCommand[PITCH] = updatePID(pitchAttitudeCmd, -gyro.value[PITCH], fcDt, &PID[PITCH_RATE_PID]);
   }
 }
 
@@ -85,7 +101,7 @@ void processHeading(void)
         else {
         // No new yaw input, calculate current heading vs. desired heading heading hold
         // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, dt, &PID[HEADING_PID]);
+          headingHold = updatePID(0, relativeHeading, fcDt, &PID[HEADING_PID]);
           headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
         }
       }
@@ -99,7 +115,7 @@ void processHeading(void)
   }
   // NEW SI Version
   commandedYaw = constrain(receiverData[YAW] * (2.5 * PWM2RAD) + radians(headingHold), -PI, PI);
-  motorAxisCommand[YAW] = updatePID(commandedYaw, angle.value[YAW], dt, &PID[YAW]);
+  motorAxisCommand[YAW] = updatePID(commandedYaw, angle.value[YAW], fcDt, &PID[YAW]);
   // uses flightAngle unbias rate
   //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }

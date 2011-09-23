@@ -3,6 +3,17 @@
 #define ACCEL_ADDRESS   0x80
 
 /******************************************************/
+
+//#define BANDWIDTH 0x0F  //   10 Hz bandwidth
+//#define BANDWIDTH 0x1F  //   20 Hz bandwidth
+//#define BANDWIDTH 0x2F  //   40 Hz bandwidth
+//#define BANDWIDTH 0x3F  //   75 Hz bandwidth
+//#define BANDWIDTH 0x4F  //  150 Hz bandwidth
+//#define BANDWIDTH 0x5F  //  300 Hz bandwidth
+//#define BANDWIDTH 0x6F  //  600 Hz bandwidth
+#define BANDWIDTH 0x7F  // 1200 Hz bandwidth
+
+/******************************************************/
 
 #include <Accel.h>
 
@@ -16,7 +27,8 @@ void readAccelAndSumForAverage() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     rawAccel.bytes[axis*2]   = twiMaster.read(0);
     rawAccel.bytes[axis*2+1] = twiMaster.read((axis*2+1) == 5);
-    accelSum[axis] += rawAccel.value[axis]>>2;
+    rawAccel.value[axis] = rawAccel.value[axis]>>2;
+    accelSum[axis] += rawAccel.value[axis];
   }
 }
 
@@ -38,7 +50,7 @@ void computeAccelBias() {
   runTimeAccelBias[YAXIS] = -accel.value[YAXIS];
   runTimeAccelBias[ZAXIS] = -9.8065 - accel.value[ZAXIS];
 
-  oneG = accel.value[ZAXIS] + runTimeAccelBias[ZAXIS];
+  oneG = abs(accel.value[ZAXIS] + runTimeAccelBias[ZAXIS]);
   sei();
 }
 
@@ -58,13 +70,13 @@ void initializeAccel(void) {
   twiMaster.write(0x10);  // Enable writting to control registers
 
   twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
-  twiMaster.write(0x20);  // Register bw_tcs (bits 4-7)
+  twiMaster.write(0x20);  // Register bw_tcs
 
   twiMaster.start(ACCEL_ADDRESS | I2C_READ);
   data = twiMaster.read(1);
   twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
   twiMaster.write(0x20);
-  twiMaster.write(data & 0x7F);  // Set low pass filter to 1200 Hz (value = 0111xxxx)
+  twiMaster.write(data & BANDWIDTH);  // Set low pass filter to bandwith selected above
 
   twiMaster.start(ACCEL_ADDRESS | I2C_WRITE);
   twiMaster.write(0x35);
