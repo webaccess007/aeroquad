@@ -32,14 +32,14 @@
 void calculateFlightError(void)
 {
   if (flightMode == ACRO) {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), gyroRate[ROLL], &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), gyroSample[ROLL]/sampleCount, &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroSample[PITCH]/sampleCount, &PID[PITCH]);
   }
   else {
     float rollAttitudeCmd = updatePID((receiverData[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
     float pitchAttitudeCmd = updatePID((receiverData[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyroRate[PITCH], &PID[LEVELGYROPITCH]);
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroSample[ROLL]/sampleCount, &PID[LEVELGYROROLL]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyroSample[PITCH]/sampleCount, &PID[LEVELGYROPITCH]);
   }
 }
 
