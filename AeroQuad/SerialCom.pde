@@ -67,8 +67,11 @@ void readSerialCommand() {
       readSerialPID(YAW_RATE_PID);
       break;
       
-    case 'D':  // Receive minAcro value
-      minAcro = readFloatSerial();
+    case 'D':  // Receive misc values
+      minAcro              = readFloatSerial();
+      hardManeuvers        = readFloatSerial();
+      accelCutoff          = readFloatSerial();
+      headingHoldAvailable = readFloatSerial();
       break;
       
     case 'E':  // Receive Roll Attitude PID values
@@ -100,12 +103,20 @@ void readSerialCommand() {
 
     case 'O': // Write accel calibration values
       writeFloat(readFloatSerial(), XAXIS_ACCEL_SCALE_FACTOR_ADR);
-      writeFloat(readFloatSerial(),        XAXIS_ACCEL_BIAS_ADR);      
+      writeFloat(readFloatSerial(), XAXIS_ACCEL_BIAS_ADR);      
       writeFloat(readFloatSerial(), YAXIS_ACCEL_SCALE_FACTOR_ADR);
-      writeFloat(readFloatSerial(),        YAXIS_ACCEL_BIAS_ADR);      
+      writeFloat(readFloatSerial(), YAXIS_ACCEL_BIAS_ADR);      
       writeFloat(readFloatSerial(), ZAXIS_ACCEL_SCALE_FACTOR_ADR);
-      writeFloat(readFloatSerial(),        ZAXIS_ACCEL_BIAS_ADR);
+      writeFloat(readFloatSerial(), ZAXIS_ACCEL_BIAS_ADR);
       break;
+      
+    #if defined(HMC5843) | defined(HMC5883)
+      case 'Q': // Write mag calibration values
+        writeFloat(readFloatSerial(), XAXIS_MAG_BIAS_ADR);      
+        writeFloat(readFloatSerial(), YAXIS_MAG_BIAS_ADR);
+        writeFloat(readFloatSerial(), ZAXIS_MAG_BIAS_ADR);
+        break;
+    #endif
       
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
@@ -116,7 +127,6 @@ void readSerialCommand() {
       case '1': // Calibrate ESCS's by setting MAXCOMMAND on all motors
       	if (validateCalibrateCommand())
         {
-          SERIAL_PRINTLN("Setting MAXCOMMAND");
           escsCalibrating = ON;
           commandAllMotors(MAXCOMMAND);
         }
@@ -125,7 +135,6 @@ void readSerialCommand() {
       case '2': // Calibrate ESC's by setting MINCOMMAND on all motors
       	if (validateCalibrateCommand())
         {
-          SERIAL_PRINTLN("Setting MINCOMMAND");
           commandAllMotors(MINCOMMAND);
         }
         break;
@@ -133,7 +142,6 @@ void readSerialCommand() {
       case '3': // Test ESC calibration
         if (validateCalibrateCommand())
         {
-          SERIAL_PRINTLN("Setting Test Command");
           commandAllMotors(constrain(readFloatSerial(), MINCOMMAND, MIDCOMMAND));
         }
         break;
@@ -142,8 +150,7 @@ void readSerialCommand() {
     case '4': // Turn off ESC calibration
       if (validateCalibrateCommand())
       {
-	  SERIAL_PRINTLN("ESC Calibration Off");
-       escsCalibrating = OFF;
+	escsCalibrating = OFF;
       }
       break;
       
@@ -170,17 +177,22 @@ void readSerialCommand() {
 //***************************************************************************************************
 
 void PrintValueComma(float val) {
-  SERIAL_PRINT(val);
+  SERIAL_PRINT(val, 6);
   comma();
 }
 
 void PrintValueComma(double val) {
-  SERIAL_PRINT(val);
+  SERIAL_PRINT(val, 6);
   comma();
 }
 
 void PrintValueComma(char val) {
   SERIAL_PRINT(val);
+  comma();
+}
+
+void PrintValueComma(byte val) {
+  SERIAL_PRINT(val, DEC);
   comma();
 }
 
@@ -204,7 +216,7 @@ void printPID(unsigned char IDPid)
 }
 
 void sendSerialTelemetry() {
-  update = 0;
+  
   switch (queryType) {
   
   case 'a':  // Send Roll Rate PID values
@@ -223,7 +235,10 @@ void sendSerialTelemetry() {
     break;
     
   case 'd':  // Send minAcro
-    SERIAL_PRINTLN(minAcro);
+    PrintValueComma(minAcro);
+    PrintValueComma(int(hardManeuvers));
+    PrintValueComma(accelCutoff);
+    SERIAL_PRINTLN (headingHoldAvailable, DEC);
     queryType = 'x';
     break;
     
@@ -249,15 +264,15 @@ void sendSerialTelemetry() {
     break;
     
   case 'i': // Send Rate Gyros
-    PrintValueComma(gyro.value[ROLL]  * 57.3);
-    PrintValueComma(gyro.value[PITCH] * 57.3);
-    SERIAL_PRINTLN(gyro.value[YAW]    * 57.3);
+    PrintValueComma(gyro.value[ROLL]);
+    PrintValueComma(gyro.value[PITCH]);
+    SERIAL_PRINTLN(gyro.value[YAW]);
     break;
     
   case 'j': // Send Attitudes
-    PrintValueComma(angle.value[ROLL]  * 57.3);
-    PrintValueComma(angle.value[PITCH] * 57.3);
-    SERIAL_PRINTLN(angle.value[YAW]    * 57.3);
+    PrintValueComma(angle.value[ROLL]);
+    PrintValueComma(angle.value[PITCH]);
+    SERIAL_PRINTLN(angle.value[YAW]);
     break;
     
   #if defined(HMC5843) | defined(HMC5883)
@@ -269,9 +284,9 @@ void sendSerialTelemetry() {
   #endif
   
   case 'l': // Send Bias Compensated Rate Gyros
-    PrintValueComma(gx * 57.3);
-    PrintValueComma(gy * 57.3);
-    SERIAL_PRINTLN (gz * 57.3);
+    PrintValueComma(gx);
+    PrintValueComma(gy);
+    SERIAL_PRINTLN (gz);
     break;
   
   case 'm': // Send Motor Commands 1 thru LASTMOTOR
@@ -344,17 +359,46 @@ void sendSerialTelemetry() {
   case 'p': // Accelerometer Calibration Output
     PrintValueComma(accelSummedSamples[XAXIS]/SUM_COUNT);
     PrintValueComma(accelSummedSamples[YAXIS]/SUM_COUNT);
-    SERIAL_PRINTLN(accelSummedSamples[ZAXIS]/SUM_COUNT);
+    SERIAL_PRINTLN (accelSummedSamples[ZAXIS]/SUM_COUNT);
     break;
 
+  #if defined(HMC5843) | defined(HMC5883)
+    case 'q': // Send mag cal values
+      SERIAL_PRINT(readFloat(XAXIS_MAG_BIAS_ADR), 6);
+      comma();
+      SERIAL_PRINT(readFloat(YAXIS_MAG_BIAS_ADR), 6);
+      comma();
+      SERIAL_PRINTLN(readFloat(ZAXIS_MAG_BIAS_ADR), 6);
+      queryType = 'X';
+      break;
+  #endif
+    
   case 'r': // Send Receiver Commands 1 thru 5
     PrintValueComma(receiverData[ROLL]);
     PrintValueComma(receiverData[PITCH]);
     PrintValueComma(receiverData[YAW]);
     PrintValueComma(receiverData[THROTTLE]);
     SERIAL_PRINTLN(receiverData[MODE]);
+    break;
+    
+  #if defined(BMP085) | defined(MS5611)
+    case 's': // Send Pressure Altitude
+      SERIAL_PRINTLN(pressureAltitude.value);
+      break;
+  #endif
+    
+  case 'w': // Send Command in Detent Discretes
+    PrintValueComma(commandInDetent[ROLL]);
+    PrintValueComma(commandInDetent[PITCH]);
+    SERIAL_PRINTLN (commandInDetent[YAW], DEC);
+    break;
     
   case 'x': // Stop sending messages
+    break;
+    
+  case 'y': // Send 100 Hz loop time
+    PrintValueComma(loopTime);
+    SERIAL_PRINTLN (isrTime);
     break;
 
   case 'z': // Send flight software version

@@ -11,14 +11,8 @@ volatile uint8_t *port_to_pcmask[] = {
 
 volatile static uint8_t PCintLast[2];
 
-// Channel data
-typedef struct {
-  byte edge;
-  unsigned long riseTime;
-  unsigned long fallTime;
-  unsigned int  lastGoodWidth;
-} tPinTimingData;
-volatile static tPinTimingData pinData[5];
+
+/******************************************************/
 
 // ISR which records time of rising or falling edge of signal
 static void measurePulseWidthISR(uint8_t port) {
@@ -62,6 +56,8 @@ static void measurePulseWidthISR(uint8_t port) {
   }
 }
 
+/******************************************************/
+
 ISR(PCINT0_vect, ISR_BLOCK) {
   measurePulseWidthISR(0); // PORT B
 }
@@ -70,8 +66,7 @@ ISR(PCINT1_vect, ISR_BLOCK) {
   measurePulseWidthISR(1); // PORT C
 }
 
-// defines arduino pins used for receiver in arduino pin numbering schema
-static byte   receiverPin[LASTCHANNEL] = {1, 2, 3, 0, 4}; // index used for ROLL, PITCH, YAW, THROTTLE, MODE
+/******************************************************/
 
 void initializeReceiver() {
   DDRB   &= 0xEE;  // Set pins PB4 and PB0 as inputs
@@ -88,21 +83,11 @@ void initializeReceiver() {
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
   }
+  pinData[0].lastGoodWidth = 1000;
+  pinData[1].lastGoodWidth = 1500;
+  pinData[2].lastGoodWidth = 1500;
+  pinData[3].lastGoodWidth = 1500;
+  pinData[4].lastGoodWidth = 1000;
 }
 
-void readReceiver(void) {
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    byte pin = receiverPin[channel];
-    uint8_t oldSREG = SREG;
-    cli();
-    // Get receiver value read by pin change interrupt handler
-    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-    SREG = oldSREG;
-
-    receiverData[channel] = lastGoodWidth;
-  }
-  receiverData[ROLL]  -= MIDCOMMAND;
-  receiverData[PITCH] -= MIDCOMMAND;
-  receiverData[YAW]   -= MIDCOMMAND;
-}
-
+/******************************************************/

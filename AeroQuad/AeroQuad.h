@@ -38,8 +38,12 @@
 #define TIMER0_COUNT0          250   // For 8 bit system timer with prescaler = 64
 #define TIMER0_COUNT1          250   // 16E6/64/500 = 500, 250 + 250 = 500
 
-#define ON 1
-#define OFF 0
+#define ON    1
+#define OFF   0
+#define TRUE  1
+#define FALSE 0
+
+#define PI 3.141593
 
 #if ((defined AeroQuad_Mini_FFIMUV2 && defined isrSourceIsITG3200) || \
      (defined AeroQuad_Mini         && defined isrSourceIsITG3200) || \
@@ -77,6 +81,7 @@
 #define YAXIS 1
 #define ZAXIS 2
 
+#define FIRSTAXIS 0
 #define LASTAXIS 3
 
 // Basic PID definitions
@@ -91,42 +96,26 @@
 
 #define LAST_PID       6
 
-float smoothHeading;
-
 // Flight Mode
-#define ACRO 0
-#define STABLE 1
+#define RATE     0
+#define ATTITUDE 1
+#define VELOCITY 2
+#define POSITION 3
 byte flightMode;
-int minAcro; // Read in from EEPROM, defines min throttle during flips
 
-// Heading hold
-byte headingHoldConfig;
-//float headingScaleFactor;
-float commandedYaw = 0;
-float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
-float heading = 0; // measured heading from yaw gyro (process variable)
-float relativeHeading = 0; // current heading the quad is set to (set point)
-float setHeading = 0;
-unsigned long headingTime = micros();
-byte headingHoldState = OFF;
+int   minAcro;
+byte  hardManeuvers;
+float accelCutoff;
+byte  headingHoldAvailable;
 
 // batteryMonitor
 int autoDescent = 0;
 
 // Communication
 char queryType = 'X';
-byte tlmType = 0;
 byte armed = OFF;
 byte safetyCheck = OFF;
-byte update = 0;
 
-/**************************************************************/
-/******************* Loop timing parameters *******************/
-/**************************************************************/
-
-unsigned long currentTime = 0;
-
-// jihlein: wireless telemetry defines
 /**************************************************************/
 /********************** Wireless Telem Port *******************/
 /**************************************************************/
@@ -181,10 +170,10 @@ typedef struct {
   t_NVR_PID PITCH_ATT_PID_GAIN_ADR;
   t_NVR_PID HEADING_PID_GAIN_ADR;
   
-  float WINDUPGUARD_ADR;
-  float HEADINGSMOOTH_ADR;
-  float HEADINGHOLD_ADR;
   float MINACRO_ADR;
+  float HARD_MANEUVER_ADR;
+  float ACCEL_CUTOFF_ADR;
+  float HEADING_HOLD_AVAILABLE_ADR;
 } t_NVR_Data;
 
 // external function defined

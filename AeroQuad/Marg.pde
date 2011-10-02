@@ -105,9 +105,7 @@ void AHRSupdate() {
   // transients on both the attitudes and bias corrected rates when the cutoff switches back and forth.
   // That's the idea at any rate.
   
-  #define CUTOFF_LIMIT 1.0  // Cutoff limit in MPS^2, might want to consider an EEPROM value for this
-  
-  if (abs(accelMagnitude - oneG) < CUTOFF_LIMIT)
+  if (abs(accelMagnitude - oneG) < accelCutoff)
   {
     exAcc = (vy*az - vz*ay);
     eyAcc = (vz*ax - vx*az);

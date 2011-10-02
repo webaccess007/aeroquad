@@ -48,8 +48,7 @@ void matrixMultiply(int aRows, int aCols_bRows, int bCols, float matrixC[], floa
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//
-//
+//  4th Order Low Pass Filter
 ////////////////////////////////////////////////////////////////////////////////
 
 struct fourthOrderData
@@ -137,5 +136,31 @@ void setupFourthOrder(void)
   fourthOrder[AZ_FILTER].outputTm3 = -9.8065;
   fourthOrder[AZ_FILTER].outputTm4 = -9.8065;
   }
+
+////////////////////////////////////////////////////////////////////////////////
+//  Standard Radian Format Limiter
+////////////////////////////////////////////////////////////////////////////////
+
+float standardRadianFormat(float angle)
+{
+  if (angle >= PI)
+    return(angle - 2 * PI);
+  else if (angle < -PI)
+    return(angle + 2 * PI);
+  else
+    return(angle);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Low Pass Filter
+////////////////////////////////////////////////////////////////////////////////
+
+float filterSmooth(float currentData, float previousData, float smoothFactor)
+{
+  if (smoothFactor != 1.0) // only apply time compensated filter if smoothFactor is applied
+    return (previousData * (1.0 - smoothFactor) + (currentData * smoothFactor)); 
+  else
+    return currentData; // if smoothFactor == 1.0, do not calculate, just bypass!
+}
 
 ////////////////////////////////////////////////////////////////////////////////

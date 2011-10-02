@@ -31,16 +31,19 @@ struct PIDdata {
 
 /******************************************************/
 
-float updatePID(float command, float state, float deltaT, struct PIDdata *PIDparameters) {
+float updatePID(float command, float state, float deltaT, struct PIDdata *PIDparameters, byte type) {
   float error;
   float dTerm;
-
+  
   if (PIDparameters->firstPass) {
     PIDparameters->firstPass = false;
     PIDparameters->lastState = state;
   }
 
   error = command - state;
+  
+  if (type == 1)
+    error = standardRadianFormat(error);
 
   PIDparameters->iTerm += error * deltaT;
   PIDparameters->iTerm = constrain(PIDparameters->iTerm, -PIDparameters->windupGuard, PIDparameters->windupGuard);
@@ -49,7 +52,7 @@ float updatePID(float command, float state, float deltaT, struct PIDdata *PIDpar
 
   PIDparameters->lastState = state;
   
-  return (PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->iTerm)) - (PIDparameters->D * dTerm);
+  return(PIDparameters->P * error) + (PIDparameters->I * (PIDparameters->iTerm)) - (PIDparameters->D * dTerm);
 }
 
 /******************************************************/

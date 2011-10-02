@@ -6,30 +6,48 @@
 
 /******************************************************/
 
-int ac1, ac2, ac3, b1, b2, mb, mc, md;
-unsigned int ac4, ac5, ac6;
+#include <PressureAltitude.h>
+
+/******************************************************/
+
+union { int value;
+       byte bytes[2];} ac1;
+
+union { int value;
+       byte bytes[2];} ac2;
+
+union { int value;
+       byte bytes[2];} ac3;
+
+union { int value;
+       byte bytes[2];} b1;
+
+union { int value;
+       byte bytes[2];} b2;
+
+union { int value;
+       byte bytes[2];} mb;
+
+union { int value;
+       byte bytes[2];} mc;
+
+union { int value;
+       byte bytes[2];} md;
+
+union {unsigned int value;
+               byte bytes[2];} ac4;
+
+union {unsigned int value;
+               byte bytes[2];} ac5;
+
+union {unsigned int value;
+               byte bytes[2];} ac6;
+
 long b3, b5, b6;
 long p;
 long x1, x2, x3;
 unsigned long b4, b7;
 long tmp;
-
-//long  temperature = 0;
-float tmpFloat;
-long  uncompensatedPressureSum = 0;
-long  uncompensatedPressureSummedSamples;
-
-union {unsigned int value;
-               byte bytes[2]; } uncompensatedTemperature;
-
-union {        long value;
-               byte bytes[4]; } uncompensatedPressure;
-
-union {        long value;
-               byte bytes[4]; } uncompensatedPressureAverage;
-
-union {       float value;
-               byte bytes[4]; } pressureAltitude;
 
 /******************************************************/
 
@@ -40,17 +58,17 @@ void initializePressure(void) {
   twiMaster.write(0xAA);
   twiMaster.start(PRESSURE_ADDRESS | I2C_READ);
 
-  ac1 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  ac2 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  ac3 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  ac4 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  ac5 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  ac6 = twiMaster.read(0) << 8 | twiMaster.read(0);
-  b1  = twiMaster.read(0) << 8 | twiMaster.read(0);
-  b2  = twiMaster.read(0) << 8 | twiMaster.read(0);
-  mb  = twiMaster.read(0) << 8 | twiMaster.read(0);
-  mc  = twiMaster.read(0) << 8 | twiMaster.read(0);
-  md  = twiMaster.read(0) << 8 | twiMaster.read(1);
+  ac1.bytes[1] = twiMaster.read(0);  ac1.bytes[0] = twiMaster.read(0);
+  ac2.bytes[1] = twiMaster.read(0);  ac2.bytes[0] = twiMaster.read(0);
+  ac3.bytes[1] = twiMaster.read(0);  ac3.bytes[0] = twiMaster.read(0);
+  ac4.bytes[1] = twiMaster.read(0);  ac4.bytes[0] = twiMaster.read(0);
+  ac5.bytes[1] = twiMaster.read(0);  ac5.bytes[0] = twiMaster.read(0);
+  ac6.bytes[1] = twiMaster.read(0);  ac6.bytes[0] = twiMaster.read(0);
+  b1.bytes[1]  = twiMaster.read(0);  b1.bytes[0]  = twiMaster.read(0);
+  b2.bytes[1]  = twiMaster.read(0);  b2.bytes[0]  = twiMaster.read(0);
+  mb.bytes[1]  = twiMaster.read(0);  mb.bytes[0]  = twiMaster.read(0);
+  mc.bytes[1]  = twiMaster.read(0);  mc.bytes[0]  = twiMaster.read(0);
+  md.bytes[1]  = twiMaster.read(0);  md.bytes[0]  = twiMaster.read(1);
 
 //  Serial.print("ac1: "); Serial.println(ac1);
 //  Serial.print("ac2: "); Serial.println(ac2);
@@ -77,8 +95,8 @@ void readTemperatureRequestPressure() {
   twiMaster.write(0xF6);
   twiMaster.start(PRESSURE_ADDRESS | I2C_READ);
 
-  uncompensatedTemperature.bytes[1] = twiMaster.read(0);
-  uncompensatedTemperature.bytes[0] = twiMaster.read(1);
+  rawTemperature.bytes[1] = twiMaster.read(0);
+  rawTemperature.bytes[0] = twiMaster.read(1);
 
   twiMaster.start(PRESSURE_ADDRESS | I2C_WRITE);  // Request pressure read
   twiMaster.write(0xF4);
@@ -92,10 +110,10 @@ void readPressureRequestPressure() {
   twiMaster.write(0xF6);
   twiMaster.start(PRESSURE_ADDRESS | I2C_READ);
 
-  uncompensatedPressure.bytes[2] = twiMaster.read(0);
-  uncompensatedPressure.bytes[1] = twiMaster.read(0);
-  uncompensatedPressure.bytes[0] = twiMaster.read(1);
-  uncompensatedPressureSum += uncompensatedPressure.value;
+  rawPressure.bytes[2] = twiMaster.read(0);
+  rawPressure.bytes[1] = twiMaster.read(0);
+  rawPressure.bytes[0] = twiMaster.read(1);
+  rawPressureSum += rawPressure.value;
 
   twiMaster.start(PRESSURE_ADDRESS | I2C_WRITE);  // Request pressure read
   twiMaster.write(0xF4);
@@ -109,10 +127,10 @@ void readPressureRequestTemperature() {
   twiMaster.write(0xF6);
   twiMaster.start(PRESSURE_ADDRESS | I2C_READ);
 
-  uncompensatedPressure.bytes[2] = twiMaster.read(0);
-  uncompensatedPressure.bytes[1] = twiMaster.read(0);
-  uncompensatedPressure.bytes[0] = twiMaster.read(1);
-  uncompensatedPressureSum += uncompensatedPressure.value;
+  rawPressure.bytes[2] = twiMaster.read(0);
+  rawPressure.bytes[1] = twiMaster.read(0);
+  rawPressure.bytes[0] = twiMaster.read(1);
+  rawPressureSum += rawPressure.value;
 
   twiMaster.start(PRESSURE_ADDRESS | I2C_WRITE);  // Request temperature read
   twiMaster.write(0xF4);
@@ -122,26 +140,25 @@ void readPressureRequestTemperature() {
 /******************************************************/
 
 void calculateTemperature() {
-  x1 = ((long)uncompensatedTemperature.value - ac6) * ac5 / 32768;
-  x2 = ((long)mc * 2048) / (x1 + md);
+  x1 = (rawTemperature.value - ac6.value) * ac5.value / 32768;
+  x2 = ((long)mc.value * 2048) / (x1 + md.value);
   b5 = x1 + x2;
-  //temperature = (b5 + 8) / 16;
 }
 
 /******************************************************/
 
-float calculatePressure() {
+float calculatePressureAltitude() {
   b6 = b5 - 4000;
-  x1 = (b2 * (b6 * b6 >> 12)) / 2048;
-  x2 = ac2 * b6 / 2048;
+  x1 = (b2.value * (b6 * b6 >> 12)) / 2048;
+  x2 = ac2.value * b6 / 2048;
   x3 = x1 + x2;
-  tmp = (ac1 * 4 + x3) << OSS;
+  tmp = (ac1.value * 4 + x3) << OSS;
   b3 = (tmp + 2) >> 2;
-  x1 = ac3 * b6 >> 13;
-  x2 = (b1 * (b6 * b6 >> 12)) / 65536;
+  x1 = ac3.value * b6 >> 13;
+  x2 = (b1.value * (b6 * b6 >> 12)) / 65536;
   x3 = ((x1 + x2) + 2) >> 2;
-  b4 = (ac4 * (long)(x3 + 32768)) / 32768;
-  b7 = ((long)(uncompensatedPressureAverage.value >> (8-OSS)) - b3) * (50000 >> OSS);
+  b4 = (ac4.value * (long)(x3 + 32768)) / 32768;
+  b7 = ((long)(rawPressureAverage >> (8-OSS)) - b3) * (50000 >> OSS);
   p = b7 < 0x80000000 ? (b7 * 2) / b4 : (b7 / b4) * 2;
   x1 = (p >> 8) * (p >> 8);
   x1 = (x1 * 3038) / 65536;

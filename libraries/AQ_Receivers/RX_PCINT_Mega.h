@@ -12,16 +12,10 @@ volatile uint8_t *port_to_pcmask[] = {
 
 volatile static uint8_t PCintLast[3];
 
-// Channel data
-typedef struct {
-  byte edge;
-  unsigned long riseTime;
-  unsigned long fallTime;
-  unsigned int lastGoodWidth;
-} tPinTimingData;
-volatile static tPinTimingData pinData[LASTCHANNEL];
+/******************************************************/
 
-ISR(PCINT2_vect, ISR_BLOCK) {
+ISR(PCINT2_vect, ISR_BLOCK)
+{
   uint8_t bit;
   uint8_t curr;
   uint8_t mask;
@@ -66,33 +60,27 @@ ISR(PCINT2_vect, ISR_BLOCK) {
   }
 }
 
-static byte receiverPin[6] = {1, 2, 3, 0, 4, 5}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+/******************************************************/
 
-void initializeReceiver() {
-  DDRK = 0;
-  PORTK = 0x3F;
+void initializeReceiver()
+{
+  DDRK    = 0;
+  PORTK   = 0x3F;
   PCMSK2 |= 0x3F;
-  PCICR |= 0x1 << 2;
+  PCICR  |= 0x1 << 2;
 
-  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    //pinMode(receiverPin[channel], INPUT);
+  for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
+  {
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
   }
+  pinData[0].lastGoodWidth = 1000;
+  pinData[1].lastGoodWidth = 1500;
+  pinData[2].lastGoodWidth = 1500;
+  pinData[3].lastGoodWidth = 1500;
+  pinData[4].lastGoodWidth = 1000;
+  pinData[5].lastGoodWidth = 1000;
+  pinData[6].lastGoodWidth = 1000;
+  pinData[7].lastGoodWidth = 1000;
 }
 
-void readReceiver(void) {
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    byte pin = receiverPin[channel];
-    uint8_t oldSREG = SREG;
-    cli();
-    // Get receiver value read by pin change interrupt handler
-    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-    SREG = oldSREG;
-
-    receiverData[channel] = lastGoodWidth;
-  }
-  receiverData[ROLL]  -= MIDCOMMAND;
-  receiverData[PITCH] -= MIDCOMMAND;
-  receiverData[YAW]   -= MIDCOMMAND;
-}
-
+/******************************************************/

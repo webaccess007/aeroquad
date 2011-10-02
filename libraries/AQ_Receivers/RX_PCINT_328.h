@@ -12,14 +12,7 @@ volatile uint8_t *port_to_pcmask[] = {
 
 volatile static uint8_t PCintLast[3];
 
-// Channel data
-typedef struct {
-  byte edge;
-  unsigned long riseTime;
-  unsigned long fallTime;
-  unsigned int  lastGoodWidth;
-} tPinTimingData;
-volatile static tPinTimingData pinData[9];
+/******************************************************/
 
 // Attaches PCINT to Arduino Pin
 void attachPinChangeInterrupt(uint8_t pin) {
@@ -40,6 +33,8 @@ void attachPinChangeInterrupt(uint8_t pin) {
   // enable the interrupt
   PCICR |= 0x01 << port;
 }
+
+/******************************************************/
 
 // ISR which records time of rising or falling edge of signal
 static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
@@ -85,6 +80,8 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
   }
 }
 
+/******************************************************/
+
 ISR(PCINT0_vect, ISR_BLOCK) {
   measurePulseWidthISR(0, 8); // PORT B
 }
@@ -93,9 +90,7 @@ ISR(PCINT2_vect, ISR_BLOCK) {
   measurePulseWidthISR(2, 0); // PORT D
 }
 
-// defines arduino pins used for receiver in arduino pin numbering schema
-static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
-
+/******************************************************/
 
 void initializeReceiver() {
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
@@ -103,21 +98,12 @@ void initializeReceiver() {
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
     attachPinChangeInterrupt(receiverPin[channel]);
   }
+  pinData[0].lastGoodWidth = 1000;
+  pinData[1].lastGoodWidth = 1500;
+  pinData[2].lastGoodWidth = 1500;
+  pinData[3].lastGoodWidth = 1500;
+  pinData[4].lastGoodWidth = 1000;
+  pinData[5].lastGoodWidth = 1000;
 }
 
-void readReceiver(void) {
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
-    byte pin = receiverPin[channel];
-    uint8_t oldSREG = SREG;
-    cli();
-    // Get receiver value read by pin change interrupt handler
-    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-    SREG = oldSREG;
-
-    receiverData[channel] = lastGoodWidth;
-  }
-  receiverData[ROLL]  -= MIDCOMMAND;
-  receiverData[PITCH] -= MIDCOMMAND;
-  receiverData[YAW]   -= MIDCOMMAND;
-}
-
+/******************************************************/

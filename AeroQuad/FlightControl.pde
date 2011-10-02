@@ -18,111 +18,96 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-// FlightControl.pde is responsible for combining sensor measurements and
-// transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// calculateFlightError /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define PWM2RAD 0.002 //  Based upon 5RAD for full stick movement, you take this times the RAD to get the PWM conversion factor
-#define ATTITUDE_SCALING (0.75 * PWM2RAD)
+#define RATE_SCALING     0.01   // Stick to rate scaling (5 radians/sec)/(500 RX PWMs) = 0.01
+#define ATTITUDE_SCALING 0.002  // Stick to att scaling (1 radian)/(500 RX PWMs) = 0.002
+
+//////////////////////////////////////////////////////////////////////////////
+
+float attCmd[3];
+float attPID[3];
+
+float rateCmd[3];
+
+float headingReference;
 
 unsigned int fcCurrentTime;
 unsigned int fcPreviousTime;
 float fcDt;
 boolean fcFirstPass = 1;
 
-void calculateFlightError(void)
+//////////////////////////////////////////////////////////////////////////////
+
+void calculateFlightCommands(void)
 {
   if (fcFirstPass == 1)
   {
     fcCurrentTime  = micros();
     fcPreviousTime = fcCurrentTime;
     fcFirstPass    = 0;
+    headingReference = angle.value[YAW];
   }
   
   fcCurrentTime = micros();
   fcDt = float(fcCurrentTime-fcPreviousTime)/1000000;
   fcPreviousTime = fcCurrentTime;
 
-  if (flightMode == ACRO) {
-    motorAxisCommand[ROLL]  = updatePID(receiverData[ROLL]  * PWM2RAD,  gyro.value[ROLL],  fcDt, &PID[ROLL_RATE_PID]);
-    motorAxisCommand[PITCH] = updatePID(receiverData[PITCH] * PWM2RAD, -gyro.value[PITCH], fcDt, &PID[PITCH_RATE_PID]);
-  }
-  else {
-    float rollAttitudeCmd  = updatePID(receiverData[ROLL]  * ATTITUDE_SCALING,  angle.value[ROLL],  fcDt, &PID[ROLL_ATT_PID]);
-    float pitchAttitudeCmd = updatePID(receiverData[PITCH] * ATTITUDE_SCALING, -angle.value[PITCH], fcDt, &PID[PITCH_ATT_PID]);
-    motorAxisCommand[ROLL]  = updatePID(rollAttitudeCmd,   gyro.value[ROLL],  fcDt, &PID[ROLL_RATE_PID]);
-    motorAxisCommand[PITCH] = updatePID(pitchAttitudeCmd, -gyro.value[PITCH], fcDt, &PID[PITCH_RATE_PID]);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processHeadingHold ///////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processHeading(void)
-{
-  if (headingHoldConfig == ON)
+  if (flightMode == ATTITUDE)
   {
-    heading = degrees(angle.value[YAW]);
-
-    // Always center relative heading around absolute heading chosen during yaw command
-    // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
-    // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
-    // AKA - THERE IS A BUG HERE - if relative heading is greater than 180 degrees, the PID will swing from negative to positive
-    // Doubt that will happen as it would have to be uncommanded.
-    relativeHeading = heading - setHeading;
-    if (heading <= (setHeading - 3.141593)) relativeHeading += 6.283185;
-    if (heading >= (setHeading + 3.141593)) relativeHeading -= 6.283185;
-
-    // Apply heading hold only when throttle high enough to start flight
-    if (receiverData[THROTTLE] > MINCHECK ) { 
-      if ((receiverData[YAW] > (MIDCOMMAND + 25)) || (receiverData[YAW] < (MIDCOMMAND - 25))) {
-        // If commanding yaw, turn off heading hold and store latest heading
-        setHeading = heading;
-        headingHold = 0;
-        PID[HEADING_PID].iTerm = 0;
-        headingHoldState = OFF;
-        headingTime = currentTime;
-      }
-      else {
-        if (relativeHeading < .25 && relativeHeading > -.25) {
-          headingHold = 0;
-          PID[HEADING_PID].iTerm = 0;
-        }
-        else if (headingHoldState == OFF) { // quick fix to soften heading hold on new heading
-          if ((currentTime - headingTime) > 500000) {
-            headingHoldState = ON;
-            headingTime = currentTime;
-            setHeading = heading;
-            headingHold = 0;
-          }
-        }
-        else {
-        // No new yaw input, calculate current heading vs. desired heading heading hold
-        // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, fcDt, &PID[HEADING_PID]);
-          headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
-        }
-      }
-    }
-    else {
-      // minimum throttle not reached, use off settings
-      setHeading = heading;
-      headingHold = 0;
-      PID[HEADING_PID].iTerm = 0;
-    }
+    attCmd[ROLL]  = receiverData[ROLL]  * ATTITUDE_SCALING;
+    attCmd[PITCH] = receiverData[PITCH] * ATTITUDE_SCALING;
   }
-  // NEW SI Version
-  commandedYaw = constrain(receiverData[YAW] * (2.5 * PWM2RAD) + radians(headingHold), -PI, PI);
-  motorAxisCommand[YAW] = updatePID(commandedYaw, angle.value[YAW], fcDt, &PID[YAW]);
-  // uses flightAngle unbias rate
-  //motors.setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
+  //else
+  //{
+  //  attCmd[ROLL]  = velocityPID[LATERAL];
+  //  attCmd[PITCH] = velocityPID[LONGITUDINAL];
+  //}
+  
+  if (flightMode >= ATTITUDE)
+  {
+    attPID[ROLL]  = updatePID(attCmd[ROLL],   angle.value[ROLL],  fcDt, &PID[ROLL_ATT_PID], 1);
+    attPID[PITCH] = updatePID(attCmd[PITCH], -angle.value[PITCH], fcDt, &PID[PITCH_ATT_PID], 1);
+  }
+  
+  if (flightMode == RATE)
+  {
+    rateCmd[ROLL]  = receiverData[ROLL]  * RATE_SCALING;
+    rateCmd[PITCH] = receiverData[PITCH] * RATE_SCALING;
+  }
+  else
+  {
+    rateCmd[ROLL]  = attPID[ROLL];
+    rateCmd[PITCH] = attPID[PITCH];
+  }
+  
+  if ((commandInDetent[YAW] == TRUE) && (headingHoldAvailable == TRUE))  // Heading Hold is ON
+  {
+    if (previousCommandInDetent[YAW] == FALSE)
+    {
+      setIntegralError(HEADING_PID, 0.0);  // First pass in heading hold with new reference, zero integral PID error
+    }
+    rateCmd[YAW] = updatePID(headingReference, angle.value[YAW], fcDt, &PID[HEADING_PID], 1);
+  }
+  else  // Heading Hold is OFF
+  {
+    rateCmd[YAW] = receiverData[YAW] * RATE_SCALING;
+    headingReference = angle.value[YAW];
+  }
+  
+  previousCommandInDetent[YAW] = commandInDetent[YAW];
+  
+  motorAxisCommand[ROLL]  = updatePID(rateCmd[ROLL],   gyro.value[ROLL],  fcDt, &PID[ROLL_RATE_PID], 0);
+  motorAxisCommand[PITCH] = updatePID(rateCmd[PITCH], -gyro.value[PITCH], fcDt, &PID[PITCH_RATE_PID], 0);
+  motorAxisCommand[YAW]   = updatePID(rateCmd[YAW],    gyro.value[YAW],   fcDt, &PID[YAW_RATE_PID], 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processMinMaxMotorCommand ////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
 void processMinMaxMotorCommand(void)
 {
   int maxMotor;
@@ -146,48 +131,24 @@ void processMinMaxMotorCommand(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// PLUS MODE //////////////////////////////////
+//////////////////////////////// FLIGHT CONTROL //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef quadPlusConfig
 void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
+  // ********************** Calculate Flight Commands ************************
+  calculateFlightCommands();
   
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
-    motorCommand[FRONT] = (receiverData[THROTTLE] + autoDescent)                           - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[RIGHT] = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL]                            + motorAxisCommand[YAW];
-    motorCommand[REAR]  = (receiverData[THROTTLE] + autoDescent)                           + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[LEFT]  = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL]                            + motorAxisCommand[YAW];
+    calculateMotorCommands();
   } 
 
-  // *********************** process min max motor command *******************
+  // ********************** Process Min/Max Motor Command ********************
   processMinMaxMotorCommand();
 
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MAXCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[RIGHT] = MAXCOMMAND;
-      maxCommand[LEFT]  = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MAXCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[LEFT]  = MAXCOMMAND;
-      maxCommand[RIGHT] = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MAXCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[FRONT] = MAXCOMMAND;
-      maxCommand[REAR]  = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MAXCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[REAR]  = MAXCOMMAND;
-      maxCommand[FRONT] = minAcro;
-    }
-  }
-
+  // ********************** Process Hard Maneuvers ***************************
+  processHardManeuvers();
+  
   // Apply limits to motor commands
   for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
     motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
@@ -206,376 +167,5 @@ void flightControl(void) {
   if (armed == OFF && escsCalibrating == OFF)
     commandAllMotors(MINCOMMAND);
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// X MODE //////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-#ifdef quadXConfig
-void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motorCommand[FRONT_LEFT]  = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[FRONT_RIGHT] = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] - motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[REAR_RIGHT]  = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[REAR_LEFT]   = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] + motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-  } 
-
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MIDCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[REAR_LEFT]   = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MIDCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      maxCommand[FRONT_RIGHT] = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MIDCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[REAR_LEFT]   = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MIDCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiverData[THROTTLE] < MINCHECK) {
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-  }
-
-  if (armed == ON && safetyCheck == ON)
-    writeMotors();
-    
-  if (armed == OFF && escsCalibrating == OFF)
-    commandAllMotors(MINCOMMAND);
-}
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// Y4 MODE //////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-#ifdef y4Config
-void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motorCommand[FRONT_LEFT]  =       (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] -       motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[FRONT_RIGHT] =       (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] -       motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[UPPER_REAR]  = 0.5 * (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] + 0.5 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[LOWER_REAR]  = 0.5 * (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] + 0.5 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-  } 
-
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MIDCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MIDCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      maxCommand[FRONT_RIGHT] = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MIDCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[UPPER_REAR]  = minAcro;
-      maxCommand[LOWER_REAR]  = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MIDCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[UPPER_REAR]  = MAXCOMMAND;
-      minCommand[LOWER_REAR]  = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiverData[THROTTLE] < MINCHECK) {
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-  }
-
-  if (armed == ON && safetyCheck == ON)
-    writeMotors();
-    
-  if (armed == OFF && escsCalibrating == OFF)
-    commandAllMotors(MINCOMMAND);
-}
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// HEX PLUS MODE //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-#ifdef hexPlusConfig
-void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motorCommand[FRONT]       = (receiverData[THROTTLE] + autoDescent)                          - 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[FRONT_RIGHT] = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] - 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[REAR_RIGHT]  = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] + 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[REAR]        = (receiverData[THROTTLE] + autoDescent)                          + 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[REAR_LEFT]   = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] + 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[FRONT_LEFT]  = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] - 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-  }
-  
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-  
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MAXCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[REAR_LEFT]   = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MIDCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      maxCommand[FRONT_RIGHT] = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MIDCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[FRONT]       = MAXCOMMAND;
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[REAR]        = minAcro;
-      maxCommand[REAR_LEFT]   = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MIDCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[REAR]        = MAXCOMMAND;
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[FRONT]       = minAcro;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiverData[THROTTLE] < MINCHECK) {
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-  }
-
-  if (armed == ON && safetyCheck == ON)
-    writeMotors();
-    
-  if (armed == OFF && escsCalibrating == OFF)
-    commandAllMotors(MINCOMMAND);
-}
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// HEX X MODE /////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-#ifdef hexXConfig
-void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motorCommand[FRONT_LEFT]  = (receiverData[THROTTLE] + autoDescent) + 0.866025 * motorAxisCommand[ROLL] - motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[FRONT_RIGHT] = (receiverData[THROTTLE] + autoDescent) - 0.866025 * motorAxisCommand[ROLL] - motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[RIGHT]       = (receiverData[THROTTLE] + autoDescent) - 0.866025 * motorAxisCommand[ROLL]                           - motorAxisCommand[YAW];
-    motorCommand[REAR_RIGHT]  = (receiverData[THROTTLE] + autoDescent) - 0.866025 * motorAxisCommand[ROLL] + motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[REAR_LEFT]   = (receiverData[THROTTLE] + autoDescent) + 0.866025 * motorAxisCommand[ROLL] + motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[LEFT]        = (receiverData[THROTTLE] + autoDescent) + 0.866025 * motorAxisCommand[ROLL]                           + motorAxisCommand[YAW];
-  }
-  
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MIDCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[RIGHT]       = MAXCOMMAND;
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[LEFT]        = minAcro;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[REAR_LEFT]   = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MIDCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[LEFT]        = MAXCOMMAND;
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      maxCommand[RIGHT]       = minAcro;
-      maxCommand[FRONT_RIGHT] = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MIDCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[REAR_LEFT]   = minAcro;
-      maxCommand[REAR_RIGHT]  = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MIDCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[REAR_LEFT]   = MAXCOMMAND;
-      minCommand[REAR_RIGHT]  = MAXCOMMAND;
-      maxCommand[FRONT_LEFT]  = minAcro;
-      maxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-    motorCommand[motor]= constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiverData[THROTTLE] < MINCHECK) {
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-  }
-
-  if (armed == ON && safetyCheck == ON)
-    writeMotors();
-    
-  if (armed == OFF && escsCalibrating == OFF)
-    commandAllMotors(MINCOMMAND);
-}
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Y6 MODE ///////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-#ifdef y6Config
-void flightControl(void) {
-  // ********************** Calculate Flight Error ***************************
-  calculateFlightError();
-  
-  // ********************** Update Yaw ***************************************
-  processHeading();
-
-  // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
-    motorCommand[UPPER_FRONT_LEFT]  = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] - 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[UPPER_FRONT_RIGHT] = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] - 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-    motorCommand[UPPER_REAR]        = (receiverData[THROTTLE] + autoDescent)                          + 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[LOWER_FRONT_LEFT]  = (receiverData[THROTTLE] + autoDescent) + motorAxisCommand[ROLL] + 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[LOWER_FRONT_RIGHT] = (receiverData[THROTTLE] + autoDescent) - motorAxisCommand[ROLL] + 0.866025 * motorAxisCommand[PITCH] + motorAxisCommand[YAW];
-    motorCommand[LOWER_REAR]        = (receiverData[THROTTLE] + autoDescent)                          - 0.866025 * motorAxisCommand[PITCH] - motorAxisCommand[YAW];
-  }
-  
-  // *********************** process min max motor command *******************
-  processMinMaxMotorCommand();
-
-  // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-
-  if (flightMode == ACRO) {
-    if (receiverData[ROLL] < (MINCHECK - MIDCOMMAND)) {        // Maximum Left Roll Rate
-      minCommand[UPPER_FRONT_RIGHT] = MAXCOMMAND;
-      minCommand[LOWER_FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[UPPER_FRONT_LEFT]  = minAcro;
-      maxCommand[LOWER_FRONT_LEFT]  = minAcro;
-    }
-    else if (receiverData[ROLL] > (MAXCHECK - MIDCOMMAND)) {   // Maximum Right Roll Rate
-      minCommand[UPPER_FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[LOWER_FRONT_LEFT]  = MAXCOMMAND;
-      maxCommand[UPPER_FRONT_RIGHT] = minAcro;
-      maxCommand[LOWER_FRONT_RIGHT] = minAcro;
-    }
-    else if (receiverData[PITCH] < (MINCHECK - MIDCOMMAND)) {  // Maximum Nose Up Pitch Rate
-      minCommand[UPPER_FRONT_LEFT]  = MAXCOMMAND;
-      minCommand[UPPER_FRONT_RIGHT] = MAXCOMMAND;
-      minCommand[LOWER_FRONT_LEFT]  = MAXCOMMAND;
-      maxCommand[LOWER_FRONT_RIGHT] = MAXCOMMAND;
-      maxCommand[UPPER_REAR]        = minAcro;
-      maxCommand[LOWER_REAR]        = minAcro;
-    }
-    else if (receiverData[PITCH] > (MAXCHECK - MIDCOMMAND)) {  // Maximum Nose Down Pitch Rate
-      minCommand[UPPER_REAR]        = MAXCOMMAND;
-      minCommand[LOWER_REAR]        = MAXCOMMAND;
-      minCommand[UPPER_FRONT_LEFT]  = minAcro;
-      maxCommand[UPPER_FRONT_RIGHT] = minAcro;
-      maxCommand[LOWER_FRONT_LEFT]  = minAcro;
-      maxCommand[LOWER_FRONT_RIGHT] = minAcro;
-    }
-  }
-
-  // Apply limits to motor commands
-  for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-    motorCommand[motor] = constrain(motorCommand[motor], minCommand[motor], maxCommand[motor]);
-  }
-
-  // If throttle in minimum position, don't apply yaw
-  if (receiverData[THROTTLE] < MINCHECK) {
-    for (byte motor = FIRSTMOTOR; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] =  MINTHROTTLE;
-    }
-  }
-
-  if (armed == ON && safetyCheck == ON)
-    writeMotors();
-    
-  if (armed == OFF && escsCalibrating == OFF)
-    commandAllMotors(MINCOMMAND);
-}
-#endif

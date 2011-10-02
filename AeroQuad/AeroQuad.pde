@@ -19,8 +19,8 @@
 */
 
 /****************************************************************************
-   Before flight, select the different user options for your AeroQuad below
-   If you need additional assitance go to http://AeroQuad.com/forum
+** Before flight, select the different user options for your AeroQuad below *
+** If you need additional assitance go to http://AeroQuad.com/forum *********
 *****************************************************************************/
 
 /****************************************************************************
@@ -40,10 +40,11 @@
  
 #define isrSourceIsITG3200  // Experimental, requires shield modifications
  
- /****************************************************************************
- *********************** Define Flight Configuration ************************
- ****************************************************************************/
-// Use only one of the following definitions
+/****************************************************************************
+*********************** Define Flight Configuration ************************
+****************************************************************************/
+// Use only one of the following definitions!!
+
 //#define quadPlusConfig
 #define quadXConfig
 //#define y4Config
@@ -55,11 +56,9 @@
 //#define quadCoaxialPlusCOnfig  // Incomplete, do not use Only available for Mega Platforms
 //#define quadCoaxialXConfig     // Incomplete, do not use Only available for Mega Platforms
 
-#if defined(isrSourceIsITG3200)
-  #define LASTCHANNEL 5
-#else
-  #define LASTCHANNEL 6
-#endif
+/****************************************************************************
+*************** Most Users Will Make No Modifications Below Here ************
+****************************************************************************/
 
 #include <EEPROM.h>
 
@@ -67,14 +66,15 @@
 TwiMaster twiMaster;
 
 #include "AeroQuad.h"
-#include "PID.h"
 #include "AQMath.h"
+#include "PID.h"
 
 // Create objects defined from Configuration Section above
 
 #ifdef AeroQuad_Mini_FFIMUV2
   #include <BMA180.h>
-  //#include <BMP085.h>
+  #include <BMP085.h>
+  //#include <MS5611.h>
   #include <ITG3200.h>
   #include <HMC5883.h>
   #if defined(isrSourceIsITG3200)
@@ -126,8 +126,31 @@ TwiMaster twiMaster;
   //#include <Motors_I2C.h>
 #endif
 
-// Include this last as it contains objects from above declarations
+// Include these last as they contain objects from above declarations
 #include "DataStorage.h"
+//#include "BatteryMonitor.h"
+
+#if   defined(quadPlusConfig)
+  #include <quadPlusConfig.h>
+#elif defined(quadXConfig)
+  #include <quadXConfig.h>
+#elif defined(y4Config)
+  #include <y4Config.h>
+#elif defined(hexPlusConfig)
+  #include <hexPlusConfig.h>
+#elif defined(hexXConfig)
+  #include <hexXConfig.h>
+#elif defined(y6Config)
+  #include <y6Config.h>
+//#elif defined(octoPlusCOnfig)
+//  #include <octoPlusConfig.h>
+//#elif defined(octoXConfig)
+//  #include <octoXConfig.h>
+//#elif defined(quadCoaxialPlusConfig)
+//  #include <quadCoaxialPlusConfig.h>
+//#elif defined(quadCoaxialXConfig)
+//  #include <quadCoaxialXConfig.h>
+#endif
 
 //////////////////////////////////
 
@@ -150,13 +173,17 @@ unsigned int thisIsrFrame = 0;
 
 //////////////////////////////////
 
+unsigned long t1, t2;
+unsigned long loopTime, isrTime;
+
+//////////////////////////////////
+
 // ************************************************************
 // ********************** Setup AeroQuad **********************
 // ************************************************************
 void setup() {
   SERIAL_BEGIN(SERIAL_BAUD);
-  Serial.println();
-
+  
   twiMaster.init(false);         // Internal Pull Ups disabled
   
   pinMode(INITIALIZED_LED, OUTPUT);
@@ -183,9 +210,12 @@ void setup() {
     initializeCompass();
   #endif
   
-  #if defined(BMP085)
+  #if defined(BMP085) | defined(MS5611)
     initializePressure();
-  #endif 
+  #endif
+ 
+  // Initialize Battery Monitor
+  //initializeBatteryMonitor();
 
   zeroIntegralError();
 
@@ -217,7 +247,7 @@ void setup() {
 void loop () {
   if (((isrFrameCounter % BACKGROUND_COUNT) == 0) && (isrFrameCounter != thisIsrFrame))
   {
-    //long t1 = micros();
+    t1 = micros();
     
     thisIsrFrame = isrFrameCounter;
     
@@ -235,11 +265,11 @@ void loop () {
         for (byte i = 0; i < 3; i++) rawMagTemporary[i] = rawMag.value[i];
       }
     #endif
-    #if defined(BMP085)
+    #if defined(BMP085) | defined(MS5611)
       if ((thisIsrFrame % ALTITUDE_COUNT) == 0 )
       {
-        uncompensatedPressureSummedSamples = uncompensatedPressureSum;
-        uncompensatedPressureSum = 0;
+        rawPressureSummedSamples = rawPressureSum;
+        rawPressureSum = 0;
       } 
     #endif      
     sei();
@@ -266,19 +296,19 @@ void loop () {
       }
     #endif
     
-    #if defined(BMP085)
+    #if defined(BMP085) | defined(MS5611)
       if ((thisIsrFrame % ALTITUDE_COUNT) == 0)
       {
         if (thisIsrFrame == ALTITUDE_COUNT)
         {
-          uncompensatedPressureAverage.value = uncompensatedPressureSummedSamples / (SUM_COUNT-1);
+          rawPressureAverage = rawPressureSummedSamples / (SUM_COUNT-1);
           calculateTemperature();
         }
         else
         {
-          uncompensatedPressureAverage.value = uncompensatedPressureSummedSamples / SUM_COUNT;
+          rawPressureAverage = rawPressureSummedSamples / SUM_COUNT;
         } 
-        pressureAltitude.value = calculatePressure();
+        pressureAltitude.value = calculatePressureAltitude();
       }
     #endif      
       
@@ -295,8 +325,9 @@ void loop () {
     {
       readSerialCommand();
       sendSerialTelemetry();
+      //measureBattery(armed);
     }
-    //Serial.println(micros()-t1);
+    loopTime = micros() - t1;
   }
 }
 
@@ -310,6 +341,7 @@ void loop () {
   ////////////////////////////////////////////////////////////////////////////////
   ISR(INT0_vect, ISR_NOBLOCK)
   {  
+    t2 = micros();
     readAccelAndSumForAverage();
     
     readGyroAndSumForAverage();
@@ -321,7 +353,7 @@ void loop () {
       }
     #endif
     
-    #if defined(BMP085)
+    #if defined(BMP085) | defined(MS5611)
       if (((isrFrameCounter + 1) % PRESSURE_COUNT) == 0)
       {
         if (isrFrameCounter == (PRESSURE_COUNT-1))  readTemperatureRequestPressure();
@@ -343,6 +375,7 @@ void loop () {
     
     isrFrameCounter++;
     if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
+    isrTime = micros() - t2;
   }
 #else
   ////////////////////////////////////////////////////////////////////////////////
@@ -355,6 +388,7 @@ void loop () {
   ////////////////////////////////////////////////////////////////////////////////
   ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)
   {   
+    t2 = micros();
     // Check which count has expired.  If count 1, just reload timer and return.
     // If count 2, reload timer and execute senor reads as required.  Then return.
     if (timer0countIndex == 0)        // If 1st count complete
@@ -400,6 +434,7 @@ void loop () {
       isrFrameCounter++;
       if (isrFrameCounter > ISR_FRAME_COUNT) isrFrameCounter = 1;
     }
+    isrTime = micros() - t2;
   }
 #endif
 

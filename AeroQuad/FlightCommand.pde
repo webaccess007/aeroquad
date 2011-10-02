@@ -64,12 +64,12 @@ void readPilotCommands() {
   if (receiverData[MODE] > MIDCOMMAND)
   {
     digitalWrite(RATE_LED, OFF);
-    flightMode = STABLE;
+    flightMode = ATTITUDE;
   }
   else
   {
     digitalWrite(RATE_LED, ON);
-    flightMode = ACRO;
+    flightMode = RATE;
   }
 }
 

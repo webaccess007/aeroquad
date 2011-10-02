@@ -66,40 +66,39 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
 // contains all default values when re-writing EEPROM
 void initializeEEPROM(void) {
   PID[ROLL_RATE_PID].P = 100.0;
-  PID[ROLL_RATE_PID].I = 0.0;
-  PID[ROLL_RATE_PID].D = 300.0;
+  PID[ROLL_RATE_PID].I =   0.0;
+  PID[ROLL_RATE_PID].D =   0.0;
   PID[ROLL_RATE_PID].windupGuard = 100;  // PWMs
   
   PID[PITCH_RATE_PID].P = 100.0;
-  PID[PITCH_RATE_PID].I = 0.0;
-  PID[PITCH_RATE_PID].D = 300.0;
+  PID[PITCH_RATE_PID].I =   0.0;
+  PID[PITCH_RATE_PID].D =   0.0;
   PID[PITCH_RATE_PID].windupGuard = 100;  // PWMs
   
   PID[YAW_RATE_PID].P = 200.0;
-  PID[YAW_RATE_PID].I = 5.0;
-  PID[YAW_RATE_PID].D = 0.0;
+  PID[YAW_RATE_PID].I =   0.0;
+  PID[YAW_RATE_PID].D =   0.0;
   PID[YAW_RATE_PID].windupGuard = 100;  // PWMs
   
   PID[ROLL_ATT_PID].P = 4.0;
-  PID[ROLL_ATT_PID].I = 0.6;
+  PID[ROLL_ATT_PID].I = 0.0;
   PID[ROLL_ATT_PID].D = 0.0;
   PID[ROLL_ATT_PID].windupGuard = 0.5;  // Radians/Sec
   
   PID[PITCH_ATT_PID].P = 4.0;
-  PID[PITCH_ATT_PID].I = 0.6;
+  PID[PITCH_ATT_PID].I = 0.0;
   PID[PITCH_ATT_PID].D = 0.0;
   PID[PITCH_ATT_PID].windupGuard = 0.5;  // Radians/Sec
   
   PID[HEADING_PID].P = 3.0;
-  PID[HEADING_PID].I = 0.1;
+  PID[HEADING_PID].I = 0.0;
   PID[HEADING_PID].D = 0.0;
   PID[HEADING_PID].windupGuard = 0.5;  // Radians/Sec
   
-  smoothHeading = 1.0;
-  headingHoldConfig = OFF;
   minAcro = 1300;
-  
-  Serial.println("EEPROM Initialized");
+  hardManeuvers = OFF;
+  accelCutoff = 1.0;
+  headingHoldAvailable = FALSE;
 }
 
 void readEEPROM(void) {
@@ -121,11 +120,10 @@ void readEEPROM(void) {
   readPID(PITCH_ATT_PID, PITCH_ATT_PID_GAIN_ADR);
   readPID(HEADING_PID,   HEADING_PID_GAIN_ADR);
   
-  smoothHeading = readFloat(HEADINGSMOOTH_ADR);
-  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
-  minAcro = readFloat(MINACRO_ADR);  
-  
-  Serial.println("EEPROM Read");
+  minAcro              = readFloat(MINACRO_ADR);
+  hardManeuvers        = readFloat(HARD_MANEUVER_ADR);
+  accelCutoff          = readFloat(ACCEL_CUTOFF_ADR);
+  headingHoldAvailable = readFloat(HEADING_HOLD_AVAILABLE_ADR);  
 }
 
 void writeEEPROM(void){
@@ -139,10 +137,10 @@ void writeEEPROM(void){
   writePID(PITCH_ATT_PID, PITCH_ATT_PID_GAIN_ADR);
   writePID(HEADING_PID,   HEADING_PID_GAIN_ADR);
   
-  writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
-  writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
-  writeFloat(minAcro, MINACRO_ADR);
+  writeFloat(minAcro,              MINACRO_ADR);
+  writeFloat(hardManeuvers,        HARD_MANEUVER_ADR);
+  writeFloat(accelCutoff,          ACCEL_CUTOFF_ADR);
+  writeFloat(headingHoldAvailable, HEADING_HOLD_AVAILABLE_ADR);
   
-  Serial.println("EEPROM Written");
   sei(); 
 }
