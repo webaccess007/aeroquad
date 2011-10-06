@@ -211,8 +211,8 @@ void initializeADC(void) {
 
   // Set Baud rate
   UBRR2 = 2; // SPI clock running at 2.6MHz
-  //UBRR2 = 1; // SPI clock running at 4MHz
-  //UBRR2 = 0; // SPI clock running at 8MHz
+//  UBRR2 = 1; // SPI clock running at 4MHz
+//  UBRR2 = 0; // SPI clock running at 8MHz
 
 
   // Enable Timer2 Overflow interrupt to capture ADC data
