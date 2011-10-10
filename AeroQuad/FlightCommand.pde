@@ -114,7 +114,7 @@ void readPilotCommands() {
    if (receiverData[AUX] < 1750) {
      if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
        if (storeAltitude == ON) {
-         holdAltitude = baroAltitude;
+         holdAltitude = getBaroAltitude();
          holdThrottle = receiverData[THROTTLE];
          PID[ALTITUDE].integratedError = 0;
          PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
