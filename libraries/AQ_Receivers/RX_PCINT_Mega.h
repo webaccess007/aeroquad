@@ -64,10 +64,10 @@ ISR(PCINT2_vect, ISR_BLOCK)
 
 void initializeReceiver()
 {
-  DDRK    = 0;
-  PORTK   = 0x3F;
-  PCMSK2 |= 0x3F;
-  PCICR  |= 0x1 << 2;
+  DDRK    = 0x00;
+  PORTK   = 0xFF;
+  PCMSK2 |= 0xFF;
+  PCICR  |= 0x01 << 2;
 
   for (byte channel = ROLL; channel < LASTCHANNEL; channel++)
   {

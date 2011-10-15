@@ -64,20 +64,20 @@ void initializeMotors(void) {
 
 void writeMotors(void) {
   #if (LASTMOTOR >= 4)
-    OCR3B = motorCommand[0] * 2;
-    OCR3C = motorCommand[1] * 2;
-    OCR3A = motorCommand[2] * 2;
-    OCR4A = motorCommand[3] * 2;
+    OCR3B = motorCommand[0];
+    OCR3C = motorCommand[1];
+    OCR3A = motorCommand[2];
+    OCR4A = motorCommand[3];
   #endif
 
   #if (LASTMOTOR >= 6)
-    OCR4B = motorCommand[4] * 2 ;
-    OCR4C = motorCommand[5] * 2 ;
+    OCR4B = motorCommand[4];
+    OCR4C = motorCommand[5];
   #endif
 
   #if (LASTMOTOR == 8)
-    OCR1A = motorCommand[6] * 2 ;
-    OCR1B = motorCommand[7] * 2 ;
+    OCR1A = motorCommand[6];
+    OCR1B = motorCommand[7];
   #endif
 
 }

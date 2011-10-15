@@ -15,7 +15,7 @@
 
 /******************************************************/
 
-#include <Accel.h>
+#include <Accel_MP.h>
 
 /******************************************************/
 
@@ -36,13 +36,13 @@ void readAccelAndSumForAverage() {
 
 void computeAccelBias() {
   cli();
-  for (int samples = 0; samples < 1000; samples++) {
+  for (int samples = 0; samples < 2000; samples++) {
     readAccelAndSumForAverage();
-    delayMicroseconds(2000);
+    delayMicroseconds(1000);
   }
 
   for (byte axis = 0; axis < 3; axis++) {
-    accel.value[axis] = (float(accelSum[axis])/1000) * accelScaleFactor[axis];
+    accel.value[axis] = (float(accelSum[axis])/2000) * accelScaleFactor[axis];
     accelSum[axis] = 0;
   }
 
@@ -50,7 +50,7 @@ void computeAccelBias() {
   runTimeAccelBias[YAXIS] = -accel.value[YAXIS];
   runTimeAccelBias[ZAXIS] = -9.8065 - accel.value[ZAXIS];
 
-  oneG = abs(accel.value[ZAXIS] + runTimeAccelBias[ZAXIS]);
+  oneG.value = abs(accel.value[ZAXIS] + runTimeAccelBias[ZAXIS]);
   sei();
 }
 

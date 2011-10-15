@@ -29,8 +29,8 @@ union {unsigned int value;
 long dT;
 long temp;
 
-int64_t offset;
-int64_t sensitivity;
+signed long long int offset;
+signed long long int sensitivity;
 
 long p;
 
@@ -155,8 +155,8 @@ void calculateTemperature()
 /******************************************************/
 
 float calculatePressureAltitude() {
-  offset      = constrain((C2.value * 65536 + (C4.value * dT)/128), -8589672450, 12884705280);
-  sensitivity = constrain((C1.value * 32768 + (C3.value * dT)/256), -4294836225, 6442352640);
+  offset      = constrain((C2.value * 65536 + (C4.value * dT)/128), -8589672450LL, 12884705280LL);
+  sensitivity = constrain((C1.value * 32768 + (C3.value * dT)/256), -4294836225LL, 6442352640LL);
   p = (rawPressureAverage * sensitivity/2097152 - offset)/32768;
 
   tmpFloat = (float(p) / 101325.0);

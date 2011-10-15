@@ -1,7 +1,6 @@
 /******************************************************/
 
 float magBias[3];
-byte  newMagData = 0;
 float rawMagTemporary[3];
 
 

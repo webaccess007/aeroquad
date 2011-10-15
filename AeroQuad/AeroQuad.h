@@ -48,23 +48,23 @@
 #if ((defined AeroQuad_Mini_FFIMUV2 && defined isrSourceIsITG3200) || \
      (defined AeroQuad_Mini         && defined isrSourceIsITG3200) || \
      (defined AeroQuad_v18          && defined isrSourceIsITG3200))
-  #define INITIALIZED_LED 13
-  #define ARMED_LED        4
-  #define RATE_LED         7 
+  #define READY_LED 13
+  #define ARMED_LED  4
+  #define RATE_LED   7 
 #endif
 
 #if ((defined AeroQuad_Mini_FFIMUV2 && !defined isrSourceIsITG3200) || \
      (defined AeroQuad_Mini         && !defined isrSourceIsITG3200) || \
      (defined AeroQuad_v18          && !defined isrSourceIsITG3200))
-  #define INITIALIZED_LED 13
-  #define ARMED_LED       12
-  #define RATE_LED        12 
+  #define READY_LED 13
+  #define ARMED_LED 12
+  #define RATE_LED  12 
 #endif
 
 #ifdef AeroQuadMega_v2
-  #define INITIALIZED_LED 13
-  #define ARMED_LED        4
-  #define RATE_LED        31
+  #define READY_LED 13
+  #define ARMED_LED  4
+  #define RATE_LED  31
 #endif
 
 // Basic axis definitions

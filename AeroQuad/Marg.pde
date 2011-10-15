@@ -111,12 +111,12 @@ void AHRSupdate() {
     eyAcc = (vz*ax - vx*az);
     ezAcc = (vx*ay - vy*ax);
     kiAcc = 0.005;
-    digitalWrite(INITIALIZED_LED, ON);
+    digitalWrite(READY_LED, ON);
   }
   else
   {
     kiAcc = 0.0;
-    digitalWrite(INITIALIZED_LED, OFF);
+    digitalWrite(READY_LED, OFF);
   }
   
   #if defined(HMC5843) | defined(HMC5883)

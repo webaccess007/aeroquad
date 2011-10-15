@@ -374,11 +374,11 @@ void sendSerialTelemetry() {
   #endif
     
   case 'r': // Send Receiver Commands 1 thru 5
-    PrintValueComma(receiverData[ROLL]);
-    PrintValueComma(receiverData[PITCH]);
-    PrintValueComma(receiverData[YAW]);
-    PrintValueComma(receiverData[THROTTLE]);
-    SERIAL_PRINTLN(receiverData[MODE]);
+    Serial.print(receiverData[ROLL]);      comma();
+    Serial.print(receiverData[PITCH]);     comma();
+    Serial.print(receiverData[YAW]);       comma();
+    Serial.print(receiverData[THROTTLE]);  comma();
+    Serial.println(receiverData[MODE]);
     break;
     
   #if defined(BMP085) | defined(MS5611)

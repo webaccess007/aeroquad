@@ -41,7 +41,7 @@ typedef struct {
   unsigned long fallTime;
   unsigned int  lastGoodWidth;
 } tPinTimingData;
-volatile static tPinTimingData pinData[5];
+volatile static tPinTimingData pinData[LASTCHANNEL];
 
 #if defined(__AVR_ATmega328P__) && defined(isrSourceIsITG3200)
   static byte receiverPin[LASTCHANNEL] = {1, 2, 3, 0, 4};    // index used for ROLL, PITCH, YAW, THROTTLE, MODE

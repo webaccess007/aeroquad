@@ -28,17 +28,17 @@
  ****************************************************************************/
 // Select which hardware you wish to use with the AeroQuad Flight Software
 
-#define AeroQuad_Mini_FFIMUV2  // AeroQuad Mini Shield, Arduino Pro Mini, FFIMUv2
+//#define AeroQuad_Mini_FFIMUV2  // AeroQuad Mini Shield, Arduino Pro Mini, FFIMUv2
 //#define AeroQuad_Mini          // Arduino Pro Mini with AeroQuad Mini Shield v1.0
-//#define AeroQuad_v18           // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
+//#define AeroQuad_v18           // Arduino Dumi/Uno with AeroQuad Shield v1.8 or greater
+#define AeroQuadMega_v2        // Arduino Mega with AeroQuad Shield v2.x
 
 /****************************************************************************
  ************************* Define Interrupt Source **************************
  ************************** 328p Processor Only *****************************
  ****************************************************************************/
  
-#define isrSourceIsITG3200  // Experimental, requires shield modifications
+//#define isrSourceIsITG3200  // Experimental, requires shield modifications
  
 /****************************************************************************
 *********************** Define Flight Configuration ************************
@@ -51,10 +51,10 @@
 //#define hexPlusConfig          // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
 //#define hexXConfig             // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
 //#define y6Config               // Only available for Mega Platforms or 328p with ITG3200 Interrupt Source and Updated EICD
-//#define octoPlusConfig         // Incomplete, do not use Only available for Mega Platforms
-//#define octoXConfig            // Incomplete, do not use Only available for Mega Platforms
-//#define quadCoaxialPlusCOnfig  // Incomplete, do not use Only available for Mega Platforms
-//#define quadCoaxialXConfig     // Incomplete, do not use Only available for Mega Platforms
+//#define octoPlusConfig         // Incomplete, do not use // Only available for Mega Platforms
+//#define octoXConfig            // Incomplete, do not use // Only available for Mega Platforms
+//#define quadCoaxialPlusConfig  // Incomplete, do not use // Only available for Mega Platforms
+//#define quadCoaxialXConfig     // Incomplete, do not use // Only available for Mega Platforms
 
 /****************************************************************************
 *************** Most Users Will Make No Modifications Below Here ************
@@ -186,12 +186,13 @@ void setup() {
   
   twiMaster.init(false);         // Internal Pull Ups disabled
   
-  pinMode(INITIALIZED_LED, OUTPUT);
-  digitalWrite(INITIALIZED_LED, OFF);
+  pinMode(READY_LED, OUTPUT);
   pinMode(ARMED_LED, OUTPUT);
+  pinMode(RATE_LED,  OUTPUT);
+  
+  digitalWrite(READY_LED, OFF);
   digitalWrite(ARMED_LED, OFF);
-  pinMode(RATE_LED, OUTPUT);
-  digitalWrite(RATE_LED, OFF);
+  digitalWrite(RATE_LED,  OFF);
   
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
@@ -225,7 +226,7 @@ void setup() {
 
   setupFourthOrder();
   
-  digitalWrite(INITIALIZED_LED, ON);
+  digitalWrite(READY_LED, ON);
   
   ////////////////////////////////////////////////////////////////////////////////
   
@@ -260,7 +261,7 @@ void loop () {
       gyroSum[i] = 0;
     }
     #if defined(HMC5843) | defined(HMC5883)
-      if (newMagData == 1)
+      if ((isrFrameCounter % COMPASS_COUNT) == 0)
       {
         for (byte i = 0; i < 3; i++) rawMagTemporary[i] = rawMag.value[i];
       }
@@ -287,12 +288,11 @@ void loop () {
     filteredAccel.value[ZAXIS] = computeFourthOrder(accel.value[ZAXIS], &fourthOrder[AZ_FILTER]);
     
     #if defined(HMC5843) | defined(HMC5883)
-      if (newMagData == 1)
+      if ((isrFrameCounter % COMPASS_COUNT) == 0)
       {
         mag.value[XAXIS] = float(rawMagTemporary[XAXIS]) + magBias[XAXIS];
         mag.value[YAXIS] = float(rawMagTemporary[YAXIS]) + magBias[YAXIS];
         mag.value[ZAXIS] = float(rawMagTemporary[ZAXIS]) + magBias[ZAXIS];
-        newMagData = 0;
       }
     #endif
     
@@ -324,7 +324,7 @@ void loop () {
     if (thisIsrFrame % SERIAL_COM_COUNT == 0)
     {
       readSerialCommand();
-      sendSerialTelemetry();
+      sendSerialTelemetry(); 
       //measureBattery(armed);
     }
     loopTime = micros() - t1;
@@ -347,9 +347,9 @@ void loop () {
     readGyroAndSumForAverage();
     
     #if defined(HMC5843) | defined(HMC5883)
-      if ((isrFrameCounter % COMPASS_COUNT) == 0) {
+      if ((isrFrameCounter % COMPASS_COUNT) == 0)
+      {
         readCompass();
-        newMagData = 1;
       }
     #endif
     
@@ -406,9 +406,9 @@ void loop () {
       readGyroAndSumForAverage();
       
       #if defined(HMC5843) | defined(HMC5883)
-        if ((isrFrameCounter % COMPASS_COUNT) == 0) {
+        if ((isrFrameCounter % COMPASS_COUNT) == 0)
+        {
           readCompass();
-          newMagData = 1;
         }
       #endif
       

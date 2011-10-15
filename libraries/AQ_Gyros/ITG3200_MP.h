@@ -18,10 +18,11 @@
 //#define LOW_PASS_FILTER 0x1D  //  10 Hz Low pass filter, 1 kHz internal sample rate
 //#define LOW_PASS_FILTER 0x1E  //   5 Hz Low pass filter, 1 kHz internal sample rate
 
+
 #if (LOW_PASS_FILTER == 0x18)
-  #define SAMPLE_RATE_DIVISOR 0x0F  // 500 Hz = 8000/(15 + 1)
+  #define SAMPLE_RATE_DIVISOR 0x07  // 1000 Hz = 8000/(7 + 1)
 #else
-  #define SAMPLE_RATE_DIVISOR 0x01  // 500 Hz = 1000/(1 + 1)
+  #define SAMPLE_RATE_DIVISOR 0x00  // 1000 Hz = 1000/(0 + 1)
 #endif
 
 /******************************************************/
@@ -30,7 +31,7 @@
 
 /******************************************************/
 
-#include <Gyro.h>
+#include <Gyro_MP.h>
 
 /******************************************************/
 
@@ -50,13 +51,13 @@ void readGyroAndSumForAverage() {
 
 void computeGyroBias() {
   cli();
-  for (int samples = 0; samples < 1000; samples++) {
+  for (int samples = 0; samples < 2000; samples++) {
     readGyroAndSumForAverage();
-    delayMicroseconds(2000);
+    delayMicroseconds(1000);
   }
 
   for (byte axis = ROLL; axis < 3; axis++) {
-    runTimeGyroBias[axis] = (float(gyroSum[axis])/1000);
+    runTimeGyroBias[axis] = (float(gyroSum[axis])/2000);
     gyroSum[axis] = 0;
   }
   sei();
