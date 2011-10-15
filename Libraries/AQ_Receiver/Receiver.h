@@ -41,13 +41,17 @@ int lastChannel = 0;
 
 float receiverXmitFactor = 0.0;
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-int receiverTrim[3] = {0,0,0};
+//int receiverTrim[3] = {0,0,0};
 int receiverZero[3] = {0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
 int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
 float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+
+boolean isReceiverFailing = false;
+volatile unsigned long noSignalCounter = 0;
+float receiverAutoDescent = 0.0;
   
 void initializeReceiverParam(int nbChannel = 6) {
   

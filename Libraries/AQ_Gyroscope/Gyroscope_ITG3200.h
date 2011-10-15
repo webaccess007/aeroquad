@@ -68,6 +68,40 @@ void measureGyro() {
   gyroLastMesuredTime = currentTime;
 }
 
+void measureGyroSum() {
+  sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
+  
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    gyroSample[axis] += (Wire.receive() << 8) | Wire.receive();
+  }
+  gyroSampleCount++;
+}
+
+void evalueateGyroRate() {
+  int gyroADC[3];
+  gyroADC[ROLL]  = (gyroSample[ROLL]/gyroSampleCount)  - gyroZero[ROLL];
+  gyroADC[PITCH] = gyroZero[PITCH] - (gyroSample[PITCH]/gyroSampleCount);
+  gyroADC[YAW]   = gyroZero[YAW] - (gyroSample[YAW]/gyroSampleCount);
+  gyroSample[0] = 0.0;
+  gyroSample[1] = 0.0;
+  gyroSample[2] = 0.0;
+  gyroSampleCount = 0;
+
+  for (byte axis = 0; axis <= YAW; axis++) {
+    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
+  }
+ 
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
+}
+
+
+
 void calibrateGyro() {
   int findZero[FINDZERO];
     

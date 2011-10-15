@@ -28,17 +28,25 @@ void initializeAccel() {
 }
   
 void measureAccel() {
-  int accelADC;
+//  int accelADC;
   for (byte axis = ROLL; axis < LASTAXIS; axis++) {
     const float rawADC = readADC(axis+3);
     if (rawADC > 500) { // Check if measurement good
       if (axis == ROLL)
-        accelADC = rawADC - accelZero[axis];
+        meterPerSec[axis] = rawADC - accelZero[axis];
       else
-        accelADC = accelZero[axis] - rawADC;
-      meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+        meterPerSec[axis] = accelZero[axis] - rawADC;
+//      meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
     }
   }
+}
+
+void measureAccelSum() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
+void evaluateMeterPerSec() {
+  // do nothing here since it's already oversample in the APM_ADC class
 }
 
 void calibrateAccel() {

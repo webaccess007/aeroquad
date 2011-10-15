@@ -30,6 +30,32 @@
 ////////////////////////////////////////////////////////////////////////////////
 // MARG Variable Definitions
 ////////////////////////////////////////////////////////////////////////////////
+//=====================================================================================================
+// AHRS.c
+// S.O.H. Madgwick
+// 25th August 2010
+//=====================================================================================================
+// Description:
+//
+// Quaternion implementation of the 'DCM filter' [Mayhony et al].  Incorporates the magnetic distortion
+// compensation algorithms from my filter [Madgwick] which eliminates the need for a reference
+// direction of flux (bx bz) to be predefined and limits the effect of magnetic distortions to yaw
+// axis only.
+//
+// User must define 'halfT' as the (sample period / 2), and the filter gains 'Kp' and 'Ki'.
+//
+// Global variables 'q0', 'q1', 'q2', 'q3' are the quaternion elements representing the estimated
+// orientation.  See my report for an overview of the use of quaternions in this application.
+//
+// User must call 'AHRSupdate()' every sample period and parse calibrated gyroscope ('gx', 'gy', 'gz'),
+// accelerometer ('ax', 'ay', 'ay') and magnetometer ('mx', 'my', 'mz') data.  Gyroscope units are
+// radians/second, accelerometer and magnetometer units are irrelevant as the vector is normalised.
+//
+//=====================================================================================================
+
+////////////////////////////////////////////////////////////////////////////////
+// MARG Variable Definitions
+////////////////////////////////////////////////////////////////////////////////
 float accelMagnitude;
 float ax, ay, az; 
 float bx, bz;
@@ -93,8 +119,8 @@ void calculateKinematics(float rollRate,           float pitchRate,     float ya
   margPreviousTime = margCurrentTime;
     
   // normalize the measurements
-  accelMagnitude = sqrt(accelRoll*accelRoll   +
-                        accelPitch*accelPitch +
+  accelMagnitude = sqrt(accelRoll*accelRoll +\
+                        accelPitch*accelPitch +\
                         accelYaw*accelYaw);       
   ax = accelRoll / accelMagnitude;
   ay = accelPitch / accelMagnitude;
@@ -121,12 +147,12 @@ void calculateKinematics(float rollRate,           float pitchRate,     float ya
     eyAcc = (vz*ax - vx*az);
     ezAcc = (vx*ay - vy*ax);
     kiAcc = 0.005;
-//    digitalWrite(INITIALIZED_LED, ON);
+//    digitalWrite(READY_LED, ON);
   }
   else
   {
     kiAcc = 0.0;
-//    digitalWrite(INITIALIZED_LED, OFF);
+//    digitalWrite(READY_LED, OFF);
   }
   
   #if defined(HMC5843) | defined(HMC5883)
@@ -288,7 +314,7 @@ void initializeKinematics(float hdgX, float hdgY)
   eyInt = 0.0;
   ezInt = 0.0;
 
-  kpAcc = 0.2; //2.0;
+  kpAcc = 2.0;
   
   kpMag = 2.0;
   kiMag = 0.005;

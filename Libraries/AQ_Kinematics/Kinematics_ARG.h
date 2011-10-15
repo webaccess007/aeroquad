@@ -174,7 +174,7 @@ void initializeKinematics(float hdgX, float hdgY)
   previousEy = 0;
   previousEz = 0;
 
-  Kp = 0.0;//0.2; // 2.0;
+  Kp = 0.2; // 2.0;
   Ki = 0.0005; //0.005;
 }
   

@@ -88,6 +88,30 @@ void measureAccel() {
   }  
 }
 
+void measureAccelSum() {
+  Wire.beginTransmission(ACCEL_ADDRESS);
+  Wire.send(ACCEL_READ_ROLL_ADDRESS);
+  Wire.endTransmission();
+  Wire.requestFrom(ACCEL_ADDRESS, 6);
+  
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    accelSample[axis] += ((Wire.receive()|(Wire.receive() << 8)) >> 2);
+  }
+  accelSampleCount++;  
+}
+
+void evaluateMeterPerSec() {
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    if (axis == XAXIS)
+      meterPerSec[axis] = (accelSample[axis]/accelSampleCount) - accelZero[axis];
+    else
+      meterPerSec[axis] = accelZero[axis] - (accelSample[axis]/accelSampleCount);
+	accelSample[axis] = 0.0;
+//    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+  }
+  accelSampleCount = 0;
+}
+
 void calibrateAccel() {
   int findZero[FINDZERO];
   int dataAddress;

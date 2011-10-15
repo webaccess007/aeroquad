@@ -29,6 +29,12 @@ float accelSmoothFactor = 1.0;
 float accelOneG = 0.0;
 float meterPerSec[3] = {0.0,0.0,0.0};
 float accelZero[3] = {0.0,0.0,0.0};
+
+
+void measureAccelSum();
+void evaluateMeterPerSec();
+float accelSample[3] = {0.0,0.0,0.0};
+byte accelSampleCount = 0;
   
 void initializeAccel();
 void calibrateAccel();

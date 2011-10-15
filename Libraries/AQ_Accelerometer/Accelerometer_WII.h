@@ -30,14 +30,22 @@ void initializeAccel() {
   accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2 
 }
 
-void measureAccel(void) {
-  int accelADC[3];
-  accelADC[XAXIS] = accelPlatformWii->getAccelADC(XAXIS) - accelZero[XAXIS];
-  accelADC[YAXIS] = accelZero[YAXIS] - accelPlatformWii->getAccelADC(YAXIS);
-  accelADC[ZAXIS] = accelZero[ZAXIS] - accelPlatformWii->getAccelADC(ZAXIS);
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
-  }
+void measureAccel() {
+//  int accelADC[3];
+  meterPerSec[XAXIS] = accelPlatformWii->getAccelADC(XAXIS) - accelZero[XAXIS];
+  meterPerSec[YAXIS] = accelZero[YAXIS] - accelPlatformWii->getAccelADC(YAXIS);
+  meterPerSec[ZAXIS] = accelZero[ZAXIS] - accelPlatformWii->getAccelADC(ZAXIS);
+//  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+//    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+//  }
+}
+
+void measureAccelSum() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
+void evaluateMeterPerSec() {
+  // do nothing here since it's already oversample in the APM_ADC class
 }
 
 void calibrateAccel() {

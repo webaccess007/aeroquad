@@ -30,14 +30,22 @@ void initializeAccel() {
 }
 
 void measureAccel() {
-  float accelADC[3];
-  accelADC[XAXIS] = accelChr6dm->data.ax - accelZero[XAXIS];
-  accelADC[YAXIS] = accelChr6dm->data.ay - accelZero[YAXIS];
-  accelADC[ZAXIS] = accelChr6dm->data.az - accelOneG;
+//  float accelADC[3];
+  meterPerSec[XAXIS] = accelChr6dm->data.ax - accelZero[XAXIS];
+  meterPerSec[YAXIS] = accelChr6dm->data.ay - accelZero[YAXIS];
+  meterPerSec[ZAXIS] = accelChr6dm->data.az - accelOneG;
 
-  meterPerSec[XAXIS] = filterSmooth(accelADC[XAXIS], meterPerSec[XAXIS], accelSmoothFactor); //to get around 1
-  meterPerSec[YAXIS] = filterSmooth(accelADC[YAXIS], meterPerSec[YAXIS], accelSmoothFactor);
-  meterPerSec[ZAXIS] = filterSmooth(accelADC[ZAXIS], meterPerSec[ZAXIS], accelSmoothFactor);
+//  meterPerSec[XAXIS] = filterSmooth(accelADC[XAXIS], meterPerSec[XAXIS], accelSmoothFactor); //to get around 1
+//  meterPerSec[YAXIS] = filterSmooth(accelADC[YAXIS], meterPerSec[YAXIS], accelSmoothFactor);
+//  meterPerSec[ZAXIS] = filterSmooth(accelADC[ZAXIS], meterPerSec[ZAXIS], accelSmoothFactor);
+}
+
+void measureAccelSum() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
+void evaluateMeterPerSec() {
+  // do nothing here since it's already oversample in the APM_ADC class
 }
 
 void calibrateAccel() {
