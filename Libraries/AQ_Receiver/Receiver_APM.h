@@ -31,8 +31,12 @@
 #include <Axis.h>
 #include <APM_RC.h>
 
+#define THROTTLE_FAILSAFE_EDGE 950
+
+#define THROTTLE_HISTORY_SIZE 10
 
 int receiverPin[6] = {0,0,0,0,0,0};
+int throttleHistory[THROTTLE_HISTORY_SIZE];
   
 void initializeReceiver(int nbChannel = 6) {
   initializeReceiverParam(nbChannel);
@@ -45,20 +49,37 @@ void initializeReceiver(int nbChannel = 6) {
 }
 
 void readReceiver() {
-  for(byte channel = ROLL; channel < lastChannel; channel++) {
-    // Apply receiver calibration adjustment
-    receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
-    // Smooth the flight control receiver inputs
-    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-  }
 
-  // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
-    receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-  // No receiverXmitFactor reduction applied for throttle, mode and
-  for (byte channel = THROTTLE; channel < lastChannel; channel++)
-    receiverCommand[channel] = receiverCommandSmooth[channel];
+  if (readReceiverChannel(receiverPin[THROTTLE]) < THROTTLE_FAILSAFE_EDGE) {
+    isReceiverFailing = true;
+	receiverCommand[THROTTLE] = throttleHistory[0];  // Use the last good throttle as current throttle
+	receiverAutoDescent -= 0.2;
+  }
+  else {
+    isReceiverFailing = false;
+	receiverAutoDescent = 0;
+	
+    for(byte channel = ROLL; channel < lastChannel; channel++) {
+      // Apply receiver calibration adjustment
+      receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
+      // Smooth the flight control receiver inputs
+      receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
+    }
+
+    // Reduce receiver commands using receiverXmitFactor and center around 1500
+    for (byte channel = ROLL; channel < THROTTLE; channel++)
+      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+    // No receiverXmitFactor reduction applied for throttle, mode and
+    for (byte channel = THROTTLE; channel < lastChannel; channel++)
+      receiverCommand[channel] = receiverCommandSmooth[channel];
+	  
+	for (int i = 0; i < THROTTLE_HISTORY_SIZE; i++) {	// needed to know the last good throttle value fot a failsafe
+	  throttleHistory[i] = throttleHistory[i+1];
+	}
+	throttleHistory[THROTTLE_HISTORY_SIZE-1] = receiverCommand[THROTTLE];
+  }
 }
+
 
   
 void setChannelValue(byte channel,int value) {

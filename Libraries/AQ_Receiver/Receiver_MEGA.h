@@ -131,13 +131,13 @@ void initializeReceiver(int nbChannel = 6) {
 }
 
 void readReceiver() {
-  if (noSignalCounter > 16)
-  {
+
+  if (noSignalCounter > 16) {
     isReceiverFailing = true;
 	receiverAutoDescent -= 0.2;
   }
-  else
-  {
+  else {
+  
     isReceiverFailing = false;
 	receiverAutoDescent = 0.0;
     for(byte channel = ROLL; channel < lastChannel; channel++) {

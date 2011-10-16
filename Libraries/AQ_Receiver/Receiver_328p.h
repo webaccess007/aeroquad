@@ -150,13 +150,11 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver()
  {
-  if (noSignalCounter > 1)
-  {
+  if (noSignalCounter > 1) {
     isReceiverFailing = true;
 	receiverAutoDescent -= 0.2;
   }
-  else
-  {
+  else {
     isReceiverFailing = false;
 	receiverAutoDescent = 0;
     for(byte channel = ROLL; channel < lastChannel; channel++) {
