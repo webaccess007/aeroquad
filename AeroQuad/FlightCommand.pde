@@ -26,7 +26,6 @@ void readPilotCommands() {
   // Read quad configuration commands from transmitter when throttle down
   if (receiverCommand[THROTTLE] < MINCHECK) {
     zeroIntegralError();
-    throttleAdjust = 0;
     //receiver->adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
     if (receiverCommand[YAW] < MINCHECK && armed == ON) {
@@ -71,15 +70,6 @@ void readPilotCommands() {
     flightMode = ACRO;
   #else
     // Check Mode switch for Acro or Stable
-    #if defined (ReceiverFailSafe)
-      if (isReceiverFailing) {
-        if (flightMode == ACRO) {
-          zeroIntegralError();
-        }
-        flightMode = STABLE;
-      }
-      else
-    #endif
     if (receiverCommand[MODE] > 1500) {
       if (flightMode == ACRO) {
         #if defined(AeroQuad_v18) || defined(AeroQuadMega_v2)
@@ -111,22 +101,21 @@ void readPilotCommands() {
   
   #ifdef AltitudeHold
    if (receiverCommand[AUX] < 1750) {
-     if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
-       if (storeAltitude == ON) {
-         holdAltitude = getBaroAltitude();
-         holdThrottle = receiverCommand[THROTTLE];
+     if (altitudeHoldState != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+       if (isStoreAltitudeNeeded) {
+         altitudeToHoldTarget = getBaroAltitude();
+         altitudeHoldThrottle = receiverCommand[THROTTLE];
          PID[ALTITUDE].integratedError = 0;
-         PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
-         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
-         storeAltitude = OFF;
+         PID[ALTITUDE].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
+         isStoreAltitudeNeeded = false;
        }
-       altitudeHold = ON;
+       altitudeHoldState = ON;
      }
      // note, Panic will stay set until Althold is toggled off/on
    } 
    else {
-     storeAltitude = ON;
-     altitudeHold = OFF;
+     isStoreAltitudeNeeded = true;
+     altitudeHoldState = OFF;
    }
   #endif
 

@@ -54,17 +54,5 @@ void measureGroundBaro() {
   groundAltitude = groundAltitude / 25.0;
 }
 
-//  const float getRawData() {
-//    return rawAltitude;
-//  }
-  
-//  const float getGroundAltitude() {
-//    return groundAltitude;
-//  }
-
-//  void setStartAltitude(float value) {
-//    altitude = value;
-//  }
-
 
 #endif

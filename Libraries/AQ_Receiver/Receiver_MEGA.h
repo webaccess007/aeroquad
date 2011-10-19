@@ -117,14 +117,14 @@ SIGNAL(PCINT2_vect) {
   static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 #endif
 
-void initializeReceiver(int nbChannel = 6) {
+void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+
+  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
   
   DDRK = 0;
   PORTK = 0;
   PCMSK2 |= 0xFF;
   PCICR |= 0x1 << 2;
-	
-  initializeReceiverParam(nbChannel);
 
   for (byte channel = ROLL; channel < lastChannel; channel++)
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
@@ -132,14 +132,12 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver() {
 
-  if (noSignalCounter > 16) {
+  if (useReceiverFailing && noSignalCounter > 16) {
     isReceiverFailing = true;
-	receiverAutoDescent -= 0.2;
   }
   else {
   
     isReceiverFailing = false;
-	receiverAutoDescent = 0.0;
     for(byte channel = ROLL; channel < lastChannel; channel++) {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;

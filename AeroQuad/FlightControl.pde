@@ -31,21 +31,20 @@
 
 void calculateFlightError(void)
 {
-  if (flightMode == ACRO) {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), gyroRate[ROLL], &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
-  }
-  else {
-    #if defined (ReceiverFailSafe)  
-      if (isReceiverFailing) {
-        receiverCommand[ROLL] = MIDCOMMAND;
-        receiverCommand[PITCH] = MIDCOMMAND;
-      }
-    #endif
+  if (flightMode == STABLE || isReceiverFailing) {
+    if (isReceiverFailing) {
+      receiverCommand[ROLL] == MIDCOMMAND;
+      receiverCommand[PITCH] == MIDCOMMAND;
+      receiverCommand[YAW] == MIDCOMMAND;
+    }
     float rollAttitudeCmd = updatePID((receiverCommand[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
     float pitchAttitudeCmd = updatePID((receiverCommand[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
     motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
     motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -gyroRate[PITCH], &PID[LEVELGYROPITCH]);
+  }
+  else {
+    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), gyroRate[ROLL], &PID[ROLL]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -gyroRate[PITCH], &PID[PITCH]);
   }
 }
 
@@ -139,9 +138,19 @@ void processHeading(void)
   // NEW SI Version
   commandedYaw = constrain(getReceiverSIData(YAW) + radians(headingHold), -PI, PI);
   motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[YAW], &PID[YAW]);
-  // uses flightAngle unbias rate
-  //motors->setMotorAxisCommand(YAW, updatePID(commandedYaw, flightAngle->getGyroUnbias(YAW), &PID[YAW]));
 }
+
+//////////////////////////////////////////////////////////////////////////////
+///////////////////// processThrottleAdjustment //////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processThrottleAdjustment() {
+  
+  if (isReceiverFailing || batteryStatus != OK) {
+    // override throttle correction to auto descent here
+  }
+  throttle = throttle + throttleCorrection;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processAltitudeHold //////////////////////////////
@@ -154,31 +163,29 @@ void processAltitudeHold(void)
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
-  if (altitudeHold == ON) {
-    throttleAdjust = updatePID(holdAltitude, getBaroAltitude(), &PID[ALTITUDE]);
+  if (altitudeHoldState == ON) {
+    throttleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-    throttleAdjust = constrain(throttleAdjust, minThrottleAdjust, maxThrottleAdjust);
-    if (abs(holdThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
-      altitudeHold = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+    throttleCorrection = constrain(throttleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
+      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
-      if (receiverCommand[THROTTLE] > (holdThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-        holdAltitude += 0.01;
+      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+        altitudeToHoldTarget += 0.01;
       }
-      if (receiverCommand[THROTTLE] < (holdThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-        holdAltitude -= 0.01;
+      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+        altitudeToHoldTarget -= 0.01;
       }
     }
+    throttle = altitudeHoldThrottle;
   }
   else {
-    // Altitude hold is off, get throttle from receiver
-    holdThrottle = receiverCommand[THROTTLE];
-    throttleAdjust = autoDescent; // autoDescent is lowered from BatteryMonitor.h during battery alarm
+    throttle = receiverCommand[THROTTLE];
+    throttleCorrection = 0;
   }
-  // holdThrottle set in FlightCommand.pde if altitude hold is on
-  throttle = holdThrottle + throttleAdjust + (int)receiverAutoDescent; // holdThrottle is also adjust by BatteryMonitor.h during battery alarm
 #else
-  // If altitude hold not enabled in AeroQuad.pde, get throttle from receiver
-  throttle = receiverCommand[THROTTLE] + autoDescent + (int)receiverAutoDescent; //autoDescent is lowered from BatteryMonitor.h while battery critical, otherwise kept 0
+  throttle = receiverCommand[THROTTLE];
+  throttleCorrection = 0;
 #endif
 }
 
@@ -192,6 +199,9 @@ void processFlightControl() {
   
   // ********************** Update Yaw ***************************************
   processHeading();
+  
+  // ********************** Process throttle adjustment ***************************************
+  processThrottleAdjustment();
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {
@@ -220,8 +230,6 @@ void processFlightControl() {
   if (armed == OFF) {
     processCalibrateESC();
   }
-  
-
 
   // *********************** Command Motors **********************
   if (armed == ON && safetyCheck == ON) {

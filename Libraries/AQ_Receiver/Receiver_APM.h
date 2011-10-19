@@ -38,8 +38,9 @@
 int receiverPin[6] = {0,0,0,0,0,0};
 int throttleHistory[THROTTLE_HISTORY_SIZE];
   
-void initializeReceiver(int nbChannel = 6) {
-  initializeReceiverParam(nbChannel);
+void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+
+  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
   receiverPin[ROLL] = 0;
   receiverPin[PITCH] = 1;
   receiverPin[YAW] = 3;
@@ -50,14 +51,12 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver() {
 
-  if (readReceiverChannel(receiverPin[THROTTLE]) < THROTTLE_FAILSAFE_EDGE) {
+  if (useReceiverFailing && readReceiverChannel(receiverPin[THROTTLE]) < THROTTLE_FAILSAFE_EDGE) {
     isReceiverFailing = true;
 	receiverCommand[THROTTLE] = throttleHistory[0];  // Use the last good throttle as current throttle
-	receiverAutoDescent -= 0.2;
   }
   else {
     isReceiverFailing = false;
-	receiverAutoDescent = 0;
 	
     for(byte channel = ROLL; channel < lastChannel; channel++) {
       // Apply receiver calibration adjustment

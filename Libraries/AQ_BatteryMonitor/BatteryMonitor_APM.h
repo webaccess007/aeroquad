@@ -21,7 +21,7 @@
 #ifndef _AQ_BATTERY_MONITOR_APM_
 #define _AQ_BATTERY_MONITOR_APM_
 
-#include "BatteryMonitor.h"
+#include "BatteryMonitorBase.h"
 #include <WProgram.h>
 
 // ***********************************************************************************
@@ -105,6 +105,7 @@ void initializeBatteryMonitor(float diodeValue) {
     //batteryVoltage = readBatteryVoltage(BATTERYPIN);
 }
 
+/**
 void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
   static byte batteryCounter=0;
   byte freq;
@@ -127,6 +128,7 @@ void lowBatteryEvent(byte level) {  // <- this logic by Jose Julio
     else batteryCounter = 0;
   }
 }
+*/
 
 const float readBatteryVoltage(byte channel) {
   return (analogRead(channel) * batteryScaleFactor) + diode;

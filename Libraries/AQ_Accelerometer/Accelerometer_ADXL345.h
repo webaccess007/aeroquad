@@ -62,6 +62,7 @@ void measureAccelSum() {
 }
 
 void evaluateMeterPerSec() {
+	
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
       meterPerSec[axis] = (accelSample[axis]/accelSampleCount) - accelZero[axis];

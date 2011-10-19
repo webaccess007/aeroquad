@@ -160,6 +160,7 @@ void readSerialCommand() {
       break;
     case 'b': // calibrate gyros
       calibrateGyro();
+      storeSensorsZeroToEEPROM();
       break;
     case 'c': // calibrate accels
       calibrateAccel();
@@ -167,6 +168,7 @@ void readSerialCommand() {
       calibrateKinematics();
       accelOneG = meterPerSec[ZAXIS];
 #endif
+      storeSensorsZeroToEEPROM();
       break;
     case 'd': // *** Spare ***
       // Spare command
@@ -366,7 +368,7 @@ void sendSerialTelemetry() {
 #endif
 #ifdef AltitudeHold
     PrintValueComma(getBaroAltitude());
-    SERIAL_PRINTLN((int)altitudeHold);
+    SERIAL_PRINTLN((int)altitudeHoldState);
 #else
     PrintValueComma(0);
     SERIAL_PRINTLN('0');

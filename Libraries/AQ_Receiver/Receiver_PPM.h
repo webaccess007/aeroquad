@@ -66,16 +66,14 @@ static void rxInt() {
 	  rcValue[chan] = diff;
 	}
     chan++;
-//    #if defined(FAILSAFE)
-//      if(failsafeCnt > 20) failsafeCnt -= 20; else failsafeCnt = 0;   // clear FailSafe counter - added by MIS
-//    #endif
   }
 }
 
 
 
-void initializeReceiver(int nbChannel = 6) {
-  initializeReceiverParam(nbChannel);
+void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+
+  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
   attachInterrupt(0, rxInt, RISING);
 }
 
@@ -87,7 +85,7 @@ void readReceiver() {
     cli(); // Let's disable interrupts
 
     receiverData[channel] = (receiverSlope[channel] * rcValue[rcChannel[channel]]) + receiverOffset[channel];
-	  
+
 	SREG = oldSREG;
     sei();// Let's enable the interrupts	
 	

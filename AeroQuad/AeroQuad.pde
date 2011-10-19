@@ -78,7 +78,7 @@
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
 #define FlightAngleARG // Use this if you do not have a magnetometer installed
-//#define FlightAngleNewARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleNewARG // EXPERIMENTAL Use this if you do not have a magnetometer installed
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -825,6 +825,8 @@
   #include <BatteryMonitor_AQ.h>
 #elif defined (BATTERY_MONITOR_APM)
   #include <BatteryMonitor_APM.h>
+#else
+  #include <BatteryMonitor.h>
 #endif  
 
 //********************************************************
@@ -913,15 +915,19 @@ void setup() {
 
 
   // Setup receiver pins for pin change interrupts
-  initializeReceiver(LASTCHANNEL);
+  #if defined (ReceiverFailSafe)
+    initializeReceiver(LASTCHANNEL,true);
+  #else
+    initializeReceiver(LASTCHANNEL);
+  #endif
   initReceiverFromEEPROM();
        
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
-  initSensorsZeroFromEEPROM();
   initializeGyro(); // defined in Gyro.h
   initializeAccel(); // defined in Accel.h
+  initSensorsZeroFromEEPROM();
   
   // Calibrate sensors
   calibrateGyro(); // defined in Gyro.h
@@ -1041,7 +1047,7 @@ void loop () {
       float filteredAccelRoll = computeFourthOrder(meterPerSec[XAXIS], &fourthOrder[AX_FILTER]);
       float filteredAccelPitch = computeFourthOrder(meterPerSec[YAXIS], &fourthOrder[AY_FILTER]);
       float filteredAccelYaw = computeFourthOrder(meterPerSec[ZAXIS], &fourthOrder[AZ_FILTER]);
-      
+
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
         calculateKinematics(gyroRate[XAXIS],                  

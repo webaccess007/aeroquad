@@ -50,11 +50,14 @@ float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
 boolean isReceiverFailing = false;
+boolean useReceiverFailing = false;
 volatile unsigned long noSignalCounter = 0;
-float receiverAutoDescent = 0.0;
   
-void initializeReceiverParam(int nbChannel = 6) {
+void initializeReceiverParam(int nbChannel,boolean useReceiverFailingFeature = false) {
   
+  lastChannel = nbChannel;
+  useReceiverFailing = useReceiverFailingFeature;
+
   receiverCommand[ROLL] = 1500;
   receiverCommand[PITCH] = 1500;
   receiverCommand[YAW] = 1500;
@@ -63,9 +66,7 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[AUX] = 1000;
   receiverCommand[AUX+1] = 1000;
   receiverCommand[AUX+2] = 1000;
-	
-  lastChannel = nbChannel;
-	
+  
   for (byte channel = ROLL; channel < lastChannel; channel++)
     receiverCommandSmooth[channel] = 1.0;
   for (byte channel = ROLL; channel < THROTTLE; channel++)

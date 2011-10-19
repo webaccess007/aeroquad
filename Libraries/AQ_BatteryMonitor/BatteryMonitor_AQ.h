@@ -21,7 +21,7 @@
 #ifndef _AQ_BATTERY_MONITOR_AQ_
 #define _AQ_BATTERY_MONITOR_AQ_
 
-#include "BatteryMonitor.h"
+#include "BatteryMonitorBase.h"
 #include <WProgram.h>
 
 #if defined (__AVR_ATmega328P__)
@@ -49,6 +49,7 @@ void initializeBatteryMonitor(float diodeValue) {
   firstAlarm = OFF;
 }
 
+/**
 void lowBatteryEvent(byte level) {
   long currentBatteryTime = millis() - previousBatteryTime;
   if (level == OK) {
@@ -80,6 +81,7 @@ void lowBatteryEvent(byte level) {
     }
   }
 }
+*/
 
 const float readBatteryVoltage(byte channel) {
   return (analogRead(channel) * batteryScaleFactor) + diode;

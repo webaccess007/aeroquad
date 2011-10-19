@@ -139,8 +139,9 @@ SIGNAL(PCINT2_vect) {
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
 
-void initializeReceiver(int nbChannel = 6) {
-  initializeReceiverParam(nbChannel);
+void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+
+  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
   for (byte channel = ROLL; channel < lastChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
@@ -150,13 +151,12 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver()
  {
-  if (noSignalCounter > 1) {
+  if (useReceiverFailing && noSignalCounter > 1) {
     isReceiverFailing = true;
-	receiverAutoDescent -= 0.2;
   }
   else {
+  
     isReceiverFailing = false;
-	receiverAutoDescent = 0;
     for(byte channel = ROLL; channel < lastChannel; channel++) {
       byte pin = receiverPin[channel];
       uint8_t oldSREG = SREG;

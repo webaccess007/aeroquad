@@ -24,8 +24,9 @@
 #include <WProgram.h>
 #include "Receiver.h"
 
-void initializeReceiver(int nbChannel = 6) {
-  initializeReceiverParam(nbChannel)
+void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+
+  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
   for (byte channel = ROLL; channel < THROTTLE; channel++) {
     receiverCommand[channel] = 1500;
     receiverZero[channel] = 1500;
