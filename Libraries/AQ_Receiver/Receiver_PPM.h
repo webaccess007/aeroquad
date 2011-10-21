@@ -71,9 +71,9 @@ static void rxInt() {
 
 
 
-void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+void initializeReceiver(int nbChannel) {
 
-  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
+  initializeReceiverParam(nbChannel);
   attachInterrupt(0, rxInt, RISING);
 }
 

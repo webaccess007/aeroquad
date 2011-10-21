@@ -49,14 +49,9 @@ float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
-boolean isReceiverFailing = false;
-boolean useReceiverFailing = false;
-volatile unsigned long noSignalCounter = 0;
-  
-void initializeReceiverParam(int nbChannel,boolean useReceiverFailingFeature = false) {
+void initializeReceiverParam(int nbChannel = 6) {
   
   lastChannel = nbChannel;
-  useReceiverFailing = useReceiverFailingFeature;
 
   receiverCommand[ROLL] = 1500;
   receiverCommand[PITCH] = 1500;

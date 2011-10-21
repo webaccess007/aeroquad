@@ -31,12 +31,7 @@
 
 void calculateFlightError(void)
 {
-  if (flightMode == STABLE || isReceiverFailing) {
-    if (isReceiverFailing) {
-      receiverCommand[ROLL] == MIDCOMMAND;
-      receiverCommand[PITCH] == MIDCOMMAND;
-      receiverCommand[YAW] == MIDCOMMAND;
-    }
+  if (flightMode == STABLE) {
     float rollAttitudeCmd = updatePID((receiverCommand[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
     float pitchAttitudeCmd = updatePID((receiverCommand[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
     motorAxisCommandRoll = updatePID(rollAttitudeCmd, gyroRate[ROLL], &PID[LEVELGYROROLL]);
@@ -145,7 +140,7 @@ void processHeading(void)
 //////////////////////////////////////////////////////////////////////////////
 void processThrottleAdjustment() {
   
-  if (isReceiverFailing || batteryStatus != OK) {
+  if (batteryStatus != OK) {
     // override throttle correction to auto descent here
   }
   throttle = throttle + throttleCorrection;

@@ -38,9 +38,6 @@
 #include <AQMath.h>
 #include <Axis.h>
 
-
-
-
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
   &PCMSK1,
@@ -117,12 +114,6 @@ static void measurePulseWidthISR(uint8_t port, uint8_t pinoffset) {
           pinData[pin].edge = FALLING_EDGE;
         }
       }
-	  if (pin != 4) {
-	    noSignalCounter = 0;
-	  }
-	  else {
-	    noSignalCounter++;
-	  }
     }
   }
 }
@@ -139,9 +130,9 @@ SIGNAL(PCINT2_vect) {
 static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
 
 
-void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false) {
+void initializeReceiver(int nbChannel = 6) {
 
-  initializeReceiverParam(nbChannel,useReceiverFailingFeature);
+  initializeReceiverParam(nbChannel);
   for (byte channel = ROLL; channel < lastChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
@@ -151,34 +142,27 @@ void initializeReceiver(int nbChannel,boolean useReceiverFailingFeature = false)
 
 void readReceiver()
  {
-  if (useReceiverFailing && noSignalCounter > 1) {
-    isReceiverFailing = true;
-  }
-  else {
-  
-    isReceiverFailing = false;
-    for(byte channel = ROLL; channel < lastChannel; channel++) {
-      byte pin = receiverPin[channel];
-      uint8_t oldSREG = SREG;
-      cli();
-      // Get receiver value read by pin change interrupt handler
-      uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-      SREG = oldSREG;
+  for(byte channel = ROLL; channel < lastChannel; channel++) {
+    byte pin = receiverPin[channel];
+    uint8_t oldSREG = SREG;
+    cli();
+    // Get receiver value read by pin change interrupt handler
+    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
+    SREG = oldSREG;
 
-      // Apply receiver calibration adjustment
-      receiverData[channel] = (receiverSlope[channel] * lastGoodWidth) + receiverOffset[channel];
-      // Smooth the flight control receiver inputs
-      receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-    }
-  
-    // Reduce receiver commands using receiverXmitFactor and center around 1500
-    for (byte channel = ROLL; channel < lastChannel; channel++)
-      if (channel < THROTTLE)
-        receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-      else
-        // No receiverXmitFactor reduction applied for throttle, mode and
-        receiverCommand[channel] = receiverCommandSmooth[channel];
+    // Apply receiver calibration adjustment
+    receiverData[channel] = (receiverSlope[channel] * lastGoodWidth) + receiverOffset[channel];
+    // Smooth the flight control receiver inputs
+    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }
+  
+  // Reduce receiver commands using receiverXmitFactor and center around 1500
+  for (byte channel = ROLL; channel < lastChannel; channel++)
+    if (channel < THROTTLE)
+      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
+    else
+      // No receiverXmitFactor reduction applied for throttle, mode and
+      receiverCommand[channel] = receiverCommandSmooth[channel];
 }
 
 #endif
