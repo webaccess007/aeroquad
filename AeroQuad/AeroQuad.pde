@@ -45,14 +45,14 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
 //#define hexY6Config
-#define octoX8Congig
+//#define octoX8Congig
 //#define octoPlusCongig  // not yet implemented
 //#define octoXCongig
 
@@ -495,7 +495,6 @@
   
   // Platform Wii declaration
   #include <Platform_Wii.h>
-  Platform_Wii platformWii;
   
   // Gyroscope declaration
   #include <Gyroscope_Wii.h>
@@ -531,13 +530,10 @@
      Wire.begin();
      
      #if defined(AeroQuad_Paris_v3)
-       platformWii.initialize(true);
+       initializeWiiSensors(true);
      #else
-       platformWii.initialize();
+       initializeWiiSensors();
      #endif  
-     
-     gyroPlatformWii = &platformWii;
-     accelPlatformWii = &platformWii;
   }
 
   /**
@@ -545,7 +541,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
-      platformWii.measure();
+      readWiiSensors();
       measureGyro();
       measureAccel();
     }
@@ -592,9 +588,7 @@
   void initPlatform() {
     Wire.begin();
     
-    platformWii.initialize();
-    gyroPlatformWii = &platformWii;
-    accelPlatformWii = &platformWii;    
+    initializeWiiSensors();   
   }
 
   /**
@@ -602,7 +596,7 @@
    */
   void measureCriticalSensors() {
     if (deltaTime >= 10000) {
-      platformWii.measure();
+      readWiiSensors();
       measureGyro();
       measureAccel();
     }
@@ -1162,7 +1156,6 @@ void loop () {
       #if defined(BattMonitor)
         measureBatteryVoltage(armed);
       #endif
-      processAltitudeHold();
 
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
