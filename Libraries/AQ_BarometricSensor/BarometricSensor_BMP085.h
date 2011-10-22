@@ -35,7 +35,7 @@
 #define PRESSURE 1
 
 
-byte overSamplingSetting;
+byte overSamplingSetting = 3;
 int ac1 = 0, ac2 = 0, ac3 = 0;
 unsigned int ac4 = 0, ac5 = 0, ac6 = 0;
 int b1 = 0, b2 = 0, mb = 0, mc = 0, md = 0;
@@ -43,7 +43,7 @@ long pressure = 0;
 long temperature = 0;
 long rawPressure = 0, rawTemperature = 0;
 byte select = 0, pressureCount = 0;
-float pressureFactor = 0.0;
+float pressureFactor = 1/5.255;
   
 void requestRawPressure() {
   updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x34+(overSamplingSetting<<6));

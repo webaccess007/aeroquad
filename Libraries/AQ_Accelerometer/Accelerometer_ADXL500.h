@@ -39,13 +39,21 @@ void measureAccel() {
   // pitchChannel = 0
   // zAxisChannel = 2
  
-  int accelADC[3];
-  accelADC[XAXIS] = analogRead(1) - accelZero[PITCH];
-  accelADC[YAXIS] = accelZero[ROLL]  - analogRead(0);
-  accelADC[ZAXIS] = accelZero[ZAXIS] - analogRead(2);
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
-  }
+//  int accelADC[3];
+  meterPerSec[XAXIS] = analogRead(1) - accelZero[PITCH];
+  meterPerSec[YAXIS] = accelZero[ROLL]  - analogRead(0);
+  meterPerSec[ZAXIS] = accelZero[ZAXIS] - analogRead(2);
+//  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+//    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+//  }
+}
+
+void measureAccelSum() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
+void evaluateMeterPerSec() {
+  // do nothing here since it's already oversample in the APM_ADC class
 }
 
 void calibrateAccel() {

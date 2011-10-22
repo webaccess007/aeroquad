@@ -50,6 +50,14 @@ void measureGyro() {
   gyroLastMesuredTime = currentTime;
 }
 
+void measureGyroSum() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
+void evalueateGyroRate() {
+  // do nothing here since it's already oversample in the APM_ADC class
+}
+
 void calibrateGyro() {
   float zeroXreads[FINDZERO];
   float zeroYreads[FINDZERO];

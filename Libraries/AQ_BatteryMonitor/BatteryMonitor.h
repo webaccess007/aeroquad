@@ -23,32 +23,10 @@
 
 #include <WProgram.h>
 
-#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
 #define OK 0
 #define WARNING 1
 #define ALARM 2
 
-float lowVoltageWarning = 10.2; //10.8;  // Pack voltage at which to trigger alarm (first alarm)
-float lowVoltageAlarm = 9.5; //10.2;     // Pack voltage at which to trigger alarm (critical alarm)
-float batteryVoltage = lowVoltageWarning + 2;
 byte batteryStatus = OK;
-  
-void initializeBatteryMonitor(float diodeValue = 0.0);
-const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-void lowBatteryEvent(byte);
-
-void measureBatteryVoltage(boolean armed) {
-  batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-  if (armed) {
-    if (batteryVoltage < lowVoltageWarning) 
-      batteryStatus = WARNING;
-    if (batteryVoltage < lowVoltageAlarm) 
-	  batteryStatus = ALARM;
-  }
-  else
-    batteryStatus = OK;
-  lowBatteryEvent(batteryStatus);
-}
-  
 
 #endif

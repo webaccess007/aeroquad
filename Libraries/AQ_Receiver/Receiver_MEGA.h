@@ -112,19 +112,20 @@ SIGNAL(PCINT2_vect) {
 #endif
 
 void initializeReceiver(int nbChannel = 6) {
+
+  initializeReceiverParam(nbChannel);
   
   DDRK = 0;
   PORTK = 0;
   PCMSK2 |= 0xFF;
   PCICR |= 0x1 << 2;
-	
-  initializeReceiverParam(nbChannel);
 
   for (byte channel = ROLL; channel < lastChannel; channel++)
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
 }
 
 void readReceiver() {
+  
   for(byte channel = ROLL; channel < lastChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;

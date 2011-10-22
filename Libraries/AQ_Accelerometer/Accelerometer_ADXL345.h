@@ -39,16 +39,38 @@ void initializeAccel() {
   
 void measureAccel() {
 
-  int accelADC;
+//  int accelADC;
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      accelADC = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
+      meterPerSec[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
     else
-      accelADC = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
-    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+      meterPerSec[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
+//    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
   }
+}
+
+void measureAccelSum() {
+
+  sendByteI2C(ACCEL_ADDRESS, 0x32);
+  Wire.requestFrom(ACCEL_ADDRESS, 6);
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    accelSample[axis] += ((Wire.receive()|(Wire.receive() << 8)));
+  }
+  accelSampleCount++;
+}
+
+void evaluateMeterPerSec() {
+	
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    if (axis == XAXIS)
+      meterPerSec[axis] = (accelSample[axis]/accelSampleCount) - accelZero[axis];
+    else
+      meterPerSec[axis] = accelZero[axis] - (accelSample[axis]/accelSampleCount);
+	accelSample[axis] = 0.0;
+  }
+  accelSampleCount = 0;
 }
 
 void calibrateAccel() {

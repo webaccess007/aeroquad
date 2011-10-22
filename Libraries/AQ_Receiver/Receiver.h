@@ -41,16 +41,18 @@ int lastChannel = 0;
 
 float receiverXmitFactor = 0.0;
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-int receiverTrim[3] = {0,0,0};
+//int receiverTrim[3] = {0,0,0};
 int receiverZero[3] = {0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
 int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
 float receiverSlope[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverOffset[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  
+
 void initializeReceiverParam(int nbChannel = 6) {
   
+  lastChannel = nbChannel;
+
   receiverCommand[ROLL] = 1500;
   receiverCommand[PITCH] = 1500;
   receiverCommand[YAW] = 1500;
@@ -59,9 +61,7 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[AUX] = 1000;
   receiverCommand[AUX+1] = 1000;
   receiverCommand[AUX+2] = 1000;
-	
-  lastChannel = nbChannel;
-	
+  
   for (byte channel = ROLL; channel < lastChannel; channel++)
     receiverCommandSmooth[channel] = 1.0;
   for (byte channel = ROLL; channel < THROTTLE; channel++)

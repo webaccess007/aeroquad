@@ -32,11 +32,11 @@
 #define MAXONWIDTH 2075
 #define MINOFFWIDTH 12000
 #define MAXOFFWIDTH 24000
+#define MAX_NO_SIGNAL_COUNTER 10
 
 #include "pins_arduino.h"
 #include <AQMath.h>
 #include <Axis.h>
-
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,
@@ -131,6 +131,7 @@ static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for ROLL, PITCH, Y
 
 
 void initializeReceiver(int nbChannel = 6) {
+
   initializeReceiverParam(nbChannel);
   for (byte channel = ROLL; channel < lastChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
@@ -139,7 +140,8 @@ void initializeReceiver(int nbChannel = 6) {
   }
 }
 
-void readReceiver() {
+void readReceiver()
+ {
   for(byte channel = ROLL; channel < lastChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;
@@ -153,7 +155,7 @@ void readReceiver() {
     // Smooth the flight control receiver inputs
     receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
   }
-
+  
   // Reduce receiver commands using receiverXmitFactor and center around 1500
   for (byte channel = ROLL; channel < lastChannel; channel++)
     if (channel < THROTTLE)

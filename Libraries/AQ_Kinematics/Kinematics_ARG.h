@@ -65,6 +65,7 @@ float previousEz = 0.0;
 // argUpdate
 ////////////////////////////////////////////////////////////////////////////////
 void argUpdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float G_Dt) {
+  
   float norm;
   float vx, vy, vz, wx, wy, wz;
   float q0i, q1i, q2i, q3i;

@@ -31,10 +31,10 @@
 #include <Axis.h>
 #include <APM_RC.h>
 
-
 int receiverPin[6] = {0,0,0,0,0,0};
   
 void initializeReceiver(int nbChannel = 6) {
+
   initializeReceiverParam(nbChannel);
   receiverPin[ROLL] = 0;
   receiverPin[PITCH] = 1;
@@ -45,6 +45,7 @@ void initializeReceiver(int nbChannel = 6) {
 }
 
 void readReceiver() {
+
   for(byte channel = ROLL; channel < lastChannel; channel++) {
     // Apply receiver calibration adjustment
     receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
@@ -59,6 +60,7 @@ void readReceiver() {
   for (byte channel = THROTTLE; channel < lastChannel; channel++)
     receiverCommand[channel] = receiverCommandSmooth[channel];
 }
+
 
   
 void setChannelValue(byte channel,int value) {
