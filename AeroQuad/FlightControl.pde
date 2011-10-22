@@ -149,9 +149,9 @@ void processAltitudeHold(void)
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
   if (altitudeHoldState == ON) {
-    altutudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
+    altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-    altutudeHoldThrottleCorrection = constrain(altutudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
       altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
@@ -166,25 +166,32 @@ void processAltitudeHold(void)
   }
   else {
     throttle = receiverCommand[THROTTLE];
-    altutudeHoldThrottleCorrection = 0;
+    altitudeHoldThrottleCorrection = 0;
   }
 #else
   throttle = receiverCommand[THROTTLE];
-  altutudeHoldThrottleCorrection = 0;
+  altitudeHoldThrottleCorrection = 0;
 #endif
-
-  throttle = throttle + altitudeHoldThrottleCorrection + (int)batteyMonitorThrottleCorrection;
-  
-  if (batteryStatus != OK) {
-    if (throttle > 1300) {
-      batteyMonitorThrottleCorrection += 0.02;
-    }
-  }
-  else {
-    batteyMonitorThrottleCorrection = 0;
-  }
 }
 
+void processThrottleCorrection() {
+
+  if (batteryStatus != OK) {
+    #ifdef AltitudeHold
+      if (throttle > 1400) {
+        altitudeToHoldTarget -= 0.2;
+      }
+    #else
+      if (throttle > 1400) {
+        batteyMonitorThrottleCorrection -= 0.1;
+      }
+    #endif
+  }
+  else {
+    batteyMonitorThrottleCorrection = 0.0;
+  }
+  throttle = throttle + altitudeHoldThrottleCorrection + (int)batteyMonitorThrottleCorrection;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -201,6 +208,8 @@ void processFlightControl() {
   if (frameCounter %  10 == 0) {  //   10 Hz tasks
     // ********************** Process Altitude hold **************************
     processAltitudeHold();
+    // ********************** Process throttle correction ********************
+    processThrottleCorrection();
   }
 
   // ********************** Calculate Motor Commands *************************

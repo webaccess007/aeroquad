@@ -32,17 +32,18 @@ float batteryVoltage = lowVoltageWarning + 2;
   
 void initializeBatteryMonitor(float diodeValue = 0.0);
 const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-//void lowBatteryEvent(byte);
 
 void measureBatteryVoltage(boolean armed) {
   batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-  if (batteryVoltage < lowVoltageWarning) 
+  if (batteryVoltage < lowVoltageWarning) {
     batteryStatus = WARNING;
-  else if (batteryVoltage < lowVoltageAlarm) 
+  }
+  else if (batteryVoltage < lowVoltageAlarm) {
 	batteryStatus = ALARM;
-  else
+  }
+  else {
     batteryStatus = OK;
-//  lowBatteryEvent(batteryStatus);
+  }
 }
   
 

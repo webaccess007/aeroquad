@@ -43,19 +43,17 @@
 float wmpLowRangeToRadPerSec  = 0.001082308;
 float wmpHighRangeToRadPerSec = 0.005844461;
   
-Platform_Wii *gyroPlatformWii;
-
 void initializeGyro() {
 }
 
 void measureGyro() {
   int gyroADC[3];
-  gyroADC[ROLL] = gyroZero[ROLL] - gyroPlatformWii->getGyroADC(ROLL);
-  gyroADC[PITCH] = gyroPlatformWii->getGyroADC(PITCH) - gyroZero[PITCH];
-  gyroADC[YAW] = gyroZero[YAW] - gyroPlatformWii->getGyroADC(YAW);
+  gyroADC[ROLL] = gyroZero[ROLL] - getWiiGyroADC(ROLL);
+  gyroADC[PITCH] = getWiiGyroADC(PITCH) - gyroZero[PITCH];
+  gyroADC[YAW] = gyroZero[YAW] - getWiiGyroADC(YAW);
 	
   for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
-    float gyroScaleFactor = gyroPlatformWii->getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
+    float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
   }
   
@@ -68,11 +66,38 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-  // do nothing here since it's already oversample in the APM_ADC class
+/**
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    gyroSample[axis] += getWiiGyroADC(axis);
+  }
+  gyroSampleCount++;
+*/  
 }
 
 void evalueateGyroRate() {
-  // do nothing here since it's already oversample in the APM_ADC class
+/**
+  int gyroADC[3];
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    if (axis == PITCH) 
+	  gyroADC[axis] = gyroSample[axis]/gyroSampleCount - gyroZero[axis];
+	else
+      gyroADC[axis] = gyroZero[axis] - gyroSample[axis]/gyroSampleCount;
+	gyroSample[axis] = 0.0;
+  }
+  gyroSampleCount = 0;
+  
+  for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
+    float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
+    gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
+  }
+  
+  // Measure gyro heading
+  long int currentTime = micros();
+  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
+    heading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  }
+  gyroLastMesuredTime = currentTime;
+*/  
 }
 
 void calibrateGyro() {
@@ -80,8 +105,8 @@ void calibrateGyro() {
     
   for (byte axis = ROLL; axis <= YAW; axis++) {
     for (int i=0; i<FINDZERO; i++) {
-	  gyroPlatformWii->measure();
-      findZero[i] = gyroPlatformWii->getGyroADC(axis);
+	  readWiiSensors();
+      findZero[i] = getWiiGyroADC(axis);
       delay(5);
     }
     gyroZero[axis] = findMedianInt(findZero, FINDZERO);

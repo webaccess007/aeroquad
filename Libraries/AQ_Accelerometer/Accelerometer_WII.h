@@ -24,28 +24,40 @@
 #include <Accelerometer.h>
 #include <Platform_Wii.h>
 
-Platform_Wii *accelPlatformWii;
-
 void initializeAccel() {
   accelScaleFactor = 0.09165093;  // Experimentally derived to produce meters/s^2 
 }
 
 void measureAccel() {
 //  int accelADC[3];
-  meterPerSec[XAXIS] = accelPlatformWii->getAccelADC(XAXIS) - accelZero[XAXIS];
-  meterPerSec[YAXIS] = accelZero[YAXIS] - accelPlatformWii->getAccelADC(YAXIS);
-  meterPerSec[ZAXIS] = accelZero[ZAXIS] - accelPlatformWii->getAccelADC(ZAXIS);
+  meterPerSec[XAXIS] = getWiiAccelADC(XAXIS) - accelZero[XAXIS];
+  meterPerSec[YAXIS] = accelZero[YAXIS] - getWiiAccelADC(YAXIS);
+  meterPerSec[ZAXIS] = accelZero[ZAXIS] - getWiiAccelADC(ZAXIS);
 //  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
 //    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
 //  }
 }
 
 void measureAccelSum() {
-  // do nothing here since it's already oversample in the APM_ADC class
+/**
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+	accelSample[axis] += getWiiAccelADC(axis);
+  }
+  accelSampleCount++;
+*/  
 }
 
 void evaluateMeterPerSec() {
-  // do nothing here since it's already oversample in the APM_ADC class
+/**
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    if (axis == XAXIS)
+	  meterPerSec[axis] = accelSample[axis]/accelSampleCount - accelZero[axis];
+	else
+	  meterPerSec[axis] = accelZero[axis] - accelSample[axis]/accelSampleCount;
+	accelSample[axis] = 0.0;
+  }
+  accelSampleCount = 0;
+*/  
 }
 
 void calibrateAccel() {
@@ -53,8 +65,8 @@ void calibrateAccel() {
 
   for(byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
     for (int i=0; i<FINDZERO; i++) {
-      accelPlatformWii->measure();
-      findZero[i] = accelPlatformWii->getAccelADC(calAxis);
+      readWiiSensors();
+      findZero[i] = getWiiAccelADC(calAxis);
       delay(5);
     }
     accelZero[calAxis] = findMedianInt(findZero, FINDZERO);

@@ -37,8 +37,8 @@ long currentBatteryTime = 0, previousBatteryTime = 0;
 
 void initializeBatteryMonitor(float diodeValue) {
   float R1   = 15000;
-  float R2   =  7500;
-  float Aref =     5.0;
+  float R2   = 7500;
+  float Aref = 5.0;
   batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
   diode = diodeValue;
   analogReference(DEFAULT);
@@ -48,40 +48,6 @@ void initializeBatteryMonitor(float diodeValue) {
   state = LOW;
   firstAlarm = OFF;
 }
-
-/**
-void lowBatteryEvent(byte level) {
-  long currentBatteryTime = millis() - previousBatteryTime;
-  if (level == OK) {
-    digitalWrite(BUZZERPIN, LOW);
-    autoDescent = 0;
-  }
-  if (level == WARNING) {
-    if (currentBatteryTime > 1100) {
-      //autoDescent = 50;
-      digitalWrite(LED3PIN, HIGH);
-      digitalWrite(BUZZERPIN, HIGH);
-    }
-    if (currentBatteryTime > 1200) {
-      previousBatteryTime = millis();
-      //autoDescent = 0;
-      digitalWrite(LED3PIN, LOW);
-      digitalWrite(BUZZERPIN, LOW);
-    }
-  }
-  if (level == ALARM) {
-    if (firstAlarm == OFF) autoDescent = 0; // intialize autoDescent to zero if first time in ALARM state
-    firstAlarm = ON;
-    digitalWrite(BUZZERPIN, HIGH); // enable buzzer
-    digitalWrite(LED3PIN, HIGH);
-    if ((currentBatteryTime > 500) && (throttle > 1400)) {
-      autoDescent -= 1; // auto descend quad
-      holdAltitude -= 0.2; // descend if in attitude hold mode
-      previousBatteryTime = millis();
-    }
-  }
-}
-*/
 
 const float readBatteryVoltage(byte channel) {
   return (analogRead(channel) * batteryScaleFactor) + diode;

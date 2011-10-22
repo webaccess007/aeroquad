@@ -39,7 +39,6 @@ void initializeAccel() {
   
 void measureAccel() {
 
-//  int accelADC;
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
@@ -47,7 +46,6 @@ void measureAccel() {
       meterPerSec[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
     else
       meterPerSec[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
-//    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
   }
 }
 
