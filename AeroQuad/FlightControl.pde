@@ -135,16 +135,6 @@ void processHeading(void)
   motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[YAW], &PID[YAW]);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-///////////////////// processThrottleAdjustment //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processThrottleAdjustment() {
-  
-  if (batteryStatus != OK) {
-    // override throttle correction to auto descent here
-  }
-  throttle = throttle + throttleCorrection;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -159,9 +149,9 @@ void processAltitudeHold(void)
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
   if (altitudeHoldState == ON) {
-    throttleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
+    altutudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
-    throttleCorrection = constrain(throttleCorrection, minThrottleAdjust, maxThrottleAdjust);
+    altutudeHoldThrottleCorrection = constrain(altutudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
     if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
       altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
     } else {
@@ -176,13 +166,26 @@ void processAltitudeHold(void)
   }
   else {
     throttle = receiverCommand[THROTTLE];
-    throttleCorrection = 0;
+    altutudeHoldThrottleCorrection = 0;
   }
 #else
   throttle = receiverCommand[THROTTLE];
-  throttleCorrection = 0;
+  altutudeHoldThrottleCorrection = 0;
 #endif
+
+  throttle = throttle + altitudeHoldThrottleCorrection + (int)batteyMonitorThrottleCorrection;
+  
+  if (batteryStatus != OK) {
+    if (throttle > 1300) {
+      batteyMonitorThrottleCorrection += 0.02;
+    }
+  }
+  else {
+    batteyMonitorThrottleCorrection = 0;
+  }
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processFlightControl main function ///////////////
@@ -195,8 +198,10 @@ void processFlightControl() {
   // ********************** Update Yaw ***************************************
   processHeading();
   
-  // ********************** Process throttle adjustment ***************************************
-  processThrottleAdjustment();
+  if (frameCounter %  10 == 0) {  //   10 Hz tasks
+    // ********************** Process Altitude hold **************************
+    processAltitudeHold();
+  }
 
   // ********************** Calculate Motor Commands *************************
   if (armed && safetyCheck) {

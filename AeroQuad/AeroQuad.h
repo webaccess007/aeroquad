@@ -146,9 +146,10 @@ int autoDescent = 0;
   boolean isStoreAltitudeNeeded = false;
   boolean altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
 #endif
-int throttleCorrection = 0;
+int altutudeHoldThrottleCorrection = 0;
 int minThrottleAdjust = -50;
 int maxThrottleAdjust = 50;
+float batteyMonitorThrottleCorrection = 0;
 
 
 //// Receiver variables
