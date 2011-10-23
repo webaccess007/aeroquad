@@ -78,10 +78,10 @@ void initializeEEPROM(void) {
   PID[YAW].I = 5.0;
   PID[YAW].D = 0.0;
   PID[LEVELROLL].P = 4.0;
-  PID[LEVELROLL].I = 0.6;
+  PID[LEVELROLL].I = 0.0;
   PID[LEVELROLL].D = 0.0;
   PID[LEVELPITCH].P = 4.0;
-  PID[LEVELPITCH].I = 0.6;
+  PID[LEVELPITCH].I = 0.0;
   PID[LEVELPITCH].D = 0.0;
   PID[HEADING].P = 3.0;
   PID[HEADING].I = 0.1;
@@ -95,8 +95,8 @@ void initializeEEPROM(void) {
   PID[LEVELGYROPITCH].I = 0.0;
   PID[LEVELGYROPITCH].D = -300.0;
 
-  PID[ALTITUDE].P = 25.0;
-  PID[ALTITUDE].I = 0.1;
+  PID[ALTITUDE].P = 10.0;
+  PID[ALTITUDE].I = 0.0;
   PID[ALTITUDE].D = 0.0;
   PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
   PID[ZDAMPENING].P = 0.0;

@@ -149,48 +149,58 @@ void processAltitudeHold(void)
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
 #ifdef AltitudeHold
   if (altitudeHoldState == ON) {
-    altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
+    int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
     //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
-      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-    } else {
-      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-        altitudeToHoldTarget += 0.01;
-      }
-      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-        altitudeToHoldTarget -= 0.01;
-      }
-    }
+//    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
+//      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+//    } else {
+//      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+//        altitudeToHoldTarget += 0.01;
+//      }
+//      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+//        altitudeToHoldTarget -= 0.01;
+//      }
+//    }
+    altitudeHoldThrottle += altitudeHoldThrottleCorrection;
     throttle = altitudeHoldThrottle;
   }
   else {
     throttle = receiverCommand[THROTTLE];
-    altitudeHoldThrottleCorrection = 0;
   }
 #else
   throttle = receiverCommand[THROTTLE];
-  altitudeHoldThrottleCorrection = 0;
 #endif
 }
 
 void processThrottleCorrection() {
 
-  if (batteryStatus != OK) {
-    #ifdef AltitudeHold
-      if (throttle > 1400) {
-        altitudeToHoldTarget -= 0.2;
-      }
-    #else
-      if (throttle > 1400) {
-        batteyMonitorThrottleCorrection -= 0.1;
-      }
-    #endif
-  }
-  else {
-    batteyMonitorThrottleCorrection = 0.0;
-  }
-  throttle = throttle + altitudeHoldThrottleCorrection + (int)batteyMonitorThrottleCorrection;
+  #if defined (BattMonitor)
+    if (batteryStatus != OK) {
+      #ifdef AltitudeHold
+        if (throttle > BATTERY_MONITOR_THROTTLE_TARGET) {
+          altitudeToHoldTarget -= 0.2;
+        }
+      #else
+        if (batteryMonitorStartThrottle == 0) {  // init battery monitor throttle correction!
+          batteryMonitorStartTime = millis();
+          batteryMonitorStartThrottle = throttle; 
+        }
+        const int batteryMonitorThrottle = map(millis()-batteryMonitorStartTime,0,BATTERY_MONITOR_GOIN_DOWN_TIME,batteryMonitorStartThrottle,BATTERY_MONITOR_THROTTLE_TARGET);
+        if (throttle < batteryMonitorThrottle) {
+          batteyMonitorThrottleCorrection = 0;
+        }
+        else {
+          batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
+        }
+      #endif
+    }
+    else {
+      batteryMonitorStartThrottle = 0;
+      batteyMonitorThrottleCorrection = 0.0;
+    }
+  #endif
+  throttle = throttle + (int)batteyMonitorThrottleCorrection;
 }
 
 
