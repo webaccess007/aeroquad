@@ -29,7 +29,7 @@
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
 
-void calculateFlightError(void)
+void calculateFlightError()
 {
   if (flightMode == STABLE) {
     float rollAttitudeCmd = updatePID((receiverCommand[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
@@ -46,7 +46,7 @@ void calculateFlightError(void)
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processCalibrateESC //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processCalibrateESC(void)
+void processCalibrateESC()
 {
   switch (calibrateESC) { // used for calibrating ESC's
   case 1:
@@ -73,7 +73,7 @@ void processCalibrateESC(void)
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processHeadingHold ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processHeading(void)
+void processHeading()
 {
   if (headingHoldConfig == ON) {
 
@@ -140,7 +140,7 @@ void processHeading(void)
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processAltitudeHold //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void processAltitudeHold(void)
+void processAltitudeHold()
 {
   // ****************************** Altitude Adjust *************************
   // Thanks to Honk for his work with altitude hold
@@ -150,20 +150,18 @@ void processAltitudeHold(void)
 #ifdef AltitudeHold
   if (altitudeHoldState == ON) {
     int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
-    //throttleAdjust = constrain((holdAltitude - altitude.getData()) * PID[ALTITUDE].P, minThrottleAdjust, maxThrottleAdjust);
     altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-//    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
-//      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-//    } else {
-//      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-//        altitudeToHoldTarget += 0.01;
-//      }
-//      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-//        altitudeToHoldTarget -= 0.01;
-//      }
-//    }
-    altitudeHoldThrottle += altitudeHoldThrottleCorrection;
-    throttle = altitudeHoldThrottle;
+    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
+      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+    } else {
+      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+        altitudeToHoldTarget += 0.01;
+      }
+      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+        altitudeToHoldTarget -= 0.01;
+      }
+    }
+    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
   }
   else {
     throttle = receiverCommand[THROTTLE];
@@ -200,7 +198,11 @@ void processThrottleCorrection() {
       batteyMonitorThrottleCorrection = 0.0;
     }
   #endif
-  throttle = throttle + (int)batteyMonitorThrottleCorrection;
+  
+  // Thank Ziojo for this little adjustment on throttle when manuevering!
+  int throttleAsjust = throttle / (cos (radians (kinematicsAngle[ROLL])) * cos (radians (kinematicsAngle[PITCH])));
+  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 160); //compensate max  +/- 25 deg ROLL or PITCH or  +/- 18 ( 18(ROLL) + 18(PITCH))
+  throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
 }
 
 

@@ -316,14 +316,14 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
 
 // defined in DataStorage.h
-void readEEPROM(void); 
-void initSensorsZeroFromEEPROM(void);
-void storeSensorsZeroToEEPROM(void);
-void initReceiverFromEEPROM(void);
+void readEEPROM(); 
+void initSensorsZeroFromEEPROM();
+void storeSensorsZeroToEEPROM();
+void initReceiverFromEEPROM();
 //////////////////////////////////////////////////////
 
 // defined in FlightCommand.pde
-void readPilotCommands(void); 
+void readPilotCommands(); 
 //////////////////////////////////////////////////////
 
 // defined in FlightControl.pde Flight control needs
