@@ -78,7 +78,7 @@ void measureGyroSum() {
   gyroSampleCount++;
 }
 
-void evalueateGyroRate() {
+void evaluateGyroRate() {
   int gyroADC[3];
   gyroADC[ROLL]  = (gyroSample[ROLL] / gyroSampleCount)  - gyroZero[ROLL];
   gyroADC[PITCH] = gyroZero[PITCH] - (gyroSample[PITCH] / gyroSampleCount);

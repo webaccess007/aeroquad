@@ -1035,8 +1035,8 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
-      evaluateMeterPerSec();
-      evalueateGyroRate();
+      evaluateMetersPerSec();
+      evaluateGyroRate();
       
       float filteredAccelRoll = computeFourthOrder(meterPerSec[XAXIS], &fourthOrder[AX_FILTER]);
       float filteredAccelPitch = computeFourthOrder(meterPerSec[YAXIS], &fourthOrder[AY_FILTER]);

@@ -54,7 +54,7 @@ void measureGyroSum() {
   // do nothing here since it's already oversample in the APM_ADC class
 }
 
-void evalueateGyroRate() {
+void evaluateGyroRate() {
   // do nothing here since it's already oversample in the APM_ADC class
 }
 

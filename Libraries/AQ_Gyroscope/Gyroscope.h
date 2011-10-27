@@ -32,7 +32,7 @@ float gyroHeading = 0.0;
 unsigned long gyroLastMesuredTime = 0;
 
 void measureGyroSum();
-void evalueateGyroRate();
+void evaluateGyroRate();
 float gyroSample[3] = {0.0,0.0,0.0};
 byte gyroSampleCount = 0;
 
