@@ -29,13 +29,9 @@ void initializeAccel() {
 }
 
 void measureAccel() {
-//  int accelADC[3];
-  meterPerSec[XAXIS] = getWiiAccelADC(XAXIS) - accelZero[XAXIS];
-  meterPerSec[YAXIS] = accelZero[YAXIS] - getWiiAccelADC(YAXIS);
-  meterPerSec[ZAXIS] = accelZero[ZAXIS] - getWiiAccelADC(ZAXIS);
-//  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-//    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
-//  }
+  meterPerSec[XAXIS] = (getWiiAccelADC(XAXIS) * accelScaleFactor) - accelZero[XAXIS];
+  meterPerSec[YAXIS] = accelZero[YAXIS] - (getWiiAccelADC(YAXIS) * accelScaleFactor);
+  meterPerSec[ZAXIS] = accelZero[ZAXIS] - (getWiiAccelADC(ZAXIS) * accelScaleFactor);
 }
 
 void measureAccelSum() {

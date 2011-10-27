@@ -35,17 +35,9 @@ void setAccelAref(float aref) {
 }
   
 void measureAccel() {
-  // rollChannel = 1
-  // pitchChannel = 0
-  // zAxisChannel = 2
- 
-//  int accelADC[3];
-  meterPerSec[XAXIS] = analogRead(1) - accelZero[PITCH];
-  meterPerSec[YAXIS] = accelZero[ROLL]  - analogRead(0);
-  meterPerSec[ZAXIS] = accelZero[ZAXIS] - analogRead(2);
-//  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-//    meterPerSec[axis] = filterSmooth(accelADC[axis] * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
-//  }
+  meterPerSec[XAXIS] = (analogRead(1) * accelScaleFactor) - accelZero[PITCH];
+  meterPerSec[YAXIS] = accelZero[ROLL]  - (analogRead(0)  * accelScaleFactor);
+  meterPerSec[ZAXIS] = accelZero[ZAXIS] - (analogRead(2)  * accelScaleFactor);
 }
 
 void measureAccelSum() {
@@ -57,24 +49,20 @@ void evaluateMeterPerSec() {
 }
 
 void calibrateAccel() {
-  // rollChannel = 1
-  // pitchChannel = 0
-  // zAxisChannel = 2
-
   int findZero[FINDZERO];
 
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(1);
+    findZero[i] = analogRead(1) * accelScaleFactor;
     delay(2);
   }
   accelZero[XAXIS] = findMedianInt(findZero, FINDZERO);
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(0);
+    findZero[i] = analogRead(0) * accelScaleFactor;
     delay(2);
   }
   accelZero[YAXIS] = findMedianInt(findZero, FINDZERO);
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(2);
+    findZero[i] = analogRead(2) * accelScaleFactor;
 	delay(2);
   }
   accelZero[ZAXIS] = findMedianInt(findZero, FINDZERO);

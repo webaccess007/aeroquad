@@ -28,15 +28,14 @@ void initializeAccel() {
 }
   
 void measureAccel() {
-//  int accelADC;
+
   for (byte axis = ROLL; axis < LASTAXIS; axis++) {
     const float rawADC = readADC(axis+3);
     if (rawADC > 500) { // Check if measurement good
       if (axis == ROLL)
-        meterPerSec[axis] = rawADC - accelZero[axis];
+        meterPerSec[axis] = (rawADC  * accelScaleFactor) - accelZero[axis];
       else
-        meterPerSec[axis] = accelZero[axis] - rawADC;
-//      meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+        meterPerSec[axis] = accelZero[axis] - (rawADC * accelScaleFactor);
     }
   }
 }
