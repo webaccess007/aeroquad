@@ -30,14 +30,10 @@ void initializeAccel() {
 }
 
 void measureAccel() {
-//  float accelADC[3];
+
   meterPerSec[XAXIS] = accelChr6dm->data.ax - accelZero[XAXIS];
   meterPerSec[YAXIS] = accelChr6dm->data.ay - accelZero[YAXIS];
   meterPerSec[ZAXIS] = accelChr6dm->data.az - accelOneG;
-
-//  meterPerSec[XAXIS] = filterSmooth(accelADC[XAXIS], meterPerSec[XAXIS], accelSmoothFactor); //to get around 1
-//  meterPerSec[YAXIS] = filterSmooth(accelADC[YAXIS], meterPerSec[YAXIS], accelSmoothFactor);
-//  meterPerSec[ZAXIS] = filterSmooth(accelADC[ZAXIS], meterPerSec[ZAXIS], accelSmoothFactor);
 }
 
 void measureAccelSum() {

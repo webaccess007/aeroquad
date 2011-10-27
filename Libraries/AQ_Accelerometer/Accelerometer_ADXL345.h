@@ -72,6 +72,7 @@ void evaluateMeterPerSec() {
 }
 
 void calibrateAccel() {
+
   int findZero[FINDZERO];
   int dataAddress;
     
