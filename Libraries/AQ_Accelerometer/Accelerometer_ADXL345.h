@@ -43,9 +43,9 @@ void measureAccel() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = ((Wire.receive()|(Wire.receive() << 8))) - accelZero[axis];
+      meterPerSec[axis] = ((Wire.receive()|(Wire.receive() << 8)) * accelScaleFactor) - accelZero[axis];
     else
-      meterPerSec[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)));
+      meterPerSec[axis] = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) * accelScaleFactor);
   }
 }
 
@@ -63,9 +63,9 @@ void evaluateMeterPerSec() {
 	
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = (accelSample[axis]/accelSampleCount) - accelZero[axis];
+      meterPerSec[axis] = ((accelSample[axis] * accelScaleFactor)/accelSampleCount) - accelZero[axis];
     else
-      meterPerSec[axis] = accelZero[axis] - (accelSample[axis]/accelSampleCount);
+      meterPerSec[axis] = accelZero[axis] - ((accelSample[axis] * accelScaleFactor)/accelSampleCount);
 	accelSample[axis] = 0.0;
   }
   accelSampleCount = 0;

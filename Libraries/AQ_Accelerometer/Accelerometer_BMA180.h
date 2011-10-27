@@ -103,11 +103,10 @@ void measureAccelSum() {
 void evaluateMeterPerSec() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = (accelSample[axis]/accelSampleCount) - accelZero[axis];
+      meterPerSec[axis] = ((accelSample[axis]* accelScaleFactor)/accelSampleCount) - accelZero[axis];
     else
-      meterPerSec[axis] = accelZero[axis] - (accelSample[axis]/accelSampleCount);
+      meterPerSec[axis] = accelZero[axis] - ((accelSample[axis]* accelScaleFactor)/accelSampleCount);
 	accelSample[axis] = 0.0;
-//    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
   }
   accelSampleCount = 0;
 }
