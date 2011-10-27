@@ -78,13 +78,11 @@ void measureAccel() {
   Wire.endTransmission();
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
-  int accelADC;
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      accelADC = ((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis];
+      meterPerSec[axis] = (((Wire.receive()|(Wire.receive() << 8)) >> 2) * accelScaleFactor) - accelZero[axis];
     else
-      accelADC = accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2);
-    meterPerSec[axis] = filterSmooth(accelADC * accelScaleFactor, meterPerSec[axis], accelSmoothFactor);
+      meterPerSec[axis] = accelZero[axis] - (((Wire.receive()|(Wire.receive() << 8)) >> 2) *accelScaleFactor);
   }  
 }
 
@@ -103,9 +101,9 @@ void measureAccelSum() {
 void evaluateMeterPerSec() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = ((accelSample[axis]* accelScaleFactor)/accelSampleCount) - accelZero[axis];
+      meterPerSec[axis] = ((accelSample[axis] * accelScaleFactor) / accelSampleCount) - accelZero[axis];
     else
-      meterPerSec[axis] = accelZero[axis] - ((accelSample[axis]* accelScaleFactor)/accelSampleCount);
+      meterPerSec[axis] = accelZero[axis] - ((accelSample[axis] * accelScaleFactor) / accelSampleCount);
 	accelSample[axis] = 0.0;
   }
   accelSampleCount = 0;
