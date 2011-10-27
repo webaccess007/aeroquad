@@ -74,7 +74,7 @@ void measureGyroSum() {
 */  
 }
 
-void evalueateGyroRate() {
+void evaluateGyroRate() {
 /**
   int gyroADC[3];
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {

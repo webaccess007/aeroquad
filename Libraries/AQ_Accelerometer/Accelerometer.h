@@ -32,7 +32,7 @@ float accelZero[3] = {0.0,0.0,0.0};
 
 
 void measureAccelSum();
-void evaluateMeterPerSec();
+void evaluateMetersPerSec();
 float accelSample[3] = {0.0,0.0,0.0};
 byte accelSampleCount = 0;
   

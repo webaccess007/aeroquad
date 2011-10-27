@@ -44,7 +44,7 @@ void measureAccelSum() {
   // do nothing here since it's already oversample in the APM_ADC class
 }
 
-void evaluateMeterPerSec() {
+void evaluateMetersPerSec() {
   // do nothing here since it's already oversample in the APM_ADC class
 }
 

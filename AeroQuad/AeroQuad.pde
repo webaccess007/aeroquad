@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Congig
 //#define octoPlusCongig  // not yet implemented
 //#define octoXCongig
@@ -301,6 +301,7 @@
   // unsuported in mini
   #undef AltitudeHold
   #undef HeadingMagHold
+//  #define HMC5843
   
   /**
    * Put AeroQuad_Mini specific intialization need here
@@ -1034,8 +1035,8 @@ void loop () {
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
       
-      evaluateMeterPerSec();
-      evalueateGyroRate();
+      evaluateMetersPerSec();
+      evaluateGyroRate();
       
       float filteredAccelRoll = computeFourthOrder(meterPerSec[XAXIS], &fourthOrder[AX_FILTER]);
       float filteredAccelPitch = computeFourthOrder(meterPerSec[YAXIS], &fourthOrder[AY_FILTER]);

@@ -98,7 +98,7 @@ void measureAccelSum() {
   accelSampleCount++;  
 }
 
-void evaluateMeterPerSec() {
+void evaluateMetersPerSec() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
       meterPerSec[axis] = ((accelSample[axis] * accelScaleFactor) / accelSampleCount) - accelZero[axis];
