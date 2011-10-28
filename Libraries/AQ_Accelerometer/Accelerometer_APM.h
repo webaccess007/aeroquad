@@ -33,9 +33,9 @@ void measureAccel() {
     const float rawADC = readADC(axis+3);
     if (rawADC > 500) { // Check if measurement good
       if (axis == ROLL)
-        meterPerSec[axis] = (rawADC  * accelScaleFactor) - accelZero[axis];
+        meterPerSec[axis] = (rawADC - accelZero[axis]) * accelScaleFactor;
       else
-        meterPerSec[axis] = accelZero[axis] - (rawADC * accelScaleFactor);
+        meterPerSec[axis] = (accelZero[axis] - rawADC) * accelScaleFactor;
     }
   }
 }

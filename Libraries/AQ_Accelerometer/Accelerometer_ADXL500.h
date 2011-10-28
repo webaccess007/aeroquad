@@ -35,9 +35,10 @@ void setAccelAref(float aref) {
 }
   
 void measureAccel() {
-  meterPerSec[XAXIS] = (analogRead(1) * accelScaleFactor) - accelZero[PITCH];
-  meterPerSec[YAXIS] = accelZero[ROLL]  - (analogRead(0)  * accelScaleFactor);
-  meterPerSec[ZAXIS] = accelZero[ZAXIS] - (analogRead(2)  * accelScaleFactor);
+
+  meterPerSec[XAXIS] = (analogRead(1)    - accelZero[PITCH]) * accelScaleFactor;
+  meterPerSec[YAXIS] = (accelZero[ROLL]  - analogRead(0))    * accelScaleFactor;
+  meterPerSec[ZAXIS] = (accelZero[ZAXIS] - (analogRead(2))   * accelScaleFactor;
 }
 
 void measureAccelSum() {
@@ -52,17 +53,17 @@ void calibrateAccel() {
   int findZero[FINDZERO];
 
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(1) * accelScaleFactor;
+    findZero[i] = analogRead(1);
     delay(2);
   }
   accelZero[XAXIS] = findMedianInt(findZero, FINDZERO);
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(0) * accelScaleFactor;
+    findZero[i] = analogRead(0);
     delay(2);
   }
   accelZero[YAXIS] = findMedianInt(findZero, FINDZERO);
   for (int i=0; i<FINDZERO; i++) {
-    findZero[i] = analogRead(2) * accelScaleFactor;
+    findZero[i] = analogRead(2);
 	delay(2);
   }
   accelZero[ZAXIS] = findMedianInt(findZero, FINDZERO);
