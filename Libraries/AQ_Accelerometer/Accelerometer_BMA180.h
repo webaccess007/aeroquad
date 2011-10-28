@@ -80,9 +80,9 @@ void measureAccel() {
   
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = (((Wire.receive()|(Wire.receive() << 8)) >> 2) * accelScaleFactor) - accelZero[axis];
+      meterPerSec[axis] = (((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis])  * accelScaleFactor;
     else
-      meterPerSec[axis] = accelZero[axis] - (((Wire.receive()|(Wire.receive() << 8)) >> 2) *accelScaleFactor);
+      meterPerSec[axis] = (accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2)) * accelScaleFactor;
   }  
 }
 
@@ -101,9 +101,9 @@ void measureAccelSum() {
 void evaluateMetersPerSec() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
     if (axis == XAXIS)
-      meterPerSec[axis] = ((accelSample[axis] * accelScaleFactor) / accelSampleCount) - accelZero[axis];
+      meterPerSec[axis] = ((accelSample[axis] / accelSampleCount) - accelZero[axis]) * accelScaleFactor;
     else
-      meterPerSec[axis] = accelZero[axis] - ((accelSample[axis] * accelScaleFactor) / accelSampleCount);
+      meterPerSec[axis] = (accelZero[axis] - (accelSample[axis] / accelSampleCount)) * accelScaleFactor;
 	accelSample[axis] = 0.0;
   }
   accelSampleCount = 0;
