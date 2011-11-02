@@ -21,7 +21,7 @@
 #ifndef _APM_RC_H_
 #define _APM_RC_H_
 
-#if defined (__AVR_ATmega1280__)
+#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
 
 #include <avr/interrupt.h>
 #include "WProgram.h"

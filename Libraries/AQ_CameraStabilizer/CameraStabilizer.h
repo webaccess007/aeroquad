@@ -64,22 +64,22 @@ int servoPitch = 0;                // 1000 - 2000 where we are or will move to n
 int servoRoll = 0;
 int servoYaw = 0;
   
-void _initialize();
-void move ();
+void initializeCameraControl();
+void cameraControlMove ();
 
 
   
-void setPitch (float angle) {
+void cameraControlSetPitch (float angle) {
   if (mode == 1) servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
   else servoPitch = constrain(centerPitch , servoMinPitch , servoMaxPitch);
 }
   
-void setRoll (float angle) {
+void cameraControlSetRoll (float angle) {
   if (mode == 1) servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
   else servoRoll = constrain(centerRoll , servoMinRoll , servoMaxRoll);
 }
   
-void setYaw (float angle) {
+void cameraControlSetYaw (float angle) {
   if (mode == 1) servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
   else servoYaw = constrain(centerYaw , servoMinYaw , servoMaxYaw);
 }
@@ -215,11 +215,11 @@ void initializeCameraStabilization() {
   servoMaxRoll = 2000;
   servoMaxYaw = 2000;
     
-  _initialize(); // specific init for timer chosen
-  setPitch(0);
-  setRoll(0);
-  setYaw(0);
-  move();
+  initializeCameraControl(); // specific init for timer chosen
+  cameraControlSetPitch(0);
+  cameraControlSetRoll(0);
+  cameraControlSetYaw(0);
+  cameraControlMove();
 }
 
 #endif  // #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)

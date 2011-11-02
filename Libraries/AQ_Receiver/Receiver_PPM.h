@@ -30,13 +30,6 @@
 #include <WProgram.h>
 #include "Receiver.h"
 
-#define RISING_EDGE 1
-#define FALLING_EDGE 0
-#define MINONWIDTH 950
-#define MAXONWIDTH 2075
-#define MINOFFWIDTH 12000
-#define MAXOFFWIDTH 24000
-
 #include "pins_arduino.h"
 #include <AQMath.h>
 #include <Axis.h>
@@ -49,7 +42,15 @@
 #define AUX1       4
 #define AUX2       5
 
-#define SERIAL_SUM_PPM         PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2 //For Graupner/Spektrum
+#define SERIAL_SUM_PPM_1         PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,0,0 //For Graupner/Spektrum
+#define SERIAL_SUM_PPM_2         ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,0,0 //For Robe/Hitec/Futaba
+#define SERIAL_SUM_PPM_3         PITCH,ROLL,THROTTLE,YAW,AUX1,AUX2,0,0 //For some Hitec/Sanwa/Others
+
+#if defined (SKETCH_SERIAL_SUM_PPM)
+  #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM
+#else	
+  #define SERIAL_SUM_PPM SERIAL_SUM_PPM_1
+#endif
 
 static uint8_t rcChannel[8] = {SERIAL_SUM_PPM};
 volatile uint16_t rcValue[8] = {1500,1500,1500,1500,1500,1500,1500,1500}; // interval [1000;2000]
