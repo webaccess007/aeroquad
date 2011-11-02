@@ -30,7 +30,7 @@
 // http://aeroquad.com/showthread.php?1484-Camera-Stablisation
 // http://aeroquad.com/showthread.php?1491-Camera-Stablisation-continued
 
-void _initialize() {
+void initializeCameraControl() {
  // Init PWM Timer 1      Probable conflict with Arducopter Motor
  DDRB = DDRB | B11100000;                                  //Set to Output Mega Port-Pin PB5-11, PB6-12, PB7-13
                                                               //WGMn1 WGMn2 WGMn3  = Mode 14 Fast PWM, TOP = ICRn ,Update of OCRnx at BOTTOM 
@@ -39,7 +39,7 @@ void _initialize() {
  ICR1 = 39999;    //50hz freq (standard servos) 20ms = 40000 * 0.5us
 }
 
-void move() {
+void cameraControlMove() {
   if (mode > 0) {
     OCR1A = servoPitch * 2;
     OCR1B = servoRoll * 2;

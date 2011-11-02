@@ -21,19 +21,8 @@
 #ifndef _AQ_BATTERY_MONITOR_AQ_
 #define _AQ_BATTERY_MONITOR_AQ_
 
-#include "BatteryMonitorBase.h"
+#include "BatteryMonitor.h"
 #include <WProgram.h>
-
-#if defined (__AVR_ATmega328P__)
-  #define BUZZERPIN 12
-#else
-  #define BUZZERPIN 49
-#endif
-
-byte state = 0, firstAlarm = 0;
-float diode = 0.0; // raw voltage goes through diode on Arduino
-float batteryScaleFactor = 0.0;
-long currentBatteryTime = 0, previousBatteryTime = 0;
 
 void initializeBatteryMonitor(float diodeValue) {
   float R1   = 15000;
@@ -42,11 +31,6 @@ void initializeBatteryMonitor(float diodeValue) {
   batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
   diode = diodeValue;
   analogReference(DEFAULT);
-  pinMode(BUZZERPIN, OUTPUT); // connect a 12V buzzer to buzzer pin
-  digitalWrite(BUZZERPIN, LOW);
-  previousBatteryTime = millis();
-  state = LOW;
-  firstAlarm = OFF;
 }
 
 const float readBatteryVoltage(byte channel) {

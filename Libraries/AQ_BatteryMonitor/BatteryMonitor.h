@@ -18,15 +18,40 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _AQ_BATTERY_MONITOR_
-#define _AQ_BATTERY_MONITOR_
+#ifndef _AQ_BATTERY_MONITOR_BASE_
+#define _AQ_BATTERY_MONITOR_BASE_
 
-#include <WProgram.h>
+#include "BatteryMonitor.h"
 
-#define OK 0
-#define WARNING 1
-#define ALARM 2
 
-byte batteryStatus = OK;
+#define BATTERY_MOBITOR_OK 0
+#define BATTERY_MOBITOR_WARNING 1
+#define BATTERY_MOBITOR_ALARM 2
+
+#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
+
+float lowVoltageWarning = 10.2; //10.8;  // Pack voltage at which to trigger alarm (first alarm)
+float lowVoltageAlarm = 9.5; //10.2;     // Pack voltage at which to trigger alarm (critical alarm)
+float batteryVoltage = 0.0;
+float diode = 0.0; // raw voltage goes through diode on Arduino
+float batteryScaleFactor = 0.0;
+byte batteryStatus = BATTERY_MOBITOR_OK;
+  
+void initializeBatteryMonitor(float diodeValue = 0.0);
+const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
+
+void measureBatteryVoltage(boolean armed) {
+  batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
+  if (batteryVoltage < lowVoltageWarning) {
+    batteryStatus = BATTERY_MOBITOR_WARNING;
+  }
+  else if (batteryVoltage < lowVoltageAlarm) {
+	batteryStatus = BATTERY_MOBITOR_ALARM;
+  }
+  else {
+    batteryStatus = BATTERY_MOBITOR_OK;
+  }
+}
+  
 
 #endif

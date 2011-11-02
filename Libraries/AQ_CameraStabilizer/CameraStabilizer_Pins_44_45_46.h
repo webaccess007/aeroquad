@@ -30,7 +30,7 @@
 
 #include "CameraStabilizer.h"
 
-void _initialize(void) {
+void initializeCameraControl() {
   // Init PWM Timer 5   Probable conflict with Arducopter Motor
   DDRL = DDRL | B00111000;                                  //Set to Output Mega Port-Pin PL3-46, PE4-45, PE5-44
   TCCR5A =((1<<WGM51)|(1<<COM5A1)|(1<<COM5B1)|(1<<COM5C1)); 
@@ -38,7 +38,7 @@ void _initialize(void) {
   ICR5 = 39999; //50hz freq (standard servos)
 }
   
-void move(void) {
+void cameraControlMove() {
   if (mode > 0) {
     OCR5A = servoPitch * 2;
     OCR5B = servoRoll * 2;

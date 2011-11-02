@@ -21,7 +21,7 @@
 #ifndef _AQ_BATTERY_MONITOR_APM_
 #define _AQ_BATTERY_MONITOR_APM_
 
-#include "BatteryMonitorBase.h"
+#include "BatteryMonitor.h"
 #include <WProgram.h>
 
 // ***********************************************************************************
@@ -47,9 +47,6 @@
   PIN59--RR_LED--150ohm--GND
   PIN60--RL_LED--150ohm--GND
 */
-
-float diode = 0.0; //Schottky diode on APM board
-float batteryScaleFactor = 0.0;
 
 void initializeBatteryMonitor(float diodeValue) {
   float R1   = 10050; //the SMD 10k resistor measured with DMM

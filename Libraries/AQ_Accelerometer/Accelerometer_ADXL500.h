@@ -38,7 +38,7 @@ void measureAccel() {
 
   meterPerSec[XAXIS] = (analogRead(1)    - accelZero[PITCH]) * accelScaleFactor;
   meterPerSec[YAXIS] = (accelZero[ROLL]  - analogRead(0))    * accelScaleFactor;
-  meterPerSec[ZAXIS] = (accelZero[ZAXIS] - (analogRead(2))   * accelScaleFactor;
+  meterPerSec[ZAXIS] = (accelZero[ZAXIS] - analogRead(2))   * accelScaleFactor;
 }
 
 void measureAccelSum() {
