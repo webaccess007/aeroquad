@@ -20,22 +20,17 @@
 
 #ifndef _AQ_BATTERY_MONITOR_AQ_
 #define _AQ_BATTERY_MONITOR_AQ_
-
-#include "BatteryMonitor.h"
-#include <WProgram.h>
-
-void initializeBatteryMonitor(float diodeValue) {
-  float R1   = 15000;
-  float R2   = 7500;
-  float Aref = 5.0;
-  batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
-  diode = diodeValue;
-  analogReference(DEFAULT);
-}
-
-const float readBatteryVoltage(byte channel) {
-  return (analogRead(channel) * batteryScaleFactor) + diode;
-}
-
-
+  // below defines two batteries, ALWAYS modify this for your own configuration !!! 
+  // battery 1 
+  //   (vpin)     = 0   - voltage divider on v2.0 shield
+  //   (cpin)     = NC  - no current sensor
+  //   (vwarning) = 7.4 - warning voltage (for 2S LiPo)
+  //   (valarm)   = 7.2 - alarm voltage
+  //   (vscale)   = ((AREF / 1024.0) * (15.0+7.5)/7.5) - voltage divider on AQ v2.0 shield ( in - 15kOhm - out - 7.5kOhm - GND )
+  //   (vbias)    = 0.82 - voltage drop on the diode on ArduinoMega VIN
+  //   (cscale)   = 0.0 - N/A due to no sensor
+  //   (cbias)    = 0.0 - N/A due to no sensor
+ const struct BatteryConfig batConfig[] = {
+   { 0, NOPIN,  BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage,    ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), BATTERY_MONITOR_DIODE_VALUE, 0.0, 0.0},
+};
 #endif

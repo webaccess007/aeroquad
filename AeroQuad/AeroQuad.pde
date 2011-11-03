@@ -860,10 +860,22 @@
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************
 //********************************************************
-#if defined (BATTERY_MONITOR_AQ)
-  #include <BatteryMonitor_AQ.h>
-#elif defined (BATTERY_MONITOR_APM)
-  #include <BatteryMonitor_APM.h>
+//#if defined (BATTERY_MONITOR_AQ)
+//  #include <BatteryMonitor_AQ.h>
+//#elif defined (BATTERY_MONITOR_APM)
+//  #include <BatteryMonitor_APM.h>
+//#endif  
+
+#ifdef BattMonitor
+  #include <BatteryMonitorTypes.h>
+  #if defined (BATTERY_MONITOR_AQ)
+    #include <BatteryMonitor_AQ.h>
+  #elif defined (BATTERY_MONITOR_APM)
+    #include <BatteryMonitor_APM.h>  
+  #else
+    #error BatteryMonitor configuration missing!!
+  #endif
+  #include <BatteryMonitor.h>
 #endif  
 
 //********************************************************
@@ -989,8 +1001,8 @@ void setup() {
   
   // Battery Monitor
   #ifdef BattMonitor
-    initializeBatteryMonitor(BATTERY_MONITOR_DIODE_VALUE);
-    lowVoltageAlarm = BattMonitorAlarmVoltage;
+    initializeBatteryMonitor();
+//    lowVoltageAlarm = BattMonitorAlarmVoltage;
   #endif
   
   // Camera stabilization setup
@@ -1184,7 +1196,7 @@ void loop () {
         measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
       #endif
       #if defined(BattMonitor)
-        measureBatteryVoltage(armed);
+        measureBatteryVoltage();
       #endif
 
       // Listen for configuration commands and reports telemetry

@@ -350,7 +350,7 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(meterPerSec[axis]);
 #ifdef BattMonitor
-    PrintValueComma(batteryVoltage);
+    PrintValueComma(batteryVoltage[0]);
 #else
     PrintValueComma(0);
 #endif

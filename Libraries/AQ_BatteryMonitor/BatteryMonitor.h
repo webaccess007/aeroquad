@@ -18,40 +18,54 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _AQ_BATTERY_MONITOR_BASE_
-#define _AQ_BATTERY_MONITOR_BASE_
+#ifndef _AQ_BATTERY_MONITOR_
+#define _AQ_BATTERY_MONITOR_
 
-#include "BatteryMonitor.h"
+byte batteryStatus = BATTERY_MONITOR_OK;
 
+float batteryVoltage[sizeof(batConfig)/sizeof(struct BatteryConfig)];
+float batteryMinVoltage[sizeof(batConfig)/sizeof(struct BatteryConfig)];
+float batteryCurrent[sizeof(batConfig)/sizeof(struct BatteryConfig)];
+float batteryMaxCurrent[sizeof(batConfig)/sizeof(struct BatteryConfig)];
+float batteryUsedCapacity[sizeof(batConfig)/sizeof(struct BatteryConfig)];
 
-#define BATTERY_MOBITOR_OK 0
-#define BATTERY_MOBITOR_WARNING 1
-#define BATTERY_MOBITOR_ALARM 2
+void initializeBatteryMonitor(){
 
-#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-
-float lowVoltageWarning = 10.2; //10.8;  // Pack voltage at which to trigger alarm (first alarm)
-float lowVoltageAlarm = 9.5; //10.2;     // Pack voltage at which to trigger alarm (critical alarm)
-float batteryVoltage = 0.0;
-float diode = 0.0; // raw voltage goes through diode on Arduino
-float batteryScaleFactor = 0.0;
-byte batteryStatus = BATTERY_MOBITOR_OK;
-  
-void initializeBatteryMonitor(float diodeValue = 0.0);
-const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-
-void measureBatteryVoltage(boolean armed) {
-  batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-  if (batteryVoltage < lowVoltageWarning) {
-    batteryStatus = BATTERY_MOBITOR_WARNING;
-  }
-  else if (batteryVoltage < lowVoltageAlarm) {
-	batteryStatus = BATTERY_MOBITOR_ALARM;
-  }
-  else {
-    batteryStatus = BATTERY_MOBITOR_OK;
+  for (int i=0; i<numberOfBatteries;i++) {
+    batteryVoltage[i]=batConfig[i].vwarning+1.0;
+    batteryMinVoltage[i]=99.0;
+    batteryCurrent[i]=0.0;
+    batteryMaxCurrent[i]=0.0;
+    batteryUsedCapacity[i]=0.0;
   }
 }
-  
 
+void measureBatteryVoltage(){
+  boolean alarm = false;
+  boolean warning = false;
+  for (int i=0; i<numberOfBatteries;i++) {
+    batteryVoltage[i] = (float)analogRead(batConfig[i].vpin)*batConfig[i].vscale+batConfig[i].vbias;
+    if (batteryVoltage[i]<batteryMinVoltage[i]) {
+      batteryMinVoltage[i]=batteryVoltage[i];
+    }
+    if (batConfig[i].cpin!=NOPIN) {
+      batteryCurrent[i]=  (float)analogRead(batConfig[i].cpin)*batConfig[i].cscale+batConfig[i].cbias;
+      if (batteryCurrent[i]>batteryMaxCurrent[i]) { 
+        batteryMaxCurrent[i]=batteryCurrent[i];
+      }
+      batteryUsedCapacity[i]+=1000.0*batteryCurrent[i]*G_Dt;
+    }
+    alarm|=(batteryVoltage[i]<batConfig[i].valarm);
+    warning|=(batteryVoltage[i]<batConfig[i].vwarning);
+  }
+  if (alarm) {
+    batteryStatus=BATTERY_MONITOR_ALARM;
+  }
+  else if (warning) {
+    batteryStatus=BATTERY_MONITOR_WARNING;
+  }
+  else {
+    batteryStatus=BATTERY_MONITOR_OK;
+  }
+}
 #endif

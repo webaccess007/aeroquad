@@ -21,9 +21,6 @@
 #ifndef _AQ_BATTERY_MONITOR_APM_
 #define _AQ_BATTERY_MONITOR_APM_
 
-#include "BatteryMonitor.h"
-#include <WProgram.h>
-
 // ***********************************************************************************
 // ************************ BatteryMonitor APM & CHR6DM  *****************************
 // ***********************************************************************************
@@ -41,31 +38,18 @@
 //Vin = (Vout * (R1+R2))/R2
 //Vin = ((((AREF/1024.0)*adDECIMAL) * (R1+R2)) / R2) + Diode drop //(aref/1024)*adDecimal is Vout
 //Vout connected to Ain0 on any Arduino
-/* Circuit:
-  PIN57--FL_LED--150ohm--GND
-  PIN58--FR_LED--150ohm--GND
-  PIN59--RR_LED--150ohm--GND
-  PIN60--RL_LED--150ohm--GND
 */
 
-void initializeBatteryMonitor(float diodeValue) {
-  float R1   = 10050; //the SMD 10k resistor measured with DMM
-  float R2   =  3260; //3k3 user mounted resistor measured with DMM
-  float Aref = 3.27F; //AREF 3V3 used (solder jumper) and measured with DMM
-  batteryScaleFactor = ((Aref / 1024.0) * ((R1 + R2) / R2));
-
-  diode = 0.306F; //Schottky diode on APM board, drop measured with DMM
-
-  analogReference(EXTERNAL); //use Oilpan 3V3 AREF or if wanted, define DEFAULT here to use VCC as reference and define that voltage in BatteryReadArmLed.h
-
-  batteryVoltage = readBatteryVoltage(BATTERYPIN);
+// battery 1 
+//   (vpin)     = 0    - voltage divider on v2.0 shield
+//   (cpin)     = NC   - no current sensor
+//   (vwarning) = 10.2 - warning voltage (for 2S LiPo)
+//   (valarm)   = 9.5  - alarm voltage
+//   (vscale)   = ((AREF / 1024.0) * (R1+R2)/R2)
+//   (vbias)    = 0.306 - voltage drop on the D1
+//   (cscale)   = 0.0  - N/A due to no sensor
+//   (cbias)    = 0.0  - N/A due to no sensor
+const struct BatteryConfig batConfig[] = {
+   { 0, NOPIN, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), BATTERY_MONITOR_DIODE_VALUE, 0.0, 0.0},
 }
-
-const float readBatteryVoltage(byte channel) {
-  return (analogRead(channel) * batteryScaleFactor) + diode;
-}
-
-
-
-
 #endif
