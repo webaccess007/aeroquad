@@ -1,21 +1,21 @@
 /*
   AeroQuad v3.0 - April 2011
-  www.AeroQuad.com 
+  www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
- 
-  This program is free software: you can redistribute it and/or modify 
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version. 
 
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-  GNU General Public License for more details. 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License 
-  along with this program. If not, see <http://www.gnu.org/licenses/>. 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /****************************************************************************
@@ -43,7 +43,7 @@
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
- ****************************************************************************/ 
+ ****************************************************************************/
 // Use only one of the following definitions
 //#define quadXConfig
 //#define quadPlusConfig
@@ -133,9 +133,9 @@
  ****************************************************************************
  ****************************************************************************
  ****************************************************************************/
- 
- 
- 
+
+
+
 // Checks to make sure we have the right combinations defined
 #if defined(FlightAngleMARG) && !defined(HeadingMagHold)
   #undef FlightAngleMARG
@@ -152,7 +152,9 @@
 #include "PID.h"
 #include <AQMath.h>
 #include <FourtOrderFilter.h>
-
+#ifdef BattMonitor
+  #include <BatteryMonitorTypes.h>
+#endif
 
 //********************************************************
 //********************************************************
@@ -165,20 +167,20 @@
 
   // Accelerometer declaration
   #include <Accelerometer_ADXL500.h>
-  
+
   // Receiver declaration
   #define RECEIVER_328P
 
   // Motor declaration
   #define MOTOR_PWM
-  
+
   // unsuported in v1
   #undef AltitudeHold
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put AeroQuad_v1 specific intialization need here
    */
@@ -186,7 +188,7 @@
     setGyroAref(aref);
     setAccelAref(aref);
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -204,20 +206,20 @@
 
   // Accelerometer declaration
   #include <Accelerometer_ADXL500.h>
-  
+
   // Receiver declaration
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM  
-  
+  #define MOTOR_PWM
+
   // unsuported in v1
   #undef AltitudeHold
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put AeroQuad_v1_IDG specific intialization need here
    */
@@ -225,7 +227,7 @@
     setGyroAref(aref);
     setAccelAref(aref);
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -239,34 +241,34 @@
 
 #ifdef AeroQuad_v18
   #include <Device_I2C.h>
-  
+
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
-  
+
   // Accelerometer declaraion
   #include <Accelerometer_BMA180.h>
-  
+
   // Receiver declaration
   #define RECEIVER_328P
-  
+
   // Motor declaration
   #define MOTOR_PWM_Timer
-  
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
   #endif
-  
+
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_AQ
-    #define BATTERY_MONITOR_DIODE_VALUE 0.9
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
   #endif
-  
+
   #undef AltitudeHold
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put AeroQuad_v18 specific intialization need here
    */
@@ -276,11 +278,11 @@
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
     digitalWrite(LED3PIN, LOW);
-    
+
     Wire.begin();
     TWBR = 12;
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -293,19 +295,19 @@
 
 #ifdef AeroQuad_Mini
   #include <Device_I2C.h>
-  
+
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
 
   // Accelerometer declaration
   #include <Accelerometer_ADXL345.h>
-  
+
   // Receiver declaration
   #define RECEIVER_328P
 
   // Motor declaration
   #define MOTOR_PWM
-  
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
@@ -313,21 +315,21 @@
   
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_AQ
-    #define BATTERY_MONITOR_DIODE_VALUE 0.53
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53)};
   #endif
-  
+
   // unsuported in mini
   #undef AltitudeHold
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put AeroQuad_Mini specific intialization need here
    */
   void initPlatform() {
     gyroAddress = ITG3200_ADDRESS-1;
-    
+
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
@@ -336,7 +338,7 @@
     Wire.begin();
     TWBR = 12;
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -357,17 +359,17 @@
 
   // Reveiver declaration
   #define RECEIVER_MEGA
-  
-  // Motor declaration
-  #define MOTOR_PWM  
 
-  // unsuported on mega v1  
+  // Motor declaration
+  #define MOTOR_PWM
+
+  // unsuported on mega v1
   #undef AltitudeHold
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put AeroQuadMega_v1 specific intialization need here
    */
@@ -375,7 +377,7 @@
     setGyroAref(aref);
     setAccelAref(aref);
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -389,10 +391,10 @@
 
 #ifdef AeroQuadMega_v2
   #include <Device_I2C.h>
-  
+
   // Gyroscope declaration
   #include <Gyroscope_ITG3200.h>
-  
+
   // Accelerometer declaration
   #include <Accelerometer_BMA180.h>
 
@@ -401,7 +403,7 @@
 
   // Motor declaration
   #define MOTOR_PWM_Timer
-  
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
@@ -414,19 +416,19 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_AQ
-    #define BATTERY_MONITOR_DIODE_VALUE 0.9
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.82)};
   #endif
-  
+
   #ifdef OSD
     #define MAX7456_OSD
   #endif  
-  
+
   /**
    * Put AeroQuadMega_v2 specific intialization need here
    */
   void initPlatform() {
-    
+
     pinMode(LED2PIN, OUTPUT);
     digitalWrite(LED2PIN, LOW);
     pinMode(LED3PIN, OUTPUT);
@@ -443,12 +445,12 @@
     digitalWrite(43, HIGH); // LED 1 on
     digitalWrite(44, HIGH); // LED 2 on
     digitalWrite(45, HIGH); // LED 3 on
-    digitalWrite(46, HIGH); // LED 4 on  
+    digitalWrite(46, HIGH); // LED 4 on
 
     Wire.begin();
     TWBR = 12;
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -464,34 +466,34 @@
   #include <APM_RC.h>
   #include <Device_I2C.h>
 
-  // Gyroscope declaration 
+  // Gyroscope declaration
   #include <Gyroscope_APM.h>
-  
+
   // Accelerometer Declaration
   #include <Accelerometer_APM.h>
 
   // Receiver Declaration
   #define RECEIVER_APM
-  
+
   // Motor Declaration
   #define MOTOR_APM
-  
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
   #endif
- 
+
   // Altitude declaration
   #ifdef AltitudeHold
     #define BMP085
   #endif
-  
+
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_APM
-    #define BATTERY_MONITOR_DIODE_VALUE 0.306
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306)};
   #endif
-  
+
   #undef CameraControl
   #undef OSD
 
@@ -506,7 +508,7 @@
 
     initializeADC();
     initRC();
-    
+
     Wire.begin();
   }
 
@@ -523,48 +525,48 @@
 
 #ifdef AeroQuad_Wii
   #include <Device_I2C.h>
-  
+
   // Platform Wii declaration
   #include <Platform_Wii.h>
-  
+
   // Gyroscope declaration
   #include <Gyroscope_Wii.h>
 
   // Accelerometer declaration
   #include <Accelerometer_WII.h>
-  
+
   // Receiver declaration
   #define RECEIVER_328P
 
   // Motor declaration
-  #define MOTOR_PWM  
-  
+  #define MOTOR_PWM
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
   #endif
-  
+
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_AQ
-    #define BATTERY_MONITOR_DIODE_VALUE 0.9
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V( 0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
   #endif
-  
+
   #undef CameraControl
   #undef OSD
   #undef AltitudeHold
-  
+
   /**
    * Put AeroQuad_Wii specific intialization need here
    */
   void initPlatform() {
      Wire.begin();
-     
+
      #if defined(AeroQuad_Paris_v3)
        initializeWiiSensors(true);
      #else
        initializeWiiSensors();
-     #endif  
+     #endif
   }
 
   /**
@@ -581,10 +583,10 @@
 
 #ifdef AeroQuadMega_Wii
   #include <Device_I2C.h>
-  
+
   // Platform Wii declaration
   #include <Platform_Wii.h>
-  
+
   // Gyroscope declaration
   #include <Gyroscope_Wii.h>
 
@@ -596,34 +598,34 @@
 
   // Motor declaration
   #define MOTOR_PWM
-  
+
   // heading mag hold declaration
   #ifdef HeadingMagHold
     #define HMC5843
   #endif
-  
+
   // Altitude declaration
   #ifdef AltitudeHold
     #define BMP085
   #endif
-  
+
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_AQ
-    #define BATTERY_MONITOR_DIODE_VALUE 0.9
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
   #endif
 
   #ifdef OSD
     #define MAX7456_OSD
-  #endif  
+  #endif
 
   /**
    * Put AeroQuadMega_Wii specific intialization need here
    */
   void initPlatform() {
     Wire.begin();
-    
-    initializeWiiSensors();   
+
+    initializeWiiSensors();
   }
 
   /**
@@ -642,7 +644,7 @@
   #include <Device_I2C.h>
   #include <Platform_CHR6DM.h>
   CHR6DM chr6dm;
-  
+
   // Gyroscope declaration
   #include <Gyroscope_CHR6DM.h>
 
@@ -654,15 +656,15 @@
 
   // Motor declaration
   #define MOTOR_PWM
-  
+
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  
+
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
   #include <Magnetometer_CHR6DM.h>
-  
+
   #ifdef OSD
     #define MAX7456_OSD
   #endif
@@ -671,13 +673,13 @@
   #ifdef AltitudeHold
     #define BMP085
   #endif
-  
+
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_APM
-    #define BATTERY_MONITOR_DIODE_VALUE 0.9
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9)};
   #endif
-  
+
   /**
    * Put AeroQuadMega_CHR6DM specific intialization need here
    */
@@ -686,19 +688,19 @@
     PORTD = B00000100;
 
     Wire.begin();
-    
+
     chr6dm.resetToFactory();
     chr6dm.setListenMode();
     chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
     chr6dm.requestPacket();
-    
+
     gyroChr6dm = &chr6dm;
     accelChr6dm = &chr6dm;
     kinematicsChr6dm = &chr6dm;
 //    tempKinematics.setGyroscope(&gyroSpecific);
     compassChr6dm = &chr6dm;
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -715,10 +717,10 @@
   #include <Device_I2C.h>
   #include <Platform_CHR6DM.h>
   CHR6DM chr6dm;
-  
+
   // Gyroscope declaration
   #include <Gyroscope_CHR6DM.h>
-  
+
   // Accelerometer declaration
   #include <Accelerometer_CHR6DM.h>
 
@@ -727,10 +729,10 @@
 
   // Motor declaration
   #define MOTOR_APM
-  
+
   // Kinematics declaration
   #include "Kinematics_CHR6DM.h"
-  
+
   // Compas declaration
   #define HeadingMagHold
   #define COMPASS_CHR6DM
@@ -740,16 +742,16 @@
   #ifdef AltitudeHold
     #define BMP085
   #endif
-  
+
   // Battery monitor declaration
   #ifdef BattMonitor
-    #define BATTERY_MONITOR_APM
-    #define BATTERY_MONITOR_DIODE_VALUE 0.306
+    struct BatteryData batteryData[] = {
+      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306)};
   #endif
-  
+
   #undef CameraControl
   #undef OSD
-  
+
   /**
    * Put APM_OP_CHR6DM specific intialization need here
    */
@@ -760,21 +762,21 @@
 
     Serial1.begin(BAUD);
     PORTD = B00000100;
-    
+
     Wire.begin();
 
     chr6dm.resetToFactory();
     chr6dm.setListenMode();
     chr6dm.setActiveChannels(CHANNEL_ALL_MASK);
     chr6dm.requestPacket();
-    
+
     gyroChr6dm = &chr6dm;
     accelChr6dm = &chr6dm;
     kinematicsChr6dm = &chr6dm;
 //    tempKinematics.setGyroscope(&gyroSpecific);
     compassChr6dm = &chr6dm;
   }
-  
+
   /**
    * Measure critical sensors
    */
@@ -830,7 +832,7 @@
 //********************************************************
 //********************** MOTORS DECLARATION **************
 //********************************************************
-#if defined triConfig 
+#if defined triConfig
   #include <Motors_Tri.h>
 #elif defined MOTOR_PWM
   #include <Motors_PWM.h>
@@ -860,24 +862,9 @@
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************
 //********************************************************
-//#if defined (BATTERY_MONITOR_AQ)
-//  #include <BatteryMonitor_AQ.h>
-//#elif defined (BATTERY_MONITOR_APM)
-//  #include <BatteryMonitor_APM.h>
-//#endif  
-
 #ifdef BattMonitor
-  #include <BatteryMonitorTypes.h>
-  #if defined (BATTERY_MONITOR_AQ)
-    #include <BatteryMonitor_AQ.h>
-  #elif defined (BATTERY_MONITOR_APM)
-    #include <BatteryMonitor_APM.h>  
-  #else
-    #error BatteryMonitor configuration missing!!
-  #endif
   #include <BatteryMonitor.h>
-#endif  
-
+#endif
 //********************************************************
 //************** CAMERA CONTROL DECLARATION **************
 //********************************************************
@@ -894,7 +881,7 @@
   #include "FlightControlQuadXMode.h"
 #elif defined quadPlusConfig
   #include "FlightControlQuadPlusMode.h"
-#elif defined hexPlusConfig  
+#elif defined hexPlusConfig
   #include "FlightControlHexPlusMode.h"
 #elif defined hexXConfig
   #include "FlightControlHexXMode.h"
@@ -903,7 +890,7 @@
 #elif defined quadY4Config
   #include "FlightControlQuadY4.h"
 #elif defined hexY6Config
-  #include "FlightControlHexY6.h"  
+  #include "FlightControlHexY6.h"
 #elif defined octoX8Congig
   #include "FlightControlOctoX8.h"
 #elif defined octoXCongig
@@ -915,13 +902,13 @@
 //********************************************************
 //****************** OSD DEVICE DECLARATION **************
 //********************************************************
-#ifdef MAX7456_OSD    // only OSD supported for now is the MAX7456
+#ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
   #include "MAX7456.h"
   #ifdef OSD_SYSTEM_MENU
     #include "OSDMenu.h"
   #endif
 #else  
-  #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
+    #undef OSD_SYSTEM_MENU  // can't use menu system without an osd, 
 #endif
 
 // Include this last as it contains objects from above declarations
@@ -946,39 +933,39 @@ void setup() {
   digitalWrite(10, LOW);
   digitalWrite(9, LOW);
   digitalWrite(8, LOW);
-#endif    
+#endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
-  
+
   initPlatform();
-  
+
   // Configure motors
   #if defined(quadXConfig) || defined(quadPlusConfig) || defined(quadY4Config) || defined(triConfig)
-     initializeMotors(FOUR_Motors); 
+     initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
-     initializeMotors(SIX_Motors); 
+     initializeMotors(SIX_Motors);
   #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoXPlusCongig)
-     initializeMotors(HEIGHT_Motors); 
+     initializeMotors(HEIGHT_Motors);
   #endif
 
   // Setup receiver pins for pin change interrupts
   initializeReceiver(LASTCHANNEL);
   initReceiverFromEEPROM();
-       
+
   // Initialize sensors
   // If sensors have a common initialization routine
   // insert it into the gyro class because it executes first
   initializeGyro(); // defined in Gyro.h
   initializeAccel(); // defined in Accel.h
   initSensorsZeroFromEEPROM();
-  
+
   // Calibrate sensors
   calibrateGyro(); // defined in Gyro.h
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;
-  
+
   // Flight angle estimation
   #ifdef HeadingMagHold
     initializeMagnetometer();
@@ -998,13 +985,12 @@ void setup() {
   #ifdef AltitudeHold
     initializeBaro();
   #endif
-  
+
   // Battery Monitor
   #ifdef BattMonitor
-    initializeBatteryMonitor();
-//    lowVoltageAlarm = BattMonitorAlarmVoltage;
+    initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData));
   #endif
-  
+
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
@@ -1013,7 +999,7 @@ void setup() {
     setmCameraPitch(11.11);
     setCenterPitch(1300);
   #endif
-  
+
   #if defined(MAX7456_OSD)
     initializeOSD();
   #endif
@@ -1026,13 +1012,10 @@ void setup() {
       delay(1000);
     #else
      binaryPort = &Serial;
-    #endif 
+    #endif
   #endif
-  
+
   setupFourthOrder();
-  
-  // AKA use a new low pass filter called a Lag Filter uncomment only if using DCM LAG filters
-  //  setupFilters(accel.accelOneG);
 
   previousTime = micros();
   digitalWrite(LEDPIN, HIGH);
@@ -1050,21 +1033,21 @@ void setup() {
   ReadCompass     readCompass   ( 100000); //  10Hz
   ProcessTelem    processTelem  ( 100000); //  10Hz
   ReadBattery     readBattery   ( 100000); //  10Hz
-  
+
   Task *tasks[] = {&readGyro, &readAccel, &runDCM, &flightControls,   \
                    &readReceiver, &readBaro, &readCompass,            \
                    &processTelem, &readBattery};
-                   
+
   TaskScheduler sched(tasks, NUM_TASKS(tasks));
-  
+
   sched.run();
 *******************************************************************/
 void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
-  
+
   measureCriticalSensors();
-  
+
   // Main scheduler loop set for 100hz
   if (deltaTime >= 10000) {
 
@@ -1074,82 +1057,82 @@ void loop () {
     #endif
 
     frameCounter++;
-    
+
     // ================================================================
     // 100hz task loop
     // ================================================================
     if (frameCounter %   1 == 0) {  //  100 Hz tasks
-     
+  
       G_Dt = (currentTime - hundredHZpreviousTime) / 1000000.0;
       hundredHZpreviousTime = currentTime;
-      
+
       evaluateMetersPerSec();
       evaluateGyroRate();
-      
+
       float filteredAccelRoll = computeFourthOrder(meterPerSec[XAXIS], &fourthOrder[AX_FILTER]);
       float filteredAccelPitch = computeFourthOrder(meterPerSec[YAXIS], &fourthOrder[AY_FILTER]);
       float filteredAccelYaw = computeFourthOrder(meterPerSec[ZAXIS], &fourthOrder[AZ_FILTER]);
 
       // ****************** Calculate Absolute Angle *****************
       #if defined FlightAngleNewARG
-        calculateKinematics(gyroRate[XAXIS],                  
-                            gyroRate[YAXIS],                      
-                            gyroRate[ZAXIS],                        
-                            filteredAccelRoll,                  
-                            filteredAccelPitch,                  
-                            filteredAccelYaw,                  
-                            0.0,                                            
-                            0.0,                                            
+        calculateKinematics(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            filteredAccelRoll,
+                            filteredAccelPitch,
+                            filteredAccelYaw,
+                            0.0,
+                            0.0,
                             0.0,
                             G_Dt);
 
       #elif defined HeadingMagHold && defined FlightAngleMARG
-        calculateKinematics(gyroRate[XAXIS],                  
-                            gyroRate[YAXIS],                      
-                            gyroRate[ZAXIS],                        
-                            filteredAccelRoll,                  
-                            filteredAccelPitch,                  
-                            filteredAccelYaw,                  
-                            getMagnetometerRawData(XAXIS),                      
-                            getMagnetometerRawData(YAXIS),                     
+        calculateKinematics(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            filteredAccelRoll,
+                            filteredAccelPitch,
+                            filteredAccelYaw,
+                            getMagnetometerRawData(XAXIS),
+                            getMagnetometerRawData(YAXIS),
                             getMagnetometerRawData(ZAXIS),
                             G_Dt);
       #elif defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],                  
-                            gyroRate[YAXIS],                      
-                            gyroRate[ZAXIS],                        
-                            filteredAccelRoll,                  
-                            filteredAccelPitch,                  
-                            filteredAccelYaw,                  
-                            0.0,                                            
-                            0.0,                                            
+        calculateKinematics(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            filteredAccelRoll,
+                            filteredAccelPitch,
+                            filteredAccelYaw,
+                            0.0,
+                            0.0,
                             0.0,
                             G_Dt);
       #elif defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],                  
-                            gyroRate[YAXIS],                      
-                            gyroRate[ZAXIS],                        
-                            filteredAccelRoll,                  
-                            filteredAccelPitch,                  
-                            filteredAccelYaw,                  
-                            accelOneG,                              
-                            getHdgXY(XAXIS),                        
+        calculateKinematics(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            filteredAccelRoll,
+                            filteredAccelPitch,
+                            filteredAccelYaw,
+                            accelOneG,
+                            getHdgXY(XAXIS),
                             getHdgXY(YAXIS),
                             G_Dt);
       #elif !defined HeadingMagHold && !defined FlightAngleMARG && !defined FlightAngleARG
-        calculateKinematics(gyroRate[XAXIS],                  
-                            gyroRate[YAXIS],                      
-                            gyroRate[ZAXIS],                        
-                            filteredAccelRoll,                  
-                            filteredAccelPitch,                  
-                            filteredAccelYaw,                  
-                            accelOneG,                               
-                            0.0,                                             
+        calculateKinematics(gyroRate[XAXIS],
+                            gyroRate[YAXIS],
+                            gyroRate[ZAXIS],
+                            filteredAccelRoll,
+                            filteredAccelPitch,
+                            filteredAccelYaw,
+                            accelOneG,
+                            0.0,
                             0.0,
                             G_Dt);
       #endif
-      
-      
+
+
       // Combines external pilot commands and measured sensor data to generate motor commands
       processFlightControl();
 
@@ -1158,32 +1141,32 @@ void loop () {
           // write out fastTelemetry to Configurator or openLog
           fastTelemetry();
         }
-      #endif      
+      #endif
     }
 
     // ================================================================
     // 50hz task loop
     // ================================================================
     if (frameCounter %   2 == 0) {  //  50 Hz tasks
-     
+
       G_Dt = (currentTime - fiftyHZpreviousTime) / 1000000.0;
       fiftyHZpreviousTime = currentTime;
-      
+
       // Reads external pilot commands and performs functions based on stick configuration
       readPilotCommands(); // defined in FlightCommand.pde
-      
+
       #ifdef AltitudeHold
         measureBaro(); // defined in altitude.h
       #endif
-      
+
       #if defined(CameraControl)
         cameraControlSetPitch(kinematicsAngle[PITCH]);
         cameraControlSetRoll(kinematicsAngle[ROLL]);
         cameraControlSetYaw(kinematicsAngle[YAW]);
         cameraControlMove();
-      #endif 
+      #endif
     }
-    
+
     // ================================================================
     // 10hz task loop
     // ================================================================
@@ -1196,13 +1179,13 @@ void loop () {
         measureMagnetometer(kinematicsAngle[ROLL], kinematicsAngle[PITCH]);
       #endif
       #if defined(BattMonitor)
-        measureBatteryVoltage();
+        measureBatteryVoltage(G_Dt);
       #endif
 
       // Listen for configuration commands and reports telemetry
       readSerialCommand(); // defined in SerialCom.pde
       sendSerialTelemetry(); // defined in SerialCom.pde
-      
+
       #ifdef OSD_SYSTEM_MENU
         updateMenu();
       #endif

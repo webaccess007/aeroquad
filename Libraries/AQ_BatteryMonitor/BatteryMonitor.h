@@ -21,51 +21,71 @@
 #ifndef _AQ_BATTERY_MONITOR_
 #define _AQ_BATTERY_MONITOR_
 
-byte batteryStatus = BATTERY_MONITOR_OK;
+#include <BatteryMonitorTypes.h>
 
-float batteryVoltage[sizeof(batConfig)/sizeof(struct BatteryConfig)];
-float batteryMinVoltage[sizeof(batConfig)/sizeof(struct BatteryConfig)];
-float batteryCurrent[sizeof(batConfig)/sizeof(struct BatteryConfig)];
-float batteryMaxCurrent[sizeof(batConfig)/sizeof(struct BatteryConfig)];
-float batteryUsedCapacity[sizeof(batConfig)/sizeof(struct BatteryConfig)];
+byte batteryStatus       = BATTERY_MONITOR_OK;
+byte numbersOfBatteries  = 0; 
 
-void initializeBatteryMonitor(){
+// Reset Battery statistics
+void resetBattery(byte batno) {
 
-  for (int i=0; i<numberOfBatteries;i++) {
-    batteryVoltage[i]=batConfig[i].vwarning+1.0;
-    batteryMinVoltage[i]=99.0;
-    batteryCurrent[i]=0.0;
-    batteryMaxCurrent[i]=0.0;
-    batteryUsedCapacity[i]=0.0;
+  if (batno < numbersOfBatteries) {
+    batteryData[batno].voltage = batteryData[batno].vWarning + 1.0;
+    batteryData[batno].minVoltage = 99.0;
+    batteryData[batno].current = 0.0;
+    batteryData[batno].maxCurrent = 0.0;
+    batteryData[batno].usedCapacity = 0.0;	
   }
 }
 
-void measureBatteryVoltage(){
-  boolean alarm = false;
-  boolean warning = false;
-  for (int i=0; i<numberOfBatteries;i++) {
-    batteryVoltage[i] = (float)analogRead(batConfig[i].vpin)*batConfig[i].vscale+batConfig[i].vbias;
-    if (batteryVoltage[i]<batteryMinVoltage[i]) {
-      batteryMinVoltage[i]=batteryVoltage[i];
-    }
-    if (batConfig[i].cpin!=NOPIN) {
-      batteryCurrent[i]=  (float)analogRead(batConfig[i].cpin)*batConfig[i].cscale+batConfig[i].cbias;
-      if (batteryCurrent[i]>batteryMaxCurrent[i]) { 
-        batteryMaxCurrent[i]=batteryCurrent[i];
-      }
-      batteryUsedCapacity[i]+=1000.0*batteryCurrent[i]*G_Dt;
-    }
-    alarm|=(batteryVoltage[i]<batConfig[i].valarm);
-    warning|=(batteryVoltage[i]<batConfig[i].vwarning);
+void initializeBatteryMonitor(byte nb){
+
+  numbersOfBatteries = nb;
+  for (int i=0; i < numbersOfBatteries; i++) {
+    resetBattery(i);
   }
+}
+
+void measureBatteryVoltage(unsigned long G_Dt){
+
+  boolean alarm   = false;
+  boolean warning = false;
+  for (int i=0; i < numbersOfBatteries; i++) {
+
+    batteryData[i].voltage = (float)analogRead(batteryData[i].vPin) * batteryData[i].vScale + batteryData[i].vBias;
+    if (batteryData[i].voltage < batteryData[i].minVoltage) {
+      batteryData[i].minVoltage=batteryData[i].voltage;
+    }
+	
+    if (batteryData[i].cPin != NOPIN) {
+      batteryData[i].current = (float)analogRead(batteryData[i].cPin) * batteryData[i].cScale + batteryData[i].cBias;
+      if (batteryData[i].current > batteryData[i].maxCurrent) { 
+        batteryData[i].maxCurrent=batteryData[i].current;
+      }
+      batteryData[i].usedCapacity += batteryData[i].current * G_Dt / 3.6;
+    }
+	
+    if (batteryData[i].voltage < batteryData[i].vAlarm) {
+      alarm = true;
+      batteryData[i].status = BATTERY_MONITOR_ALARM;
+    }
+    else if (batteryData[i].voltage < batteryData[i].vWarning) {
+      warning = true;
+      batteryData[i].status = BATTERY_MONITOR_WARNING;
+    }
+    else {
+      batteryData[i].status = BATTERY_MONITOR_OK;
+    }
+  }
+  
   if (alarm) {
-    batteryStatus=BATTERY_MONITOR_ALARM;
+    batteryStatus = BATTERY_MONITOR_ALARM;
   }
   else if (warning) {
-    batteryStatus=BATTERY_MONITOR_WARNING;
+    batteryStatus = BATTERY_MONITOR_WARNING;
   }
   else {
-    batteryStatus=BATTERY_MONITOR_OK;
+    batteryStatus = BATTERY_MONITOR_OK;
   }
 }
 #endif

@@ -25,15 +25,29 @@
 #define BATTERY_MONITOR_WARNING 1
 #define BATTERY_MONITOR_ALARM   2
 
-struct BatteryConfig {
-    byte vpin,cpin;         // A/D pins for voltage and current sensors (255 == no sensor)
-    float vwarning,valarm;  // Warning and Alarm voltage level
-    float vscale,vbias;     // voltage polynom V = vbias + (Aref*Ain(vpin))*vscale;
-    float cscale,cbias;     // current polynom C = cbias + (Aref*Ain(cpin))*cscale;
+#define NOPIN 255
+
+struct BatteryData {
+  byte  vPin,cPin;        // A/D pins for voltage and current sensors (255 == no sensor)
+  float vWarning,vAlarm;  // Warning and Alarm voltage levels
+  float vScale,vBias;     // voltage polynom V = vbias + AnalogIn(vpin)*vscale
+  float cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
+  float voltage;          // Current battery voltage 
+  float current;          // Current battery current
+  float minVoltage;       // Minimum voltage since reset
+  float maxCurrent;       // Maximum current since reset
+  float usedCapacity;     // Capacity used since reset (in mAh)
+  byte  status;           //
 };
 
-#define numberOfBatteries (sizeof(batConfig)/sizeof(struct BatteryConfig))
+extern struct BatteryData batteryData[]; // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
+extern byte		          numbersOfBatteries;  // number of batteries monitored, defined by BatteryMonitor
+extern byte               batteryStatus; // combined state of batteries, defined by BatteryMonitor
 
-#define NOPIN 255
+// Helper macros to make battery difinitions cleaner
+// define battery with just voltage sensing 
+#define BM_DEFINE_BATTERY_V(VPIN,VWARNING,VALARM,VSCALE,VBIAS) {VPIN,NOPIN,VWARNING,VALARM,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, BATTERY_MONITOR_OK},
+// define battery with voltage and current sensors
+//#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, BATTERY_MONITOR_OK},
 
 #endif
