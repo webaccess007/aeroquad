@@ -32,7 +32,7 @@ struct BatteryData {
   float vWarning,vAlarm;  // Warning and Alarm voltage levels
   float vScale,vBias;     // voltage polynom V = vbias + AnalogIn(vpin)*vscale
   float cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
-  float voltage;          // Current battery voltage 
+  float voltage;          // Current battery voltage
   float current;          // Current battery current
   float minVoltage;       // Minimum voltage since reset
   float maxCurrent;       // Maximum current since reset
@@ -40,14 +40,16 @@ struct BatteryData {
   byte  status;           //
 };
 
-extern struct BatteryData batteryData[]; // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
-extern byte		          numbersOfBatteries;  // number of batteries monitored, defined by BatteryMonitor
-extern byte               batteryStatus; // combined state of batteries, defined by BatteryMonitor
+extern struct BatteryData batteryData[];     // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
+extern byte               numberOfBatteries; // number of batteries monitored, defined by BatteryMonitor
+extern byte               batteryStatus;     // combined state of batteries, defined by BatteryMonitor
 
 // Helper macros to make battery difinitions cleaner
-// define battery with just voltage sensing 
+
+// for defining battery with just voltage sensing
 #define BM_DEFINE_BATTERY_V(VPIN,VWARNING,VALARM,VSCALE,VBIAS) {VPIN,NOPIN,VWARNING,VALARM,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, BATTERY_MONITOR_OK},
-// define battery with voltage and current sensors
-//#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, BATTERY_MONITOR_OK},
+
+// for defining battery with voltage and current sensors
+#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, BATTERY_MONITOR_OK},
 
 #endif
