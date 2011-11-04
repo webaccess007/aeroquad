@@ -350,7 +350,7 @@ void sendSerialTelemetry() {
     for (byte axis = ROLL; axis < LASTAXIS; axis++)
       PrintValueComma(meterPerSec[axis]);
 #ifdef BattMonitor
-    PrintValueComma(batteryVoltage);
+    PrintValueComma(batteryData[0].voltage);
 #else
     PrintValueComma(0);
 #endif
@@ -381,7 +381,6 @@ void sendSerialTelemetry() {
     }
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
       PrintValueComma(motorCommand[axis]);
-//      PrintValueComma(motorConfiguratorCommand[axis]);
     }
     SERIAL_PRINTLN();
     break;

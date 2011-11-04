@@ -18,40 +18,74 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _AQ_BATTERY_MONITOR_BASE_
-#define _AQ_BATTERY_MONITOR_BASE_
+#ifndef _AQ_BATTERY_MONITOR_
+#define _AQ_BATTERY_MONITOR_
 
-#include "BatteryMonitor.h"
+#include <BatteryMonitorTypes.h>
 
+byte batteryStatus       = BATTERY_MONITOR_OK;
+byte numbersOfBatteries  = 0; 
 
-#define BATTERY_MOBITOR_OK 0
-#define BATTERY_MOBITOR_WARNING 1
-#define BATTERY_MOBITOR_ALARM 2
+// Reset Battery statistics
+void resetBattery(byte batno) {
 
-#define BATTERYPIN 0      // Ain 0 (universal to every Arduino), pin 55 on Mega (1280)
-
-float lowVoltageWarning = 10.2; //10.8;  // Pack voltage at which to trigger alarm (first alarm)
-float lowVoltageAlarm = 9.5; //10.2;     // Pack voltage at which to trigger alarm (critical alarm)
-float batteryVoltage = 0.0;
-float diode = 0.0; // raw voltage goes through diode on Arduino
-float batteryScaleFactor = 0.0;
-byte batteryStatus = BATTERY_MOBITOR_OK;
-  
-void initializeBatteryMonitor(float diodeValue = 0.0);
-const float readBatteryVoltage(byte); // defined as virtual in case future hardware has custom way to read battery voltage
-
-void measureBatteryVoltage(boolean armed) {
-  batteryVoltage = filterSmooth(readBatteryVoltage(BATTERYPIN), batteryVoltage, 0.1);
-  if (batteryVoltage < lowVoltageWarning) {
-    batteryStatus = BATTERY_MOBITOR_WARNING;
-  }
-  else if (batteryVoltage < lowVoltageAlarm) {
-	batteryStatus = BATTERY_MOBITOR_ALARM;
-  }
-  else {
-    batteryStatus = BATTERY_MOBITOR_OK;
+  if (batno < numbersOfBatteries) {
+    batteryData[batno].voltage = batteryData[batno].vWarning + 1.0;
+    batteryData[batno].minVoltage = 99.0;
+    batteryData[batno].current = 0.0;
+    batteryData[batno].maxCurrent = 0.0;
+    batteryData[batno].usedCapacity = 0.0;	
   }
 }
-  
 
+void initializeBatteryMonitor(byte nb){
+
+  numbersOfBatteries = nb;
+  for (int i=0; i < numbersOfBatteries; i++) {
+    resetBattery(i);
+  }
+}
+
+void measureBatteryVoltage(unsigned long G_Dt){
+
+  boolean alarm   = false;
+  boolean warning = false;
+  for (int i=0; i < numbersOfBatteries; i++) {
+
+    batteryData[i].voltage = (float)analogRead(batteryData[i].vPin) * batteryData[i].vScale + batteryData[i].vBias;
+    if (batteryData[i].voltage < batteryData[i].minVoltage) {
+      batteryData[i].minVoltage=batteryData[i].voltage;
+    }
+	
+    if (batteryData[i].cPin != NOPIN) {
+      batteryData[i].current = (float)analogRead(batteryData[i].cPin) * batteryData[i].cScale + batteryData[i].cBias;
+      if (batteryData[i].current > batteryData[i].maxCurrent) { 
+        batteryData[i].maxCurrent=batteryData[i].current;
+      }
+      batteryData[i].usedCapacity += batteryData[i].current * G_Dt / 3.6;
+    }
+	
+    if (batteryData[i].voltage < batteryData[i].vAlarm) {
+      alarm = true;
+      batteryData[i].status = BATTERY_MONITOR_ALARM;
+    }
+    else if (batteryData[i].voltage < batteryData[i].vWarning) {
+      warning = true;
+      batteryData[i].status = BATTERY_MONITOR_WARNING;
+    }
+    else {
+      batteryData[i].status = BATTERY_MONITOR_OK;
+    }
+  }
+  
+  if (alarm) {
+    batteryStatus = BATTERY_MONITOR_ALARM;
+  }
+  else if (warning) {
+    batteryStatus = BATTERY_MONITOR_WARNING;
+  }
+  else {
+    batteryStatus = BATTERY_MONITOR_OK;
+  }
+}
 #endif
