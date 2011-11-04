@@ -70,18 +70,33 @@ void cameraControlMove ();
 
   
 void cameraControlSetPitch (float angle) {
-  if (mode == 1) servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
-  else servoPitch = constrain(centerPitch , servoMinPitch , servoMaxPitch);
+
+  if (mode == 1) {
+    servoPitch = constrain((mCameraPitch * angle) + centerPitch , servoMinPitch , servoMaxPitch);
+  }
+  else {
+    servoPitch = constrain(centerPitch , servoMinPitch , servoMaxPitch);
+  }
 }
   
 void cameraControlSetRoll (float angle) {
-  if (mode == 1) servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
-  else servoRoll = constrain(centerRoll , servoMinRoll , servoMaxRoll);
+
+  if (mode == 1) {
+    servoRoll = constrain((mCameraRoll * angle) + centerRoll , servoMinRoll , servoMaxRoll);
+  }
+  else {
+    servoRoll = constrain(centerRoll , servoMinRoll , servoMaxRoll);
+  }
 }
   
 void cameraControlSetYaw (float angle) {
-  if (mode == 1) servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
-  else servoYaw = constrain(centerYaw , servoMinYaw , servoMaxYaw);
+
+  if (mode == 1) {
+    servoYaw = constrain((mCameraYaw * angle) + centerYaw , servoMinYaw , servoMaxYaw);
+  }
+  else {
+    servoYaw = constrain(centerYaw , servoMinYaw , servoMaxYaw);
+  }	
 }
   
 void setmCameraPitch(float gear) {
@@ -202,9 +217,9 @@ int getServoMaxYaw(void) {
 
 void initializeCameraStabilization() {
   mode = 1;                 // 0 = off,  1 = onboard stabilisation, 2 = serialCom/debug/adjust center 
-  mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
-  mCameraRoll = 11.11;        
-  mCameraYaw = 11.11;
+  mCameraPitch = 318.3;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
+  mCameraRoll = 318.3;        
+  mCameraYaw = 318.3;
   centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
   centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
   centerYaw = 1500;  
