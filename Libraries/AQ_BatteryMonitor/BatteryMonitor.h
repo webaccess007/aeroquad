@@ -23,48 +23,46 @@
 
 #include <BatteryMonitorTypes.h>
 
-byte batteryStatus       = BATTERY_MONITOR_OK;
-byte numbersOfBatteries  = 0; 
+byte batteryStatus     = BATTERY_MONITOR_OK;
+byte numberOfBatteries = 0; 
 
 // Reset Battery statistics
 void resetBattery(byte batno) {
 
-  if (batno < numbersOfBatteries) {
+  if (batno < numberOfBatteries) {
     batteryData[batno].voltage = batteryData[batno].vWarning + 1.0;
-    batteryData[batno].minVoltage = 99.0;
-    batteryData[batno].current = 0.0;
-    batteryData[batno].maxCurrent = 0.0;
-    batteryData[batno].usedCapacity = 0.0;	
+    batteryData[batno].minVoltage   = 99.0;
+    batteryData[batno].current      = 0.0;
+    batteryData[batno].maxCurrent   = 0.0;
+    batteryData[batno].usedCapacity = 0.0;
   }
 }
 
-void initializeBatteryMonitor(byte nb){
+void initializeBatteryMonitor(byte nb) {
 
-  numbersOfBatteries = nb;
-  for (int i=0; i < numbersOfBatteries; i++) {
+  numberOfBatteries = nb;
+  for (int i = 0; i < numberOfBatteries; i++) {
     resetBattery(i);
   }
 }
 
-void measureBatteryVoltage(unsigned long G_Dt){
+void measureBatteryVoltage(float deltaTime) {
 
   boolean alarm   = false;
   boolean warning = false;
-  for (int i=0; i < numbersOfBatteries; i++) {
 
+  for (int i = 0; i < numberOfBatteries; i++) {
     batteryData[i].voltage = (float)analogRead(batteryData[i].vPin) * batteryData[i].vScale + batteryData[i].vBias;
     if (batteryData[i].voltage < batteryData[i].minVoltage) {
-      batteryData[i].minVoltage=batteryData[i].voltage;
+      batteryData[i].minVoltage = batteryData[i].voltage;
     }
-	
     if (batteryData[i].cPin != NOPIN) {
-      batteryData[i].current = (float)analogRead(batteryData[i].cPin) * batteryData[i].cScale + batteryData[i].cBias;
+      batteryData[i].current =  (float)analogRead(batteryData[i].cPin) * batteryData[i].cScale + batteryData[i].cBias;
       if (batteryData[i].current > batteryData[i].maxCurrent) { 
-        batteryData[i].maxCurrent=batteryData[i].current;
+        batteryData[i].maxCurrent = batteryData[i].current;
       }
-      batteryData[i].usedCapacity += batteryData[i].current * G_Dt / 3.6;
+      batteryData[i].usedCapacity += batteryData[i].current * deltaTime / 3.6; // current(A) * 1000 * time(s) / 3600 -> mAh 
     }
-	
     if (batteryData[i].voltage < batteryData[i].vAlarm) {
       alarm = true;
       batteryData[i].status = BATTERY_MONITOR_ALARM;
@@ -77,7 +75,7 @@ void measureBatteryVoltage(unsigned long G_Dt){
       batteryData[i].status = BATTERY_MONITOR_OK;
     }
   }
-  
+
   if (alarm) {
     batteryStatus = BATTERY_MONITOR_ALARM;
   }
