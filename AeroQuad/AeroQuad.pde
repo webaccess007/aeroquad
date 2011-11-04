@@ -994,9 +994,9 @@ void setup() {
   // Camera stabilization setup
   #if defined (CameraControl)
     initializeCameraStabilization();
-    setmCameraRoll(11.11); // Need to figure out nice way to reverse servos
+    setmCameraRoll(318.3); // Need to figure out nice way to reverse servos
     setCenterRoll(1500); // Need to figure out nice way to set center position
-    setmCameraPitch(11.11);
+    setmCameraPitch(318.3);
     setCenterPitch(1300);
   #endif
 
@@ -1159,9 +1159,9 @@ void loop () {
       #endif
 
       #if defined(CameraControl)
-        cameraControlSetPitch(degrees(kinematicsAngle[PITCH]));
-        cameraControlSetRoll(degrees(kinematicsAngle[ROLL]));
-        cameraControlSetYaw(degrees(kinematicsAngle[YAW]));
+        cameraControlSetPitch(kinematicsAngle[PITCH]);
+        cameraControlSetRoll(kinematicsAngle[ROLL]);
+        cameraControlSetYaw(kinematicsAngle[YAW]);
         cameraControlMove();
       #endif
     }
