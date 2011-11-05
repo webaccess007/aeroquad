@@ -356,7 +356,7 @@ void menuEeprom(byte mode, byte action) {
             // Initialize EEPROM with default values
             initializeEEPROM(); // defined in DataStorage.h
             calibrateGyro();
-            calibrateAccel();
+            computeAccelBias();
             zeroIntegralError();
 #ifdef HeadingMagHold
             initializeMagnetometer();

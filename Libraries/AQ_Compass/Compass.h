@@ -24,32 +24,35 @@
 
 #include <WProgram.h>
 
-float magMax[3] = {0.0,0.0,0.0};
-float magMin[3] = {0.0,0.0,0.0};
-  
 float hdgX = 0.0;
 float hdgY = 0.0;
 
 float measuredMagX = 0.0;
 float measuredMagY = 0.0;
 float measuredMagZ = 0.0;
-float magScale[3] = {0.0,0.0,0.0};
-float magOffset[3] = {0.0,0.0,0.0};
+
+float rawMag[3] = {0.0,0.0,0.0};
+float magBias[3] = {0.0,0.0,0.0};
+
+//float magMax[3] = {0.0,0.0,0.0};
+//float magMin[3] = {0.0,0.0,0.0};
+//float magScale[3] = {0.0,0.0,0.0};
+//float magOffset[3] = {0.0,0.0,0.0};
+//float magBias[3] = {0.0, 0.0, 0.0};
 
 void initializeMagnetometer();
 void measureMagnetometer(float roll, float pitch);
-  
+
 const float getHdgXY(byte axis) {
   if (axis == XAXIS) return hdgX;
   if (axis == YAXIS) return hdgY;
 }
 
 const int getMagnetometerRawData(byte axis) {
-  if (axis == XAXIS) return measuredMagX;
-  if (axis == YAXIS) return measuredMagY;
-  if (axis == ZAXIS) return measuredMagZ;
+  return rawMag[axis];
 }
 
+/*
 void setMagCal(byte axis, float maxValue, float minValue) {
   magMax[axis] = maxValue;
   magMin[axis] = minValue;
@@ -61,6 +64,5 @@ void setMagCal(byte axis, float maxValue, float minValue) {
   // b = y1 - mx1; b = -1 - (m * min)
   magOffset[axis] = -(magScale[axis] * magMin[axis]) - 1;
 }
-
-
+*/
 #endif

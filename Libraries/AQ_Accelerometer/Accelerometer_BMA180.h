@@ -33,6 +33,7 @@
 #define ACCEL_BW_TCS 0x20
 #define ACCEL_LOW_PASS_FILTER_REGISTER 0x20
 #define ACCEL_10HZ_LOW_PASS_FILTER_VALUE 0x0F
+#define ACCEL_1200HZ_LOW_PASS_FILTER_VALUE 0X7F
 #define ACCEL_OFFSET_REGISTER 0x35
 #define ACCEL_READ_ROLL_ADDRESS 0x02
 #define ACCEL_READ_PITCH_ADDRESS 0x04
@@ -40,7 +41,7 @@
 
 void initializeAccel() {
   
-  accelScaleFactor = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range
+  //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
   
   if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) // page 52 of datasheet
     Serial.println("Accelerometer not found!");
@@ -54,7 +55,7 @@ void initializeAccel() {
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_ENABLE_WRITE_CONTROL_REGISTER, ACCEL_CONTROL_REGISTER); 		//enable writing to control registers
   sendByteI2C(ACCEL_ADDRESS, ACCEL_BW_TCS); 															// register bw_tcs (bits 4-7)
   byte data = readByteI2C(ACCEL_ADDRESS); 																// get current register value
-  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_10HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
+  updateRegisterI2C(ACCEL_ADDRESS, ACCEL_LOW_PASS_FILTER_REGISTER, data & ACCEL_1200HZ_LOW_PASS_FILTER_VALUE); 	// set low pass filter to 10Hz (value = 0000xxxx)
 
   // From page 27 of BMA180 Datasheet
   //  1.0g = 0.13 mg/LSB
@@ -67,10 +68,10 @@ void initializeAccel() {
   sendByteI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER); 													// register offset_lsb1 (bits 1-3)
   data = readByteI2C(ACCEL_ADDRESS);
   data &= 0xF1;
-  data |= 0x04; // Set range select bits for +/-2g
+  //data |= 0x04; // Set range select bits for +/-2g
+  data |= 0x08;
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_OFFSET_REGISTER, data);	
 }
-
   
 void measureAccel() {
   Wire.beginTransmission(ACCEL_ADDRESS);
@@ -79,10 +80,7 @@ void measureAccel() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    if (axis == XAXIS)
-      meterPerSec[axis] = (((Wire.receive()|(Wire.receive() << 8)) >> 2) - accelZero[axis])  * accelScaleFactor;
-    else
-      meterPerSec[axis] = (accelZero[axis] - ((Wire.receive()|(Wire.receive() << 8)) >> 2)) * accelScaleFactor;
+    meterPerSec[axis] = ((Wire.receive()|(Wire.receive() << 8)) >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }  
 }
 
@@ -100,37 +98,30 @@ void measureAccelSum() {
 
 void evaluateMetersPerSec() {
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    if (axis == XAXIS)
-      meterPerSec[axis] = ((accelSample[axis] / accelSampleCount) - accelZero[axis]) * accelScaleFactor;
-    else
-      meterPerSec[axis] = (accelZero[axis] - (accelSample[axis] / accelSampleCount)) * accelScaleFactor;
-	accelSample[axis] = 0.0;
+    meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+	  accelSample[axis] = 0.0;
   }
   accelSampleCount = 0;
 }
 
-void calibrateAccel() {
-  int findZero[FINDZERO];
-  int dataAddress;
-    
-  for (byte calAxis = XAXIS; calAxis < ZAXIS; calAxis++) {
-    if (calAxis == XAXIS) dataAddress = ACCEL_READ_ROLL_ADDRESS;
-    if (calAxis == YAXIS) dataAddress = ACCEL_READ_PITCH_ADDRESS;
-    if (calAxis == ZAXIS) dataAddress = ACCEL_READ_YAW_ADDRESS;
-    for (int i=0; i<FINDZERO; i++) {
-      sendByteI2C(ACCEL_ADDRESS, dataAddress);
-      findZero[i] = readReverseWordI2C(ACCEL_ADDRESS) >> 2; // last two bits are not part of measurement
-      delay(10);
-    }
-    accelZero[calAxis] = findMedianInt(findZero, FINDZERO);
+void computeAccelBias() {
+  #define SAMPLECOUNT 400.0
+  for (int samples = 0; samples < SAMPLECOUNT; samples++) {
+    measureAccelSum();
+    delayMicroseconds(2500);
   }
 
-  // replace with estimated Z axis 0g value
-  accelZero[ZAXIS] = (accelZero[XAXIS] + accelZero[PITCH]) / 2;
-  // store accel value that represents 1g
-  measureAccel();
-  accelOneG = -meterPerSec[ZAXIS];
-}
+  for (byte axis = 0; axis < 3; axis++) {
+    meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
+    accelSample[axis] = 0;
+  }
+  accelSampleCount = 0;
 
+  runTimeAccelBias[XAXIS] = -meterPerSec[XAXIS];
+  runTimeAccelBias[YAXIS] = -meterPerSec[YAXIS];
+  runTimeAccelBias[ZAXIS] = -9.8065 - meterPerSec[ZAXIS];
+
+  accelOneG = abs(meterPerSec[ZAXIS] + runTimeAccelBias[ZAXIS]);
+}
 
 #endif
