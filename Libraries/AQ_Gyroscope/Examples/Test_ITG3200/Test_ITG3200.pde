@@ -29,7 +29,7 @@
 
 unsigned long timer;
 
-Gyroscope_ITG3200 gyro;
+//Gyroscope_ITG3200 gyro;
 
 void setup()
 {
@@ -38,8 +38,10 @@ void setup()
 
   Wire.begin();
 
-  gyro.initialize();
-  gyro.calibrate();
+  //gyro.initialize();
+  //gyro.calibrate();
+  initializeGyro();
+  calibrateGyro();
   timer = millis();
 }
 
@@ -48,16 +50,20 @@ void loop(void)
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    gyro.measure();
+    //gyro.measure();
+    measureGyro();
     
     Serial.print("Roll: ");
-    Serial.print(degrees(gyro.getRadPerSec(ROLL)));
+    //Serial.print(degrees(gyro.getRadPerSec(ROLL)));
+    Serial.print(degrees(gyroRate[ROLL]));
     Serial.print(" Pitch: ");
-    Serial.print(degrees(gyro.getRadPerSec(PITCH)));
+    //Serial.print(degrees(gyro.getRadPerSec(PITCH)));
+    Serial.print(degrees(gyroRate[PITCH]));
     Serial.print(" Yaw: ");
-    Serial.print(degrees(gyro.getRadPerSec(YAW)));
-    Serial.print(" Heading: ");
-    Serial.print(degrees(gyro.getHeading()));
+    //Serial.print(degrees(gyro.getRadPerSec(YAW)));
+    Serial.print(degrees(gyroRate[YAW]));
+    //Serial.print(" Heading: ");
+    //Serial.print(degrees(gyro.getHeading()));
     Serial.println();
   }
 }
