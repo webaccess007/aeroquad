@@ -188,10 +188,10 @@ void show_font() //show all chars on 24 wide grid
 
   // show all characters on screen (actually 0-254)
   for (x = 0;x<255;x++) {
+    spi_writereg(DMDI_reg,(byte)x);
     if ((x%24)==23) {
       for (byte i=0;i<6;i++) spi_writereg(DMDI_reg,0);
     }
-    spi_writereg(DMDI_reg,(byte)x);
   }
 
   spi_writereg(DMDI_reg,END_string);

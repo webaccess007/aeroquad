@@ -376,7 +376,7 @@ void displayVoltage() {
   }
 
   char buf[12];
-  snprintf(buf,7,"%c%2d.%1dV",(osdBatMinMax) ? 'm' : '\4', currentValue/10,currentValue%10);
+  snprintf(buf,7,"%c%2d.%1dV",(osdBatMinMax) ? '\23' : '\20', currentValue/10,currentValue%10);
   writeChars( buf, 6, ((batteryData[osdBatNo].status!=BATTERY_MONITOR_OK))?1:0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL );
 
   if (batteryData[osdBatNo].cPin != NOPIN) {
@@ -387,7 +387,7 @@ void displayVoltage() {
     else {
       currentValue = batteryData[osdBatNo].current*10.0;
     }
-    snprintf(buf,12,"%3d.%1dA%4u\020", currentValue/10,currentValue%10,(unsigned)batteryData[osdBatNo].usedCapacity);
+    snprintf(buf,12,"%3d.%1dA%4u\24", currentValue/10,currentValue%10,(unsigned)batteryData[osdBatNo].usedCapacity);
     writeChars( buf, 11, 0, VOLTAGE_ROW+osdBatNo, VOLTAGE_COL+6 );
   }
 
@@ -623,7 +623,7 @@ byte lastFlightMode = 9;
 void displayReticle() {
 
   if (lastFlightMode != flightMode) {
-    writeChars( (ACRO==flightMode)?"\1\2":"\21\22", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+    writeChars( (ACRO == flightMode) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     lastFlightMode = flightMode;
   }
 }
