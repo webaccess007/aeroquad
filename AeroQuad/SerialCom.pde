@@ -514,9 +514,9 @@ void sendSerialTelemetry() {
     PrintValueComma(camera.getServoMaxRoll());
     SERIAL_PRINTLN(camera.getServoMaxYaw());
 #else
-    for (byte index=0; index < 13; index++)
+    for (byte index=0; index < 12; index++)
       PrintValueComma(0);
-    SERIAL_PRINTLN();
+    SERIAL_PRINTLN(0);
 #endif
     break;
   }
