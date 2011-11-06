@@ -72,7 +72,7 @@
 // Battery Monitor Options
 // *******************************************************************************************************************************
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
 //#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
 
 //
@@ -119,12 +119,12 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
-//#define OSD
+#define OSD
 // Menu system, currently only usable with OSD
-//#define OSD_SYSTEM_MENU
+#define OSD_SYSTEM_MENU
 
 
 #define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
