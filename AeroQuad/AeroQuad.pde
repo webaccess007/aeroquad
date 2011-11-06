@@ -45,13 +45,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Congig
 //#define octoPlusCongig  // not yet implemented
 //#define octoXCongig
@@ -63,12 +63,17 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
-//  #define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
+
+//
+// *******************************************************************************************************************************
+// Battery Monitor Options
+// *******************************************************************************************************************************
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
 
 //
 // *******************************************************************************************************************************
@@ -81,15 +86,15 @@
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3 //For some Hitec/Sanwa/Others
 
-
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// You must define *only* one of the following 2 flightAngle calculations
+// You must define *only* one of the following flightAngle calculations
 // If you only want DCM, then don't define either of the below
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // Experimental!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+
 //#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
@@ -102,7 +107,7 @@
 // Additionally 8 receiver channels are only available when not using the Arduino Uno
 // *******************************************************************************************************************************
 #define LASTCHANNEL 6
-//#define LASTCHANNEL 8
+//#define LASTCHANNEL 8 - warning, this needs to be debugged, incorrect COM behaviour appears when selecting this
 
 //
 // *******************************************************************************************************************************
@@ -891,11 +896,11 @@
   #include "FlightControlQuadY4.h"
 #elif defined hexY6Config
   #include "FlightControlHexY6.h"
-#elif defined octoX8Congig
+#elif defined octoX8Config
   #include "FlightControlOctoX8.h"
-#elif defined octoXCongig
+#elif defined octoXConfig
   #include "FlightControlOctoX.h"
-#elif defined octoPlusCongig
+#elif defined octoPlusConfig
   #include "FlightControlOctoPlus.h"
 #endif
 
@@ -961,7 +966,8 @@ void setup() {
   initSensorsZeroFromEEPROM();
 
   // Calibrate sensors
-  calibrateGyro(); // defined in Gyro.h
+  calibrateGyro();
+  computeAccelBias();
   zeroIntegralError();
   levelAdjust[ROLL] = 0;
   levelAdjust[PITCH] = 0;

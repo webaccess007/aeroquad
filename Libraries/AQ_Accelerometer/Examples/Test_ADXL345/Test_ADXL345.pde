@@ -28,7 +28,7 @@
 #include <Accelerometer_ADXL345.h>
 
 unsigned long timer;
-Accelerometer_ADXL345 accel;
+//Accelerometer_ADXL345 accel;
 
 void setup() {
   
@@ -37,8 +37,10 @@ void setup() {
 
   Wire.begin();
   
-  accel.initialize();  
-  accel.calibrate();
+  //accel.initialize();  
+  //accel.calibrate();
+  initializeAccel();
+  calibrateAccel();
 }
 
 void loop() {
@@ -46,14 +48,18 @@ void loop() {
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    accel.measure();
+    //accel.measure();
+    measureAccel();
     
     Serial.print("Roll: ");
-    Serial.print(accel.getMeterPerSec(XAXIS));
+    //Serial.print(accel.getMeterPerSec(XAXIS));
+    Serial.print(meterPerSec[XAXIS]);
     Serial.print(" Pitch: ");
-    Serial.print(accel.getMeterPerSec(YAXIS));
+    //Serial.print(accel.getMeterPerSec(YAXIS));
+    Serial.print(meterPerSec[YAXIS]);
     Serial.print(" Yaw: ");
-    Serial.print(accel.getMeterPerSec(ZAXIS));
+    //Serial.print(accel.getMeterPerSec(ZAXIS));
+    Serial.print(meterPerSec[ZAXIS]);
     Serial.println();
   }
 
