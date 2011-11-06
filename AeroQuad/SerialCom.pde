@@ -377,7 +377,7 @@ void sendSerialTelemetry() {
     for (byte motor = 0; motor < (8 - (LASTMOTOR - 1)); motor++) // max of 8 motor outputs supported
       PrintValueComma(0); // zero out unused motor channels
 #ifdef BattMonitor
-    PrintValueComma(batteryVoltage);
+    PrintValueComma(batteryData[0].voltage);
 #else
     PrintValueComma(0);
 #endif
