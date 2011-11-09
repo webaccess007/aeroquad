@@ -98,6 +98,15 @@ unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
 
 
+// Analog Reference Value
+// This value provided from Configurator
+// Use a DMM to measure the voltage between AREF and GND
+// Enter the measured voltage below to define your value for aref
+// If you don't have a DMM use the following:
+// AeroQuad Shield v1.7, aref = 3.0
+// AeroQuad Shield v1.6 or below, aref = 2.8
+float aref; // Read in from EEPROM
+
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
 //int levelAdjust[2] = {0,0};
