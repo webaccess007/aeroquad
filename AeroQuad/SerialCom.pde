@@ -89,6 +89,7 @@ void readSerialCommand() {
       runTimeAccelBias[YAXIS] = readFloatSerial();      
       accelScaleFactor[ZAXIS] = readFloatSerial();
       runTimeAccelBias[ZAXIS] = readFloatSerial();
+      writeEEPROM();
       break;
     case 'I': // Receiver altitude hold PID
 #ifdef AltitudeHold
@@ -411,8 +412,11 @@ void sendSerialTelemetry() {
   case 'Z': // Accelerometer Calibration Output
     measureAccelSum();
     PrintValueComma(accelSample[XAXIS]/accelSampleCount);
+    accelSample[XAXIS] = 0.0;
     PrintValueComma(accelSample[YAXIS]/accelSampleCount);
+    accelSample[YAXIS] = 0.0;
     SERIAL_PRINTLN (accelSample[ZAXIS]/accelSampleCount);
+    accelSample[ZAXIS] = 0.0;
     accelSampleCount = 0;
     break;
   case '6': // Report remote commands

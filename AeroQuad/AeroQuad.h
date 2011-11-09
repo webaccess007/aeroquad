@@ -90,15 +90,6 @@ float smoothHeading;
 #define ROLLRATEPIN 4
 #define YAWRATEPIN 5
 
-// Analog Reference Value
-// This value provided from Configurator
-// Use a DMM to measure the voltage between AREF and GND
-// Enter the measured voltage below to define your value for aref
-// If you don't have a DMM use the following:
-// AeroQuad Shield v1.7, aref = 3.0
-// AeroQuad Shield v1.6 or below, aref = 2.8
-float aref;
-
 // Flight Mode
 #define ACRO 0
 #define STABLE 1
