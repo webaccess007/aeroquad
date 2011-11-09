@@ -35,9 +35,9 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
@@ -63,17 +63,17 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // *******************************************************************************************************************************
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
-//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
 
 //
 // *******************************************************************************************************************************
