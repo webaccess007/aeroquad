@@ -102,6 +102,7 @@ void initializeEEPROM() {
   PID[ZDAMPENING].P = 0.0;
   PID[ZDAMPENING].I = 0.0;
   PID[ZDAMPENING].D = 0.0;
+  
   #ifdef AltitudeHold    
     minThrottleAdjust = -50.0;
     maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
@@ -148,7 +149,7 @@ void initializeEEPROM() {
 
   smoothHeading = 1.0;
   flightMode = ACRO;
-  headingHoldConfig = OFF;
+  headingHoldConfig = ON;
   minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   
@@ -286,6 +287,7 @@ void writeEEPROM(){
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
   writeFloat(minAcro, MINACRO_ADR);
   writeFloat(accelOneG, ACCEL_1G_ADR);
+  writeFloat(SOFTWARE_VERSION, SOFTWARE_VERSION_ADR);
     
   /*#ifdef Camera
   writeFloat(mCameraPitch, MCAMERAPITCH_ADR);

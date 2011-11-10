@@ -24,11 +24,10 @@
 #include "pins_arduino.h"
 
 // Flight Software Version
-#define VERSION 3.0
+#define SOFTWARE_VERSION 3.0
 
 #define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
-//#define BAUD 57600
 #define LEDPIN 13
 #define ON 1
 #define OFF 0
@@ -270,6 +269,7 @@ typedef struct {
   t_NVR_PID ZDAMP_PID_GAIN_ADR;
   t_NVR_Receiver RECEIVER_DATA[LASTCHANNEL];
   
+  float SOFTWARE_VERSION_ADR;
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float GYROSMOOTH_ADR;
