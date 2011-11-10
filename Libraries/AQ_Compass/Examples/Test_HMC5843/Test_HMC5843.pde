@@ -18,40 +18,38 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <AQMath.h>
-#include <Axis.h>
-#include <Receiver_328p.h>
+#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
 
+#include <Axis.h>
+#include <AQMath.h>
+#include <Magnetometer_HMC5843.h>
 
 unsigned long timer;
 
 void setup() {
   
   Serial.begin(115200);
-  Serial.println("Receiver library test (Receiver_APM)");
-
-  initializeReceiver();  
+  Serial.println("Magnetometer library test (HMC5843)");
+  
+  Wire.begin();
+  initializeMagnetometer();
 }
 
 void loop() {
   
-  if((millis() - timer) > 50) // 20Hz
+  if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    readReceiver();
+    //accel.measure();
+    measureMagnetometer(0.0,0.0);
     
-    Serial.print("Throttle: ");
-    Serial.print(receiverCommand[THROTTLE]);
-    Serial.print(" Yaw: ");
-    Serial.print(receiverCommand[YAW]);
-    Serial.print(" Roll: ");
-    Serial.print(receiverCommand[ROLL]);
+    Serial.print("Roll: ");
+    Serial.print(getMagnetometerRawData(XAXIS));
     Serial.print(" Pitch: ");
-    Serial.print(receiverCommand[PITCH]);
-    Serial.print(" Mode: ");
-    Serial.print(receiverCommand[MODE]);
-    Serial.print(" Aux: ");
-    Serial.print(receiverCommand[AUX]);
+    Serial.print(getMagnetometerRawData(YAXIS));
+    Serial.print(" Yaw: ");
+    Serial.print(getMagnetometerRawData(ZAXIS));
     Serial.println();
   }
 }
