@@ -22,13 +22,15 @@
 #define _AEROQUAD_ACCELEROMETER_ADXL345_H_
 
 #include <Accelerometer.h>
+#include <SensorsStatus.h>
 
 #define ACCEL_ADDRESS 0x53
 
 void initializeAccel() {
 
-  if (readWhoI2C(ACCEL_ADDRESS) !=  0xE5) 			// page 14 of datasheet
-    Serial.println("Accelerometer not found!");
+  if (readWhoI2C(ACCEL_ADDRESS) !=  0xE5) { 			// page 14 of datasheet
+    sensorsState |= ACCEL_BIT_STATE;
+  }
 	
   updateRegisterI2C(ACCEL_ADDRESS, 0x2D, 1<<3); 	// set device to *measure*
   updateRegisterI2C(ACCEL_ADDRESS, 0x31, 0x08); 	// set full range and +/- 2G

@@ -18,30 +18,14 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_AXIS_DEFINES_H_
-#define _AEROQUAD_AXIS_DEFINES_H_
+#ifndef _AQ_SENSORS_STATE_H_
+#define _AQ_SENSORS_STATE_H_
 
-// Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
-#define THROTTLE 3
-#define MODE 4
-#define AUX 5
-#define AUX2 6
-#define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
+byte sensorsState = 0;
 
+#define GYRO_BIT_STATE  0X01
+#define ACCEL_BIT_STATE 0x02
+#define MAG_BIT_STATE   0x04
+#define BARO_BIT_STATE  0x08
 
 #endif
