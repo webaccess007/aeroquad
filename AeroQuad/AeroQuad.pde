@@ -520,6 +520,7 @@
     initRC();
 
     Wire.begin();
+    TWBR = 12;
   }
 
   /**
