@@ -23,6 +23,7 @@
 
 #include <Accelerometer.h>
 #include <Device_I2C.h>
+#include <SensorsStatus.h>
 
 #define ACCEL_ADDRESS 0x40
 #define ACCEL_IDENTITY 0x03
@@ -43,8 +44,9 @@ void initializeAccel() {
   
   //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
   
-  if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) // page 52 of datasheet
-    Serial.println("Accelerometer not found!");
+  if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) {// page 52 of datasheet
+    sensorsState |= ACCEL_BIT_STATE;
+  }
 	
   updateRegisterI2C(ACCEL_ADDRESS, ACCEL_RESET_REGISTER, ACCEL_TRIGER_RESET_VALUE); 					//reset device
   delay(10);  																							//sleep 10 ms after reset (page 25)

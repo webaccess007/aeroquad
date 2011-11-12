@@ -51,12 +51,6 @@ void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->D = nvrReadFloat(IDEeprom+8);
   pid->lastPosition = 0;
   pid->integratedError = 0;
-  // AKA experiements with PIDS
-  pid->firstPass = true;
-  if (IDPid == HEADING)
-    pid->typePID = TYPEPI;
-  else
-    pid->typePID = NOTYPE;
 }
 
 void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
@@ -87,7 +81,6 @@ void initializeEEPROM() {
   PID[HEADING].I = 0.1;
   PID[HEADING].D = 0.0;
   // AKA PID experiements
-  PID[HEADING].typePID = TYPEPI;
   PID[LEVELGYROROLL].P = 100.0;
   PID[LEVELGYROROLL].I = 0.0;
   PID[LEVELGYROROLL].D = -300.0;
@@ -127,11 +120,6 @@ void initializeEEPROM() {
   for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
     if (i != ALTITUDE)
         PID[i].windupGuard = windupGuard;
-  }
-  // AKA added so that each PID has a type incase we need special cases like detecting +/- PI
-  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
-    if (i != HEADING)
-        PID[i].typePID = NOTYPE;
   }
     
   receiverXmitFactor = 1.0;
