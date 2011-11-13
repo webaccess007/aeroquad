@@ -89,12 +89,18 @@ void processHeading()
     // AKA - THERE IS A BUG HERE - if relative heading is greater than 180 degrees, the PID will swing from negative to positive
     // Doubt that will happen as it would have to be uncommanded.
     relativeHeading = heading - setHeading;
-    if (heading <= (setHeading - 180)) relativeHeading += 360;
-    if (heading >= (setHeading + 180)) relativeHeading -= 360;
+    if (heading <= (setHeading - 180)) {
+      relativeHeading += 360;
+    }
+    if (heading >= (setHeading + 180)) {
+      relativeHeading -= 360;
+    }
 
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
+      
       if ((receiverCommand[YAW] > (MIDCOMMAND + 25)) || (receiverCommand[YAW] < (MIDCOMMAND - 25))) {
+        
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
         headingHold = 0;
