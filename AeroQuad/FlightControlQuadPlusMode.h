@@ -35,8 +35,8 @@
 
 
 #define FRONT MOTOR1
-#define REAR  MOTOR2
-#define RIGHT MOTOR3
+#define RIGHT MOTOR2
+#define REAR  MOTOR3
 #define LEFT  MOTOR4
 #define LASTMOTOR MOTOR4+1
 
