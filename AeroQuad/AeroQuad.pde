@@ -51,9 +51,9 @@
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Congig
-//#define octoPlusCongig  // not yet implemented
+#define octoPlusCongig  // not yet implemented
 //#define octoXCongig     // EXPERIMENTAL: not completely re-tested
 
 //
@@ -906,7 +906,7 @@
   #include "FlightControlOctoX8.h"
 #elif defined octoXConfig
   #include "FlightControlOctoX.h"
-#elif defined octoPlusConfig
+#elif defined octoPlusCongig
   #include "FlightControlOctoPlus.h"
 #endif
 
@@ -960,7 +960,7 @@ void setup() {
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors);
-  #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoXPlusCongig)
+  #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig)
      initializeMotors(HEIGHT_Motors);
   #endif
 
