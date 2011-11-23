@@ -29,11 +29,17 @@
       CCW  0....Back.....0  CW
 */
 
-
-#define FRONT_LEFT  MOTOR1
-#define FRONT_RIGHT MOTOR2
-#define REAR_RIGHT  MOTOR3
-#define REAR_LEFT   MOTOR4
+#ifdef OLD_MOTOR_NUMBERING  
+  #define FRONT_LEFT  MOTOR1
+  #define REAR_RIGHT  MOTOR2
+  #define FRONT_RIGHT MOTOR3
+  #define REAR_LEFT   MOTOR4
+#else
+  #define FRONT_LEFT  MOTOR1
+  #define FRONT_RIGHT MOTOR2
+  #define REAR_RIGHT  MOTOR3
+  #define REAR_LEFT   MOTOR4
+#endif
 #define LASTMOTOR   MOTOR4+1
 
 void applyMotorCommand() {

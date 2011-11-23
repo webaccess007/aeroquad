@@ -51,10 +51,12 @@
 //#define hexXConfig      // not flight tested, take real care
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
-//#define octoX8Congig
-#define octoPlusCongig  // not yet implemented
-//#define octoXCongig     // EXPERIMENTAL: not completely re-tested
+#define hexY6Config
+//#define octoX8Config
+//#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
+//#define octoXConfig     // EXPERIMENTAL: not completely re-tested
+
+//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD ONLY
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -889,15 +891,15 @@
 //******** FLIGHT CONFIGURATION DECLARATION **************
 //********************************************************
 #if defined quadXConfig
-  #include "FlightControlQuadXMode.h"
+  #include "FlightControlQuadX.h"
 #elif defined quadPlusConfig
-  #include "FlightControlQuadPlusMode.h"
+  #include "FlightControlQuadPlus.h"
 #elif defined hexPlusConfig
-  #include "FlightControlHexPlusMode.h"
+  #include "FlightControlHexPlus.h"
 #elif defined hexXConfig
-  #include "FlightControlHexXMode.h"
+  #include "FlightControlHexX.h"
 #elif defined triConfig
-  #include "FlightControlTriMode.h"
+  #include "FlightControlTri.h"
 #elif defined quadY4Config
   #include "FlightControlQuadY4.h"
 #elif defined hexY6Config
@@ -906,7 +908,7 @@
   #include "FlightControlOctoX8.h"
 #elif defined octoXConfig
   #include "FlightControlOctoX.h"
-#elif defined octoPlusCongig
+#elif defined octoPlusConfig
   #include "FlightControlOctoPlus.h"
 #endif
 
@@ -960,7 +962,7 @@ void setup() {
      initializeMotors(FOUR_Motors);
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors);
-  #elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig)
+  #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
      initializeMotors(HEIGHT_Motors);
   #endif
 

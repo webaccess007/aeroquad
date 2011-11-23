@@ -33,11 +33,17 @@
                  CW
 */     
 
-
-#define FRONT MOTOR1
-#define RIGHT MOTOR2
-#define REAR  MOTOR3
-#define LEFT  MOTOR4
+#ifdef OLD_MOTOR_NUMBERING  
+  #define FRONT MOTOR1
+  #define REAR  MOTOR2
+  #define RIGHT MOTOR3
+  #define LEFT  MOTOR4
+#else
+  #define FRONT MOTOR1
+  #define RIGHT MOTOR2
+  #define REAR  MOTOR3
+  #define LEFT  MOTOR4
+#endif
 #define LASTMOTOR MOTOR4+1
 
 void applyMotorCommand() {
