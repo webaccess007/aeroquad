@@ -346,7 +346,7 @@ int motorAxisCommandYaw = 0;
   int motorMaxCommand[6] = {0,0,0,0,0,0};
   int motorMinCommand[6] = {0,0,0,0,0,0};
   int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
-#elif defined (octoX8Congig) || defined (octoXCongig) || defined (octoPlusCongig) 
+#elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig) 
   int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
   int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
   int motorConfiguratorCommand[8] = {0,0,0,0,0,0,0,0};
