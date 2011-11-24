@@ -254,9 +254,9 @@ public:
     sendByteI2C(compassAddress, 0x03);
     Wire.requestFrom(compassAddress, 6);
 
-    measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-    measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
     measuredMagY = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+    measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
 
     Wire.endTransmission();
 
@@ -276,7 +276,6 @@ public:
     
     hdgX = magX / tmp;
     hdgY = -magY / tmp;
-
   }
 };
 
