@@ -280,20 +280,21 @@ void sendSerialTelemetry() {
     PrintValueComma(minThrottleAdjust);
     PrintValueComma(maxThrottleAdjust);
     PrintValueComma(altitude.getSmoothFactor());
-    PrintPID(ZDAMPENING);
+    PrintValueComma(PID[ZDAMPENING].P);
+    PrintValueComma(PID[ZDAMPENING].I);
+    SERIAL_PRINTLN(PID[ZDAMPENING].D);
 #else
-    for(byte i=0; i<10; i++) {
-      PrintValueComma(0);
+    for(byte i=0; i<9; i++) {
+     PrintValueComma(0);
     }
+    SERIAL_PRINTLN('0');
 #endif
-    SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'L': // Send data filtering values
     PrintValueComma(gyro.getSmoothFactor());
     PrintValueComma(accel.getSmoothFactor());
-    PrintValueComma(timeConstant);
-    SERIAL_PRINTLN(aref);
+    SERIAL_PRINTLN(timeConstant);
     queryType = 'X';
     break;
   case 'N': // Send transmitter smoothing values
@@ -305,11 +306,12 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'P': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL-1; axis++) {
       PrintValueComma(receiver.getTransmitterSlope(axis));
       PrintValueComma(receiver.getTransmitterOffset(axis));
     }
-    SERIAL_PRINTLN();
+    PrintValueComma(receiver.getTransmitterSlope(LASTCHANNEL-1));
+    SERIAL_PRINTLN(receiver.getTransmitterOffset(LASTCHANNEL-1));
     queryType = 'X';
     break;
   case 'Q': // Send sensor data
@@ -474,15 +476,17 @@ void sendSerialTelemetry() {
     break;
   case 'g': // Send magnetometer cal values
 #ifdef HeadingMagHold
-    // dirty trick to disable compiler loop unrolling
-    //for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    for (byte axis = XAXIS; axis < 99; axis++) {
-      if(axis == LASTAXIS)
-        break;
-      PrintValueComma(compass.getMagMax(axis));
-      PrintValueComma(compass.getMagMin(axis));
-    }
-    SERIAL_PRINTLN();
+    SERIAL_PRINT(compass.getMagMax(XAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMin(XAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMax(YAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMin(YAXIS), 2);
+    comma();
+    SERIAL_PRINT(compass.getMagMax(ZAXIS), 2);
+    comma();
+    SERIAL_PRINTLN(compass.getMagMin(ZAXIS), 2);
 #endif
     queryType = 'X';
     break;
