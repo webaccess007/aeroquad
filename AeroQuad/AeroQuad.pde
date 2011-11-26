@@ -417,11 +417,13 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
+//    #define SPARKFUN_5883L_BOB
+//    #define HMC5883L
     #define HMC5843
   #endif
 
   // Altitude declaration
-  #ifdef AltitudeHold
+  #ifdef AltitudeHold    
     #define BMP085
   #endif
 
