@@ -53,10 +53,8 @@ void initializeMagnetometer() {
   
     updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
     delay(50);
-  
     updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
     delay(10);
-
     updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01);  // Perform single conversion
     delay(10);
    
@@ -95,34 +93,45 @@ void measureMagnetometer(float roll, float pitch) {
     // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
     // JI - 11/24/11 - 5883L X axis points aft
     // JI - 11/24/11 - 5883L Sensor Orientation 3
-    measuredMagX = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+//    measuredMagX = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+//    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+//    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    rawMag[XAXIS] = -((Wire.receive() << 8) | Wire.receive());
+	rawMag[ZAXIS] = -((Wire.receive() << 8) | Wire.receive());
+    rawMag[YAXIS] =  ((Wire.receive() << 8) | Wire.receive());
   #elif defined(SPARKFUN_5883L_BOB)
     // JI - 11/24/11 - Sparkfun 5883L Breakout Board Upside Down on v2p0 shield
     // JI - 11/24/11 - 5883L is upside down, X axis points forward
     // JI - 11/24/11 - 5883L Sensor Orientation 5
-    measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-    measuredMagZ =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+//    measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+//    measuredMagZ =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+//    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    rawMag[XAXIS] = ((Wire.receive() << 8) | Wire.receive());
+	rawMag[ZAXIS] = ((Wire.receive() << 8) | Wire.receive());
+    rawMag[YAXIS] = ((Wire.receive() << 8) | Wire.receive());
   #else
     //!! Define 5883L Orientation !!
   #endif
-    
+  
   Wire.endTransmission();
+  
+  measuredMagX = rawMag[XAXIS] + magBias[XAXIS];
+  measuredMagY = rawMag[YAXIS] + magBias[YAXIS];
+  measuredMagZ = rawMag[ZAXIS] + magBias[ZAXIS];
 
-  cosRoll =  cos(roll);
-  sinRoll =  sin(roll);
-  cosPitch = cos(pitch);
-  sinPitch = sin(pitch);
 
-  magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + 
-         ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + 
-         ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+  float cosRoll =  cos(roll);
+  float sinRoll =  sin(roll);
+  float cosPitch = cos(pitch);
+  float sinPitch = sin(pitch);
+
+  magX = (float)measuredMagX * cosPitch + 
+         (float)measuredMagY * sinRoll * sinPitch + 
+         (float)measuredMagZ * cosRoll * sinPitch;
            
-  magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - 
-         ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
-
+  magY = (float)measuredMagY * cosRoll - 
+         (float)measuredMagZ * sinRoll;
+		 
   tmp  = sqrt(magX * magX + magY * magY);
     
   hdgX = magX / tmp;
