@@ -108,9 +108,9 @@ void initializeEEPROM(void) {
     altitude.setSmoothFactor(0.1);
   #endif
   #ifdef HeadingMagHold
-    compass.setMagCal(XAXIS, 1, 0);
-    compass.setMagCal(YAXIS, 1, 0);
-    compass.setMagCal(ZAXIS, 1, 0);
+    compass.setMagCal(XAXIS, 1, -1);  // JI - 11/24/11 - Changed 0 to -1 for min value
+    compass.setMagCal(YAXIS, 1, -1);  // JI - 11/24/11 - Changed 0 to -1 for min value 
+    compass.setMagCal(ZAXIS, 1, -1);  // JI - 11/24/11 - Changed 0 to -1 for min value
   #endif
   windupGuard = 1000.0;
 

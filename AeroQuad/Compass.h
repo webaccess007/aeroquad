@@ -254,10 +254,24 @@ public:
     sendByteI2C(compassAddress, 0x03);
     Wire.requestFrom(compassAddress, 6);
 
-    measuredMagY = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-    measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-    measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-
+    #if defined(SPARKFUN_9DOF)
+      // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
+      // JI - 11/24/11 - 5883L X axis points aft
+      // JI - 11/24/11 - 5883L Sensor Orientation 3
+      measuredMagX = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+      measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+      measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    #elif defined(SPARKFUN_5883L_BOB)
+      // JI - 11/24/11 - Sparkfun 5883L Breakout Board Upside Down on v2p0 shield
+      // JI - 11/24/11 - 5883L is upside down, X axis points forward
+      // JI - 11/24/11 - 5883L Sensor Orientation 5
+      measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+      measuredMagZ =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+      measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+    #else
+      !! Define 5883L Orientation !!
+    #endif
+    
     Wire.endTransmission();
 
     cosRoll =  cos(roll);

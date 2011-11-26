@@ -219,17 +219,23 @@ public:
       autoDescent = 0;
     }
     if (level == WARNING) {
-      //if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
-      //  autoDescent = -50;
-      //}
+#ifdef HeartBeatMode
+      if ((autoDescent == 0) && (currentBatteryTime > 1000)) {
+        autoDescent = -100;
+      }
+#endif
       if (currentBatteryTime > 1100) {
-        //autoDescent = 50;
+#ifdef HeartBeatMode
+        autoDescent = 100;
+#endif
         digitalWrite(LED3PIN, HIGH);
         digitalWrite(BUZZERPIN, HIGH);
       }
       if (currentBatteryTime > 1200) {
         previousBatteryTime = millis();
-        //autoDescent = 0;
+#ifdef HeartBeatMode
+        autoDescent = 0;
+#endif
         digitalWrite(LED3PIN, LOW);
         digitalWrite(BUZZERPIN, LOW);
       }
@@ -243,11 +249,13 @@ public:
         autoDescent -= 1; // auto descend quad
         holdAltitude -= 0.2; // descend if in attitude hold mode
         previousBatteryTime = millis();
-        //if (state == LOW) state = HIGH;
-        //else state = LOW;
-        //digitalWrite(LEDPIN, state);
-        //digitalWrite(LED2PIN, state);
-        //digitalWrite(LED3PIN, state);
+#ifdef HeartBeatMode
+        if (state == LOW) state = HIGH;
+        else state = LOW;
+        digitalWrite(LEDPIN, state);
+        digitalWrite(LED2PIN, state);
+        digitalWrite(LED3PIN, state);
+#endif
       }
     }
   }

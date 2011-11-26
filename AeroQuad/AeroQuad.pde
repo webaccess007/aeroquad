@@ -50,16 +50,18 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define HEXACOAXIAL
-//#define HEXARADIAL
+//#define OCTOX_CONFIG   // JI - 11/25/11
+//#define X8PLUS_CONFIG  // JI - 11/25/11
+//#define X8X_CONFIG     // JI - 11/25/11
 
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse liek a heart beat to show batteries are low
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -261,8 +263,11 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"
-    Magnetometer_HMC5843 compass;
+    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    // #define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    // #include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    // Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -447,6 +452,7 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
+    #define SPARKFUN_9DOF  // ji - 11/24/11 - Defines 5883L Orientation
     #include "Compass.h"
     Magnetometer_HMC5883L compass;
   #endif
@@ -474,6 +480,15 @@
 #ifdef plusConfig
   void (*processFlightControl)() = &processFlightControlPlusMode;
 #endif
+#ifdef OCTOX_CONFIG                                              // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlOctoX;   // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
+#ifdef X8PLUS_CONFIG                                             // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8Plus;  // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
+#ifdef X8X_CONFIG                                                // JI - 11/25/11
+  void (*processFlightControl)() = &processFlightControlX8X;     // JI - 11/25/11
+#endif                                                           // JI - 11/25/11
 
 // Include this last as it contains objects from above declarations
 #include "DataStorage.h"
