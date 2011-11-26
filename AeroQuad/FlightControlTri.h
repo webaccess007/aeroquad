@@ -95,29 +95,28 @@ void processMinMaxCommand() {
 }
 
 
-void processHardManuevers() {
-  if (flightMode == ACRO) {
-    if (receiverCommand[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT]  = minAcro;
-      motorMaxCommand[REAR]        = throttle + motorAxisCommandPitch*4/3;
-    }
-    else if (receiverCommand[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
-      motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
-      motorMaxCommand[REAR]        = throttle + motorAxisCommandPitch*4/3;
-    }
-    else if (receiverCommand[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-      motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
-      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
-      motorMaxCommand[REAR]        = minAcro;
-    }
-    else if (receiverCommand[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
-      motorMinCommand[REAR]        = MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT]  = minAcro;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-}
+//void processHardManuevers() {
+//
+//  if (receiverCommand[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
+//    motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
+//    motorMaxCommand[FRONT_LEFT]  = minAcro;
+//    motorMaxCommand[REAR]        = throttle + motorAxisCommandPitch*4/3;
+//  }
+//  else if (receiverCommand[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
+//    motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
+//    motorMaxCommand[FRONT_RIGHT] = minAcro;
+//    motorMaxCommand[REAR]        = throttle + motorAxisCommandPitch*4/3;
+//  }
+//  else if (receiverCommand[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
+//    motorMinCommand[FRONT_LEFT]  = MAXCOMMAND;
+//    motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
+//    motorMaxCommand[REAR]        = minAcro;
+//  }
+//  else if (receiverCommand[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
+//    motorMinCommand[REAR]        = MAXCOMMAND;
+//    motorMaxCommand[FRONT_LEFT]  = minAcro;
+//    motorMaxCommand[FRONT_RIGHT] = minAcro;
+//  }
+//}
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_

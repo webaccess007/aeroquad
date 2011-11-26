@@ -56,6 +56,11 @@ void applyMotorCommand() {
 }
 
 void processMinMaxCommand() {
+  
+  if (receiverCommand[THROTTLE] > MAXCHECK) { // if the throttle is about the max, we used tue PID values!
+    return;
+  }
+  
   if ((motorCommand[FRONT_LEFT] <= MINTHROTTLE) || (motorCommand[REAR_LEFT] <= MINTHROTTLE) || (motorCommand[RIGHT] <= MINTHROTTLE)) {
     delta = receiverCommand[THROTTLE] - MINTHROTTLE;
     motorMaxCommand[REAR_RIGHT] =  constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
@@ -99,38 +104,36 @@ void processMinMaxCommand() {
   }
 }
 
-void processHardManuevers() {
-  if (flightMode == ACRO) {
-    if (receiverCommand[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-      motorMinCommand[RIGHT] =       MAXCOMMAND;
-      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
-      motorMinCommand[REAR_RIGHT] =  MAXCOMMAND;
-      motorMaxCommand[LEFT] =        minAcro;
-      motorMaxCommand[FRONT_LEFT] =  minAcro;
-      motorMaxCommand[REAR_LEFT] =   minAcro;
-    }
-    else if (receiverCommand[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
-      motorMinCommand[LEFT] =        MAXCOMMAND;
-      motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
-      motorMinCommand[REAR_LEFT] =   MAXCOMMAND;
-      motorMaxCommand[RIGHT] =       minAcro;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
-      motorMaxCommand[REAR_RIGHT] =  minAcro;
-    }
-    else if (receiverCommand[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-      motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
-      motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
-      motorMaxCommand[REAR_LEFT] =   minAcro;
-      motorMaxCommand[REAR_RIGHT] =  minAcro;
-    }
-    else if (receiverCommand[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
-      motorMinCommand[REAR_LEFT] =   MAXCOMMAND;
-      motorMinCommand[REAR_RIGHT] =  MAXCOMMAND;
-      motorMaxCommand[FRONT_LEFT] =  minAcro;
-      motorMaxCommand[FRONT_RIGHT] = minAcro;
-    }
-  }
-}
-
+//void processHardManuevers() {
+//
+//  if (receiverCommand[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
+//    motorMinCommand[RIGHT] =       MAXCOMMAND;
+//    motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
+//    motorMinCommand[REAR_RIGHT] =  MAXCOMMAND;
+//    motorMaxCommand[LEFT] =        minAcro;
+//    motorMaxCommand[FRONT_LEFT] =  minAcro;
+//    motorMaxCommand[REAR_LEFT] =   minAcro;
+//  }
+//  else if (receiverCommand[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
+//    motorMinCommand[LEFT] =        MAXCOMMAND;
+//    motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
+//    motorMinCommand[REAR_LEFT] =   MAXCOMMAND;
+//    motorMaxCommand[RIGHT] =       minAcro;
+//    motorMaxCommand[FRONT_RIGHT] = minAcro;
+//    motorMaxCommand[REAR_RIGHT] =  minAcro;
+//  }
+//  else if (receiverCommand[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
+//    motorMinCommand[FRONT_LEFT] =  MAXCOMMAND;
+//    motorMinCommand[FRONT_RIGHT] = MAXCOMMAND;
+//    motorMaxCommand[REAR_LEFT] =   minAcro;
+//    motorMaxCommand[REAR_RIGHT] =  minAcro;
+//  }
+//  else if (receiverCommand[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
+//    motorMinCommand[REAR_LEFT] =   MAXCOMMAND;
+//    motorMinCommand[REAR_RIGHT] =  MAXCOMMAND;
+//    motorMaxCommand[FRONT_LEFT] =  minAcro;
+//    motorMaxCommand[FRONT_RIGHT] = minAcro;
+//  }
+//}
 
 #endif  // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_X_MODE_H_
