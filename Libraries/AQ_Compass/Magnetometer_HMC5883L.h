@@ -19,22 +19,21 @@
 */
 
 
-#ifndef _AEROQUAD_MAGNETOMETER_HMC5843_H_
-#define _AEROQUAD_MAGNETOMETER_HMC5843_H_
+#ifndef _AEROQUAD_MAGNETOMETER_HMC5883L_H_
+#define _AEROQUAD_MAGNETOMETER_HMC5883L_H_
 
 #include "Compass.h"
 
 #include <WProgram.h>
 
 #define COMPASS_ADDRESS 0x1E
-//#define SENSOR_GAIN 0x00  // +/- 0.7 Ga
-#define SENSOR_GAIN 0x20  // +/- 1.0 Ga (default)
-//#define SENSOR_GAIN 0x40  // +/- 1.5 Ga
-//#define SENSOR_GAIN 0x60  // +/- 2.0 Ga
-//#define SENSOR_GAIN 0x80  // +/- 3.2 Ga
-//#define SENSOR_GAIN 0xA0  // +/- 3.8 Ga
-//#define SENSOR_GAIN 0xC0  // +/- 4.5 Ga
-//#define SENSOR_GAIN 0xE0  // +/- 6.5 Ga (not recommended)
+
+// See HMC58x3 datasheet for more information on these values
+#define NormalOperation             0x10
+// Default DataOutputRate is 10hz on HMC5843 , 15hz on HMC5883L
+#define DataOutputRate_Default      ( 0x04 << 2 )
+#define HMC5883L_SampleAveraging_8  ( 0x03 << 5 )
+
 
 float magCalibration[3] = {0.0,0.0,0.0};
   
@@ -49,12 +48,12 @@ void initializeMagnetometer() {
   magCalibration[ZAXIS] = 1.0;
     
   while (success == false && numAttempts < 5 ) {
-    
+     
     numAttempts++;
   
     updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
     delay(50);
-   
+  
     updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
     delay(10);
 
@@ -64,17 +63,16 @@ void initializeMagnetometer() {
     measureMagnetometer(0.0, 0.0);                    // Read calibration data
     delay(10);
    
-    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1000.0 
-        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1000.0 
-        && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1000.0) {
-      magCalibration[XAXIS] = fabs(715.0 / measuredMagX);
-      magCalibration[YAXIS] = fabs(715.0 / measuredMagY);
-      magCalibration[ZAXIS] = fabs(715.0 / measuredMagZ);
-   
+    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1564.4f 
+        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1564.4f 
+        && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1477.2f) {
+      magCalibration[XAXIS] = fabs(1264.4f / measuredMagX);
+      magCalibration[YAXIS] = fabs(1264.4f / measuredMagY);
+      magCalibration[ZAXIS] = fabs(1177.2f / measuredMagZ); 
       success = true;
     }
    
-    updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x10);  // Set 10hz update rate and normal operaiton
+    updateRegisterI2C(COMPASS_ADDRESS, 0x00, HMC5883L_SampleAveraging_8 | DataOutputRate_Default | NormalOperation);
     delay(50);
 
     updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x00); // Continuous Update mode
@@ -82,6 +80,7 @@ void initializeMagnetometer() {
   }
 
   measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
+  
 }
 
 void measureMagnetometer(float roll, float pitch) {
@@ -92,10 +91,24 @@ void measureMagnetometer(float roll, float pitch) {
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
-  measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-  measuredMagY = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-  measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-
+  #if defined(SPARKFUN_9DOF)
+    // JI - 11/24/11 - SparkFun DOF on v2p1 Shield Configuration
+    // JI - 11/24/11 - 5883L X axis points aft
+    // JI - 11/24/11 - 5883L Sensor Orientation 3
+    measuredMagX = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    measuredMagZ = -((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+  #elif defined(SPARKFUN_5883L_BOB)
+    // JI - 11/24/11 - Sparkfun 5883L Breakout Board Upside Down on v2p0 shield
+    // JI - 11/24/11 - 5883L is upside down, X axis points forward
+    // JI - 11/24/11 - 5883L Sensor Orientation 5
+    measuredMagX =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
+    measuredMagZ =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
+    measuredMagY =  ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
+  #else
+    //!! Define 5883L Orientation !!
+  #endif
+    
   Wire.endTransmission();
 
   cosRoll =  cos(roll);
