@@ -179,16 +179,17 @@ void processAltitudeHold()
 
 #if defined BattMonitorAutoDescent
   void processBatteryMonitorThrottleAdjustment() {
-    if (batteryStatus == BATTERY_MONITOR_ALARM) {
-      if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
-        batteryMonitorAlarmCounter++;
-      }
-      else {
-        #ifdef AltitudeHold
-          if (throttle > BATTERY_MONITOR_THROTTLE_TARGET) {
-            altitudeToHoldTarget -= 0.2;
-          }
-        #else
+    
+    if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT && batteryData[0].voltage < BattMonitorAlarmVoltage) {
+      batteryMonitorAlarmCounter++;
+    }
+    else {
+      #ifdef AltitudeHold
+        if (altitudeHoldState == ON) {
+          altitudeToHoldTarget -= 0.2;
+        }
+        else {
+      #endif
           if (batteryMonitorStartThrottle == 0) {  // init battery monitor throttle correction!
             batteryMonitorStartTime = millis();
             batteryMonitorStartThrottle = throttle; 
@@ -200,8 +201,9 @@ void processAltitudeHold()
           else {
             batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
           }
-        #endif
-      }
+      #ifdef AltitudeHold
+        }
+      #endif
     }
   }
 #endif  
