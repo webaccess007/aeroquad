@@ -153,28 +153,28 @@ void processAltitudeHold()
   // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
   // Thanks to Sherbakov for his work in Z Axis dampening
   // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-#ifdef AltitudeHold
-  if (altitudeHoldState == ON) {
-    int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
-    altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-    if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
-      altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-    } else {
-      if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-        altitudeToHoldTarget += 0.01;
+  #ifdef AltitudeHold
+    if (altitudeHoldState == ON) {
+      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
+      altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
+      if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > PANICSTICK_MOVEMENT) {
+        altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
+      } else {
+        if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + ALTBUMP)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
+          altitudeToHoldTarget += 0.01;
+        }
+        if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
+          altitudeToHoldTarget -= 0.01;
+        }
       }
-      if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - ALTBUMP)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-        altitudeToHoldTarget -= 0.01;
-      }
+      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
     }
-    throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
-  }
-  else {
+    else {
+      throttle = receiverCommand[THROTTLE];
+    }
+  #else
     throttle = receiverCommand[THROTTLE];
-  }
-#else
-  throttle = receiverCommand[THROTTLE];
-#endif
+  #endif
 }
 
 #if defined BattMonitorAutoDescent
@@ -202,10 +202,6 @@ void processAltitudeHold()
           }
         #endif
       }
-    }
-    else {
-      batteryMonitorStartThrottle = 0;
-      batteyMonitorThrottleCorrection = 0.0;
     }
   }
 #endif  
@@ -263,7 +259,9 @@ void processFlightControl() {
   } 
 
   // *********************** process min max motor command *******************
-  processMinMaxCommand();
+  if (receiverCommand[THROTTLE] <= MAXCHECK) { // if the throttle is about the max, we used true PID values! PATCH for max throttle bug
+    processMinMaxCommand();
+  }
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == ACRO) {

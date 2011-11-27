@@ -40,9 +40,9 @@
 #define LEFT            MOTOR1
 #define RIGHT           MOTOR2
 #define REAR            MOTOR3
-#define REAR_UNDER      MOTOR4
-#define LEFT_UNDER      MOTOR5
-#define RIGHT_UNDER     MOTOR6
+#define LEFT_UNDER      MOTOR4
+#define RIGHT_UNDER     MOTOR5
+#define REAR_UNDER      MOTOR6
 #define LASTMOTOR       MOTOR6+1
 
 void applyMotorCommand() {
@@ -57,10 +57,6 @@ void applyMotorCommand() {
 }
 
 void processMinMaxCommand() {
-  
-  if (receiverCommand[THROTTLE] > MAXCHECK) { // if the throttle is about the max, we used tue PID values!
-    return;
-  }
   
   if ((motorCommand[LEFT] <= MINTHROTTLE) || (motorCommand[REAR_UNDER] <= MINTHROTTLE)){
     delta = receiverCommand[THROTTLE] - MINTHROTTLE;
@@ -113,36 +109,5 @@ void processMinMaxCommand() {
   }
 }
 
-//void processHardManuevers() {
-//
-//  if (receiverCommand[ROLL] < MINCHECK) {        // Maximum Left Roll Rate
-//    motorMinCommand[RIGHT]       = MAXCOMMAND;
-//    motorMinCommand[RIGHT_UNDER] = MAXCOMMAND;
-//    motorMaxCommand[LEFT]        = minAcro;
-//    motorMaxCommand[LEFT_UNDER]  = minAcro;
-//  }
-//  else if (receiverCommand[ROLL] > MAXCHECK) {   // Maximum Right Roll Rate
-//    motorMinCommand[LEFT]        = MAXCOMMAND;
-//    motorMinCommand[LEFT_UNDER]  = MAXCOMMAND;
-//    motorMaxCommand[RIGHT]       = minAcro;
-//    motorMaxCommand[RIGHT_UNDER] = minAcro;
-//  }
-//  else if (receiverCommand[PITCH] < MINCHECK) {  // Maximum Nose Up Pitch Rate
-//    motorMinCommand[LEFT]        = MAXCOMMAND;
-//    motorMinCommand[LEFT_UNDER]  = MAXCOMMAND;
-//    motorMinCommand[RIGHT]       = MAXCOMMAND;
-//    motorMinCommand[RIGHT_UNDER] = MAXCOMMAND;
-//    motorMaxCommand[REAR_UNDER]  = minAcro;
-//    motorMaxCommand[REAR]        = minAcro;
-//  }
-//  else if (receiverCommand[PITCH] > MAXCHECK) {  // Maximum Nose Down Pitch Rate
-//    motorMinCommand[LEFT]        = minAcro;
-//    motorMinCommand[LEFT_UNDER]  = minAcro;
-//    motorMinCommand[RIGHT]       = minAcro;
-//    motorMinCommand[RIGHT_UNDER] = minAcro;
-//    motorMaxCommand[REAR_UNDER]  = MAXCOMMAND;
-//    motorMaxCommand[REAR]        = MAXCOMMAND;
-//  }
-//}
 
-#endif // #define _AQ_PROCESS_FLIGHT_CONTROL_X_MODE_H_
+#endif // #define _AQ_PROCESS_FLIGHT_CONTROL_HEX_Y6_MODE_H_
