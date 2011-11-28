@@ -107,10 +107,6 @@ float aref; // Read in from EEPROM
 
 // Auto level setup
 float levelAdjust[2] = {0.0,0.0};
-//int levelAdjust[2] = {0,0};
-  // Scale to convert 1000-2000 PWM to +/- 45 degrees
-//float mLevelTransmitter = 0.09;
-//float bLevelTransmitter = -135;
 
 #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
   float CHR_RollAngle;
@@ -135,11 +131,11 @@ int batteyMonitorThrottleCorrection = 0;
 #if defined (BattMonitor)
   int batteryMonitorStartThrottle = 0;
   unsigned long batteryMonitorStartTime = 0;
-  #define BATTERY_MONITOR_THROTTLE_TARGET 1100
+  #define BATTERY_MONITOR_THROTTLE_TARGET 1200
   #define BATTERY_MONITOR_GOIN_DOWN_TIME 60000  // 1 minutes
   #if defined BattMonitorAutoDescent
     int batteryMonitorAlarmCounter = 0;
-    #define BATTERY_MONITOR_MAX_ALARM_COUNT 20
+    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
   #endif
 #endif
 

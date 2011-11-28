@@ -86,7 +86,7 @@
 // Battery Monitor Options
 // *******************************************************************************************************************************
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAlarmVoltage 13.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+#define BattMonitorAlarmVoltage 11.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
 #define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
 
 //

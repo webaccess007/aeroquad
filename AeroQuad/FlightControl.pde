@@ -180,8 +180,10 @@ void processAltitudeHold()
 #if defined BattMonitorAutoDescent
   void processBatteryMonitorThrottleAdjustment() {
     
-    if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT && batteryData[0].voltage < BattMonitorAlarmVoltage) {
-      batteryMonitorAlarmCounter++;
+    if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
+      if (batteryData[0].voltage < BattMonitorAlarmVoltage) {
+        batteryMonitorAlarmCounter++;
+      }
     }
     else {
       #ifdef AltitudeHold
