@@ -33,19 +33,21 @@ struct BatteryData {
   float minVoltage;       // Minimum voltage since reset
   float maxCurrent;       // Maximum current since reset
   float usedCapacity;     // Capacity used since reset (in mAh)
-  byte  status;           //
 };
 
 extern struct BatteryData batteryData[];     // BatteryMonitor config, !! MUST BE DEFINED BY MAIN SKETCH !!
 extern byte               numberOfBatteries; // number of batteries monitored, defined by BatteryMonitor
 extern byte               batteryStatus;     // combined state of batteries, defined by BatteryMonitor
+extern boolean            batteryAlarm;      // any battery in alarm state
+extern boolean            batteryWarning;    // any battery in warning state
+
 
 // Helper macros to make battery difinitions cleaner
 
 // for defining battery with just voltage sensing
-#define BM_DEFINE_BATTERY_V(VPIN,VWARNING,VALARM,VSCALE,VBIAS) {VPIN,NOPIN,VWARNING,VALARM,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0},
+#define BM_DEFINE_BATTERY_V(VPIN,VWARNING,VALARM,VSCALE,VBIAS) {VPIN,NOPIN,VWARNING,VALARM,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 
 // for defining battery with voltage and current sensors
-#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0},
+#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0},
 
 #endif
