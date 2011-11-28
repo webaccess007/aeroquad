@@ -26,15 +26,15 @@
              UPPER/LOWER
 
 
-       CW/CCW           CCW/CW
+           CW          CCW
             
-           0....Front....0  
+   CCW     0....Front....0      CW
            ......***......    
            ......***......
            ......***......    
-           0....Back.....0  
+   CW      0....Back.....0      CCW
       
-       CCW/CW           CW/CCW
+           CCW          CW
 */     
 
 #define FRONT_LEFT      MOTOR1
@@ -61,58 +61,62 @@ void applyMotorCommand() {
 }
 
 
-// @Kenny, check this one for v3.0
 void processMinMaxCommand() {
 
-  if ((motorCommand[FRONT_LEFT] <= MINTHROTTLE) || (motorCommand[MID_FRONT_RIGHT] <= MINTHROTTLE)){
+  if ((motorCommand[FRONT_LEFT] <= MINTHROTTLE) || (motorCommand[MID_FRONT_LEFT] <= MINTHROTTLE) ||
+      (motorCommand[REAR_RIGHT] <= MINTHROTTLE) || (motorCommand[MID_REAR_RIGHT] <= MINTHROTTLE)) {
     delta = receiverCommand[THROTTLE] - MINTHROTTLE;
-    motorMaxCommand[FRONT_RIGHT]    = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[MID_REAR_RIGHT] = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[REAR_LEFT]      = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[MID_FRONT_LEFT] = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-  }
-  else if ((motorCommand[FRONT_LEFT] >= MAXCOMMAND) || (motorCommand[MID_FRONT_RIGHT] >= MAXCOMMAND)) {
-    delta = MAXCOMMAND - receiverCommand[THROTTLE];
-    motorMinCommand[FRONT_RIGHT]    = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[MID_REAR_RIGHT] = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[REAR_LEFT]      = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[MID_FRONT_LEFT] = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-  }     
-  else {
-    motorMaxCommand[FRONT_RIGHT]    = MAXCOMMAND;
-    motorMaxCommand[MID_REAR_RIGHT] = MAXCOMMAND; 
-    motorMaxCommand[REAR_LEFT]      = MAXCOMMAND;
-    motorMaxCommand[MID_FRONT_LEFT] = MAXCOMMAND; 
-    motorMinCommand[FRONT_RIGHT]    = MINTHROTTLE;
-    motorMinCommand[MID_REAR_RIGHT] = MINTHROTTLE;
-    motorMinCommand[REAR_LEFT]      = MINTHROTTLE;
-    motorMinCommand[MID_FRONT_LEFT] = MINTHROTTLE;
-  }
-
-  if ((motorCommand[MID_REAR_RIGHT] <= MINTHROTTLE) || (motorCommand[FRONT_RIGHT] <= MINTHROTTLE)){
-    delta = receiverCommand[THROTTLE] - MINTHROTTLE;
-    motorMaxCommand[FRONT_LEFT]      = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[FRONT_RIGHT]     = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
     motorMaxCommand[MID_FRONT_RIGHT] = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
-    motorMaxCommand[REAR_RIGHT]      = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[REAR_LEFT]       = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
     motorMaxCommand[MID_REAR_LEFT]   = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
   }
-  else if ((motorCommand[MID_REAR_RIGHT] >= MAXCOMMAND) || (motorCommand[FRONT_RIGHT] >= MAXCOMMAND)) {
+  else if ((motorCommand[FRONT_LEFT] >= MAXCOMMAND) || (motorCommand[MID_FRONT_LEFT] >= MAXCOMMAND) ||
+           (motorCommand[REAR_RIGHT] >= MAXCOMMAND) || (motorCommand[MID_REAR_RIGHT] >= MAXCOMMAND)) {
     delta = MAXCOMMAND - receiverCommand[THROTTLE];
-    motorMinCommand[FRONT_LEFT]      = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[FRONT_RIGHT]     = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
     motorMinCommand[MID_FRONT_RIGHT] = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
-    motorMinCommand[REAR_RIGHT]      = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[REAR_LEFT]       = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
     motorMinCommand[MID_REAR_LEFT]   = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
   }     
   else {
-    motorMaxCommand[FRONT_LEFT]      = MAXCOMMAND;
-    motorMaxCommand[MID_FRONT_RIGHT] = MAXCOMMAND;
-    motorMaxCommand[REAR_RIGHT]      = MAXCOMMAND;
-    motorMaxCommand[MID_REAR_LEFT]   = MAXCOMMAND;
-    motorMinCommand[FRONT_LEFT]      = MINTHROTTLE;
+    motorMaxCommand[FRONT_RIGHT]     = MAXCOMMAND;
+    motorMaxCommand[MID_FRONT_RIGHT] = MAXCOMMAND; 
+    motorMaxCommand[REAR_LEFT]       = MAXCOMMAND;
+    motorMaxCommand[MID_REAR_LEFT]   = MAXCOMMAND; 
+    motorMinCommand[FRONT_RIGHT]     = MINTHROTTLE;
     motorMinCommand[MID_FRONT_RIGHT] = MINTHROTTLE;
-    motorMinCommand[REAR_RIGHT]      = MINTHROTTLE;
+    motorMinCommand[REAR_LEFT]       = MINTHROTTLE;
     motorMinCommand[MID_REAR_LEFT]   = MINTHROTTLE;
   }
+
+  if ((motorCommand[FRONT_RIGHT] <= MINTHROTTLE) || (motorCommand[MID_FRONT_RIGHT] <= MINTHROTTLE) ||
+      (motorCommand[REAR_LEFT] <= MINTHROTTLE)   || (motorCommand[MID_REAR_LEFT] <= MINTHROTTLE)) {
+    delta = receiverCommand[THROTTLE] - MINTHROTTLE;
+    motorMaxCommand[FRONT_LEFT]     = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[MID_FRONT_LEFT] = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[REAR_RIGHT]     = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+    motorMaxCommand[MID_REAR_RIGHT] = constrain(receiverCommand[THROTTLE] + delta, MINTHROTTLE, MAXCHECK);
+  }
+  else if ((motorCommand[FRONT_RIGHT] >= MAXCOMMAND) || (motorCommand[MID_FRONT_RIGHT] >= MAXCOMMAND) ||
+           (motorCommand[REAR_LEFT] >= MAXCOMMAND)   || (motorCommand[MID_REAR_LEFT] >= MAXCOMMAND)) {
+    delta = MAXCOMMAND - receiverCommand[THROTTLE];
+    motorMinCommand[FRONT_LEFT]     = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[MID_FRONT_LEFT] = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[REAR_RIGHT]     = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+    motorMinCommand[MID_REAR_RIGHT] = constrain(receiverCommand[THROTTLE] - delta, MINTHROTTLE, MAXCOMMAND);
+  }     
+  else {
+    motorMaxCommand[FRONT_LEFT]     = MAXCOMMAND;
+    motorMaxCommand[MID_FRONT_LEFT] = MAXCOMMAND; 
+    motorMaxCommand[REAR_RIGHT]     = MAXCOMMAND;
+    motorMaxCommand[MID_REAR_RIGHT] = MAXCOMMAND; 
+    motorMinCommand[FRONT_LEFT]     = MINTHROTTLE;
+    motorMinCommand[MID_FRONT_LEFT] = MINTHROTTLE;
+    motorMinCommand[REAR_RIGHT]     = MINTHROTTLE;
+    motorMinCommand[MID_REAR_RIGHT] = MINTHROTTLE;
+  }
+
 }
 
 #endif // #define _AQ_PROCESS_FLIGHT_CONTROL_OCTO_X_MODE_H_
