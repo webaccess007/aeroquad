@@ -181,7 +181,7 @@ void processAltitudeHold()
   void processBatteryMonitorThrottleAdjustment() {
     
     if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
-      if (batteryData[0].voltage < BattMonitorAlarmVoltage) {
+      if (batteryAlarm) {
         batteryMonitorAlarmCounter++;
       }
     }

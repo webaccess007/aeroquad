@@ -86,8 +86,9 @@
 // Battery Monitor Options
 // *******************************************************************************************************************************
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAlarmVoltage 11.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+#define BattMonitorAlarmVoltage 10.5  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
 #define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
+#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -429,8 +430,13 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.82)};
+    #ifdef POWERED_BY_VIN
+      struct BatteryData batteryData[] = {
+        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+    #else
+      struct BatteryData batteryData[] = {
+        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+    #endif
   #endif
 
   #ifdef OSD
@@ -501,8 +507,13 @@
 
   // Battery Monitor declaration
   #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.82)};
+    #ifdef POWERED_BY_VIN
+      struct BatteryData batteryData[] = {
+        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+    #else
+      struct BatteryData batteryData[] = {
+        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+    #endif
   #endif
 
   #ifdef OSD
@@ -572,11 +583,11 @@
   #endif
 
   // Battery Monitor declaration
-//  #ifdef BattMonitor
-//    struct BatteryData batteryData[] = {
-//      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.82)};
-//  #endif
   #undef BatteryMonitor // unsuported
+  #undef BattMonitorAlarmVoltage
+  #undef BattMonitorAutoDescent
+  #undef POWERED_BY_VIN
+
 
   #ifdef OSD
     #define MAX7456_OSD
