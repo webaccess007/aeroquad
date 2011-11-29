@@ -316,27 +316,6 @@ void initReceiverFromEEPROM();
 void readPilotCommands(); 
 //////////////////////////////////////////////////////
 
-// defined in FlightControl.pde Flight control needs
-int motorAxisCommandRoll = 0;
-int motorAxisCommandPitch = 0;
-int motorAxisCommandYaw = 0;
-
-#if defined quadXConfig || defined quadPlusConfig || defined triConfig || defined quadY4Config
-  int motorMaxCommand[4] = {0,0,0,0};
-  int motorMinCommand[4] = {0,0,0,0};
-  int motorConfiguratorCommand[4] = {0,0,0,0};
-#elif defined hexXConfig || defined hexPlusConfig || defined hexY6Config
-  int motorMaxCommand[6] = {0,0,0,0,0,0};
-  int motorMinCommand[6] = {0,0,0,0,0,0};
-  int motorConfiguratorCommand[6] = {0,0,0,0,0,0};
-#elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig) 
-  int motorMaxCommand[8] = {0,0,0,0,0,0,0,0};
-  int motorMinCommand[8] = {0,0,0,0,0,0,0,0};
-  int motorConfiguratorCommand[8] = {0,0,0,0,0,0,0,0};
-#endif
-
-
-
 void calculateFlightError();
 void processHeading();
 void processAltitudeHold();
