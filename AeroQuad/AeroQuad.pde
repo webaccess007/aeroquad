@@ -35,7 +35,7 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.x
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AutonavShield       // For the AutoNav shield build by blue23 on the forum, @see http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
@@ -85,10 +85,10 @@
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // *******************************************************************************************************************************
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAlarmVoltage 10.5  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
-#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
-#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -137,9 +137,7 @@
 //#define OSD_SYSTEM_MENU
 
 
-#define YAW_DIRECTION 1 // if you want to reverse the yaw correction direction
-//#define YAW_DIRECTION -1
-
+//#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
 /****************************************************************************
  ****************************************************************************
@@ -1127,6 +1125,10 @@ void setup() {
   digitalWrite(9, LOW);
   digitalWrite(8, LOW);
 #endif
+
+  #ifdef CHANGE_YAW_DIRECTION
+    YAW_DIRECTION = -1;
+  #endif
 
   // Read user values from EEPROM
   readEEPROM(); // defined in DataStorage.h
