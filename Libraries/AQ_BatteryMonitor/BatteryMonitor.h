@@ -24,7 +24,6 @@
 #include <BatteryMonitorTypes.h>
 
 byte    numberOfBatteries = 0; 
-boolean batteryWarning    = false;
 boolean batteryAlarm      = false;
 
 // Reset Battery statistics
@@ -49,25 +48,21 @@ void initializeBatteryMonitor(byte nb) {
 
 void measureBatteryVoltage(float deltaTime) {
 
-  batteryAlarm   = false;
-  batteryWarning = false;
+  batteryAlarm = false;  
   for (int i = 0; i < numberOfBatteries; i++) {
     batteryData[i].voltage = (float)analogRead(batteryData[i].vPin) * batteryData[i].vScale + batteryData[i].vBias;
     if (batteryData[i].voltage < batteryData[i].minVoltage) {
       batteryData[i].minVoltage = batteryData[i].voltage;
     }
-    if (batteryData[i].cPin != NOPIN) {
+    if (batteryData[i].cPin != BM_NOPIN) {
       batteryData[i].current =  (float)analogRead(batteryData[i].cPin) * batteryData[i].cScale + batteryData[i].cBias;
       if (batteryData[i].current > batteryData[i].maxCurrent) { 
         batteryData[i].maxCurrent = batteryData[i].current;
       }
       batteryData[i].usedCapacity += batteryData[i].current * deltaTime / 3.6; // current(A) * 1000 * time(s) / 3600 -> mAh 
     }
-    if (batteryData[i].voltage <= batteryData[i].vAlarm) {
+    if (batteryIsAlarm(i)) {
       batteryAlarm = true;
-    }
-    else if (batteryData[i].voltage <= batteryData[i].vWarning) {
-      batteryWarning = true;
     }
   }
 }
