@@ -188,7 +188,7 @@ void processAltitudeHold()
     else {
       #ifdef AltitudeHold
         if (altitudeHoldState == ON) {
-          altitudeToHoldTarget -= 0.2;
+          altitudeToHoldTarget -= 0.02;
         }
         else {
       #endif
@@ -231,6 +231,33 @@ void processHardManuevers() {
     for (int motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minAcro;
       motorMaxCommand[motor] = MAXCOMMAND;
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////// processMinMaxCommand ////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void processMinMaxCommand()
+{
+  for (byte motor = 0; motor < LASTMOTOR; motor++)
+  {
+    motorMinCommand[motor] = MINTHROTTLE;
+    motorMaxCommand[motor] = MAXCOMMAND;
+  }
+
+  int maxMotor = motorCommand[0];
+  
+  for (byte motor=1; motor < LASTMOTOR; motor++) {
+    if (motorCommand[motor] > maxMotor) {
+      maxMotor = motorCommand[motor];
+    }
+  }
+    
+  for (byte motor = 0; motor < LASTMOTOR; motor++) {
+    if (maxMotor > MAXCHECK) {
+      motorCommand[motor] =  motorCommand[motor] - (maxMotor - MAXCHECK);
     }
   }
 }
