@@ -407,8 +407,11 @@ void sendSerialTelemetry() {
   case 'Z': // Accelerometer Calibration Output
     measureAccelSum();
     PrintValueComma(accelSample[XAXIS]/accelSampleCount);
+    accelSample[XAXIS] = 0.0;
     PrintValueComma(accelSample[YAXIS]/accelSampleCount);
+    accelSample[YAXIS] = 0.0;
     SERIAL_PRINTLN (accelSample[ZAXIS]/accelSampleCount);
+    accelSample[ZAXIS] = 0.0;
     accelSampleCount = 0;
     break;
   case '6': // Report remote commands
