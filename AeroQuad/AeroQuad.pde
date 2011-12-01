@@ -37,8 +37,8 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -59,9 +59,9 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse liek a heart beat to show batteries are low
+//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse liek a heart beat to show batteries are low
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -263,11 +263,12 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
-    Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
-    // #define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
-    // #include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
-    // Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    //#define SPARKFUN_5843_BOB       // JI - 11/26/11 - Use this line with 5843 Breakout Board
+    //#include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    //Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    #define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
@@ -452,7 +453,7 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    #define SPARKFUN_9DOF  // ji - 11/24/11 - Defines 5883L Orientation
+    #define SPARKFUN_9DOF  // JI - 11/24/11 - Defines 5883L Orientation
     #include "Compass.h"
     Magnetometer_HMC5883L compass;
   #endif

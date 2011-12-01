@@ -171,7 +171,7 @@ public:
   }
 };
 
-
+#if !defined(SPARKFUN_5843_BOB)  // JI - 11/26/11
 ////////////////////////////////////////////////////////////////////////////////
 // Magnetometer (HMC5883L)
 ////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +292,7 @@ public:
     hdgY = -magY / tmp;
   }
 };
-
+#endif  // JI - 11/26/11
 
 // ***********************************************************************
 // ************************* CHR6DM Subclass *****************************
@@ -325,149 +325,4 @@ public:
 };
 #endif
 
-/*
-////////////////////////////////////////////////////////////////////////////////
-// Magnetometer (HMC5883L)
-////////////////////////////////////////////////////////////////////////////////
 
-#define HMC58X3_ADDR 0x1E // 7 bit address of the HMC58X3 used with the Wire library
-#define HMC_POS_BIAS 1
-#define HMC_NEG_BIAS 2
-
-#define HMC58X3_R_XM 3
-#define HMC58X3_R_XL 4
-
-// HMC58X3 register map. For details see HMC58X3 datasheet
-#define HMC58X3_R_CONFA 0
-#define HMC58X3_R_CONFB 1
-#define HMC58X3_R_MODE 2
-#define HMC58X3_R_XM 3
-#define HMC58X3_R_XL 4
-
-class Magnetometer_HMC5883L : public Compass {
-private:
-  float cosRoll;
-  float sinRoll;
-  float cosPitch;
-  float sinPitch;
-  float magx_scale, magy_scale, magz_scale, magx_max, magy_max, magz_max;
-
-  byte MAG_X_H;
-  byte MAG_X_L;
-  byte MAG_Y_H;
-  byte MAG_Y_L;
-  byte MAG_Z_H;
-  byte MAG_Z_L;
-
-  int magnetometer_address;
-  int gain;
-
-
-public: 
-  Magnetometer_HMC5883L() : Compass() {
-    magnetometer_address = 0x1E;
-    MAG_X_H=0x03;
-    MAG_X_L=0x04;
-    MAG_Y_H=0x07;
-    MAG_Y_L=0x08;
-    MAG_Z_H=0x05;
-    MAG_Z_L=0x06;
-    gain = 1;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Initialize HMC5883L Magnetometer
-  ////////////////////////////////////////////////////////////////////////////////
-
-  void initialize(void) {
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_CONFA, 0x70);
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_CONFB, 0xA0);
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_MODE, 0x00);
-
-    magx_scale=1; // get actual values
-    magy_scale=1;
-    magz_scale=1;
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_CONFA, 0x010 + HMC_POS_BIAS); // Reg A DOR=0x010 + MS1,MS0 set to pos bias
-  
-    // set the gain
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_CONFB, gain << 5);
-  
-    // now iniit
-    float x, y, z, mx=0, my=0, mz=0, t=10;
-  
-    byte buff[6];
-  
-    for (int i=0; i<(int)t; i++) { 
-      updateRegisterI2C(magnetometer_address, HMC58X3_R_MODE, 1); // calibration mode
-      delay(100);
-
-      sendByteI2C(compassAddress, 0x03);
-      Wire.requestFrom(compassAddress, 6);
-
-      measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-      measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-      measuredMagY = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-
-      Wire.endTransmission();
-    
-      if (measuredMagX > mx) mx = x;
-      if (measuredMagY > my) my = y;
-      if (measuredMagZ > mz) mz = z;
-    }
-  
-    float max=0;
-    if (mx>max) max=mx;
-    if (my>max) max=my;
-    if (mz>max) max=mz;
-  
-    magx_max = mx;
-    magy_max = my;
-    magz_max = mz;
-    magx_scale = max/mx; // calc scales
-    magy_scale = max/my;
-    magz_scale = max/mz;
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_CONFA, 0x010); // set RegA/DOR back to default
-    delay(10);
-    // now set mode
-    updateRegisterI2C(magnetometer_address, HMC58X3_R_MODE, 0);
-    delay(100);
-  }
-  
-  ////////////////////////////////////////////////////////////////////////////////
-  // Measure HMC5883L Magnetometer
-  ////////////////////////////////////////////////////////////////////////////////
-
-  void measure(float roll, float pitch) {
-    float magX;
-    float magY;
-    float tmp;
-    
-    sendByteI2C(compassAddress, 0x03);
-    Wire.requestFrom(compassAddress, 6);
-
-    measuredMagX = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[XAXIS];
-    measuredMagZ = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[ZAXIS];
-    measuredMagY = ((Wire.receive() << 8) | Wire.receive()) * magCalibration[YAXIS];
-
-    Wire.endTransmission();
-
-    cosRoll =  cos(roll);
-    sinRoll =  sin(roll);
-    cosPitch = cos(pitch);
-    sinPitch = sin(pitch);
-
-    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + \
-           ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + \
-           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
-           
-    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - \
-           ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
-
-    tmp  = sqrt(magX * magX + magY * magY);
-    
-    hdgX = magX / tmp;
-    hdgY = -magY / tmp;
-
-  }
-};
-*/
