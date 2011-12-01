@@ -37,8 +37,8 @@
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board					
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with APM Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -50,18 +50,18 @@
 // Use only one of the following definitions
 #define XConfig
 //#define plusConfig
-//#define OCTOX_CONFIG   // JI - 11/25/11
-//#define X8PLUS_CONFIG  // JI - 11/25/11
-//#define X8X_CONFIG     // JI - 11/25/11
+//#define OCTOX_CONFIG
+//#define X8PLUS_CONFIG
+//#define X8X_CONFIG
 
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse liek a heart beat to show batteries are low
+#define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define HeartBeatMode // Used in AeroQuad Battery Monitor, if low battery detected, the motors will pulse like a heart beat to show batteries are low
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -91,7 +91,11 @@
 // D12 to D33 for roll, connect servo to SERVO1
 // D11 to D34 for pitch, connect servo to SERVO2
 // D13 to D35 for yaw, connect servo to SERVO3
-// Please note that you will need to have battery connected to power on servos with v2.0 shield
+// if using v2.1 Shield
+// Connect pitch servo to Camera 1 input
+// Connect roll servo to Camera 2 input
+// Connect yaw servo to Camera 3 input
+// Please note that you will need to have a battery connected to power on servos with the v2.0/v2.1 shields
 // *******************************************************************************************************************************
 //#define CameraControl
 
@@ -263,12 +267,12 @@
   #endif
   FlightAngle *flightAngle = &tempFlightAngle;
   #ifdef HeadingMagHold
-    //#define SPARKFUN_5843_BOB       // JI - 11/26/11 - Use this line with 5843 Breakout Board
-    //#include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
-    //Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
-    #define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
-    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
-    Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    #define SPARKFUN_5843_BOB       // JI - 11/26/11 - Use this line with 5843 Breakout Board
+    #include "Compass.h"            // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    Magnetometer_HMC5843 compass;   // JI - 11/24/11 - Use this line with 5843 Breakout Board
+    //#define SPARKFUN_5883L_BOB      // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    //#include "Compass.h"            // JI - 11/24/11 - Use this line with 5883L Breakout Board
+    //Magnetometer_HMC5883L compass;  // JI - 11/24/11 - Use this line with 5883L Breakout Board
   #endif
   #ifdef AltitudeHold
     #include "Altitude.h"
