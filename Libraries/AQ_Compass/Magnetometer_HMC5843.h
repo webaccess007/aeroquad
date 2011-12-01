@@ -36,49 +36,14 @@
 //#define SENSOR_GAIN 0xC0  // +/- 4.5 Ga
 //#define SENSOR_GAIN 0xE0  // +/- 6.5 Ga (not recommended)
 
-float magCalibration[3] = {0.0,0.0,0.0};
-  
 void initializeMagnetometer() {
 
-  byte numAttempts = 0;
-  bool success = false;
   delay(10);                             // Power up delay **
    
-  magCalibration[XAXIS] = 1.0;
-  magCalibration[YAXIS] = 1.0;
-  magCalibration[ZAXIS] = 1.0;
-    
-  while (success == false && numAttempts < 5 ) {
-     
-    numAttempts++;
- 
-    updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x11);  // Set positive bias configuration for sensor calibraiton
-    delay(50);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x01, 0x20); // Set +/- 1G gain
-    delay(10);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01);  // Perform single conversion
-    delay(10);
-   
-    measureMagnetometer(0.0, 0.0);                    // Read calibration data
-    delay(10);
-   
-    if ( fabs(measuredMagX) > 500.0 && fabs(measuredMagX) < 1000.0 
-        && fabs(measuredMagY) > 500.0 && fabs(measuredMagY) < 1000.0 
-        && fabs(measuredMagZ) > 500.0 && fabs(measuredMagZ) < 1000.0) {
-      magCalibration[XAXIS] = fabs(715.0 / measuredMagX);
-      magCalibration[YAXIS] = fabs(715.0 / measuredMagY);
-      magCalibration[ZAXIS] = fabs(715.0 / measuredMagZ);
-    
-      success = true;
-    }
-   
-    updateRegisterI2C(COMPASS_ADDRESS, 0x00, 0x18); // 50Hz update rate
-    delay(20);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
-    delay(20);
-    updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x00); // Continuous conversion
-    delay(20);
-  }
+  updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
+  delay(20);
+  updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
+  delay(20);
 
   measureMagnetometer(0.0, 0.0);  // Assume 1st measurement at 0 degrees roll and 0 degrees pitch
 }
@@ -96,6 +61,8 @@ void measureMagnetometer(float roll, float pitch) {
   rawMag[ZAXIS] = -((Wire.receive() << 8) | Wire.receive());
 
   Wire.endTransmission();
+
+  updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
 
   measuredMagX = rawMag[XAXIS] + magBias[XAXIS];
   measuredMagY = rawMag[YAXIS] + magBias[YAXIS];
