@@ -24,7 +24,7 @@
 
 #include "Compass.h"
 
-#include <WProgram.h>
+#include "Arduino.h"
 
 #define COMPASS_ADDRESS 0x1E
 //#define SENSOR_GAIN 0x00  // +/- 0.7 Ga
@@ -56,9 +56,9 @@ void measureMagnetometer(float roll, float pitch) {
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
-  rawMag[XAXIS] =  ((Wire.receive() << 8) | Wire.receive());
-  rawMag[YAXIS] = -((Wire.receive() << 8) | Wire.receive());
-  rawMag[ZAXIS] = -((Wire.receive() << 8) | Wire.receive());
+  rawMag[XAXIS] =  ((Wire.read() << 8) | Wire.read());
+  rawMag[YAXIS] = -((Wire.read() << 8) | Wire.read());
+  rawMag[ZAXIS] = -((Wire.read() << 8) | Wire.read());
 
   Wire.endTransmission();
 

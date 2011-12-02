@@ -559,8 +559,8 @@ void printInt(int data) {
   msb = data >> 8;
   lsb = data & 0xff;
 
-  binaryPort->print(msb, BYTE);
-  binaryPort->print(lsb, BYTE);
+  binaryPort->write(msb);
+  binaryPort->write(lsb);
 }
 
 void sendBinaryFloat(float data) {
@@ -570,10 +570,10 @@ void sendBinaryFloat(float data) {
   } binaryFloat;
 
   binaryFloat.floatVal = data;
-  binaryPort->print(binaryFloat.floatByte[3], BYTE);
-  binaryPort->print(binaryFloat.floatByte[2], BYTE);
-  binaryPort->print(binaryFloat.floatByte[1], BYTE);
-  binaryPort->print(binaryFloat.floatByte[0], BYTE);
+  binaryPort->write(binaryFloat.floatByte[3]);
+  binaryPort->write(binaryFloat.floatByte[2]);
+  binaryPort->write(binaryFloat.floatByte[1]);
+  binaryPort->write(binaryFloat.floatByte[0]);
 }
 
 void sendBinaryuslong(unsigned long data) {
@@ -583,10 +583,10 @@ void sendBinaryuslong(unsigned long data) {
   } binaryuslong;
 
   binaryuslong.uslongVal = data;
-  binaryPort->print(binaryuslong.uslongByte[3], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[2], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[1], BYTE);
-  binaryPort->print(binaryuslong.uslongByte[0], BYTE);
+  binaryPort->write(binaryuslong.uslongByte[3]);
+  binaryPort->write(binaryuslong.uslongByte[2]);
+  binaryPort->write(binaryuslong.uslongByte[1]);
+  binaryPort->write(binaryuslong.uslongByte[0]);
 }
 
 #ifdef BinaryWrite
@@ -607,15 +607,15 @@ void fastTelemetry()
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
 //        printInt((int)flightMode);
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
+//       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
+//       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
 //        sendBinaryFloat(accel->accelOneG);
        #ifdef HeadingMagHold
 //          sendBinaryFloat(compass->hdgX);
 //          sendBinaryFloat(compass->hdgY);
-           sendBinaryFloat(compass->getRawData(XAXIS));
-           sendBinaryFloat(compass->getRawData(YAXIS));
-           sendBinaryFloat(compass->getRawData(ZAXIS));
+//           sendBinaryFloat(compass->getRawData(XAXIS));
+//           sendBinaryFloat(compass->getRawData(YAXIS));
+//           sendBinaryFloat(compass->getRawData(ZAXIS));
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
