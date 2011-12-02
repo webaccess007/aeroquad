@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include "WProgram.h"
+#include "Arduino.h."
 #include "pins_arduino.h"
 
 // Flight Software Version
