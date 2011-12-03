@@ -33,14 +33,14 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AutonavShield       // For the AutoNav shield build by blue23 on the forum, @see http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
@@ -89,10 +89,10 @@
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // *******************************************************************************************************************************
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
-//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
+#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -179,6 +179,10 @@
 //********************************************************
 //********************************************************
 #ifdef AeroQuad_v1
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
   // Gyroscope declaration
   #include <Gyroscope_IDG_IDZ500.h>
 
@@ -217,6 +221,10 @@
 #endif
 
 #ifdef AeroQuad_v1_IDG
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
   // Gyroscope declaration
   #include <Gyroscope_IDG_IDZ500.h>
 
@@ -255,6 +263,10 @@
 #endif
 
 #ifdef AeroQuad_v18
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -289,10 +301,10 @@
    */
   void initPlatform() {
 
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -309,6 +321,10 @@
 #endif
 
 #ifdef AeroQuad_Mini
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -345,10 +361,10 @@
   void initPlatform() {
     gyroAddress = ITG3200_ADDRESS-1;
 
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     Wire.begin();
     TWBR = 12;
@@ -364,6 +380,10 @@
 #endif
 
 #ifdef AeroQuadMega_v1
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   // Special thanks to Wilafau for fixes for this setup
   // http://aeroquad.com/showthread.php?991-AeroQuad-Flight-Software-v2.0&p=11466&viewfull=1#post11466
   // Gyroscope declaration
@@ -404,6 +424,10 @@
 #endif
 
 #ifdef AeroQuadMega_v2
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -450,10 +474,10 @@
    */
   void initPlatform() {
 
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -482,6 +506,10 @@
 #endif
 
 #ifdef AeroQuadMega_v21
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   #define SPARKFUN_9DOF
   
   #include <Device_I2C.h>
@@ -528,10 +556,10 @@
    */
   void initPlatform() {
 
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -560,6 +588,10 @@
 #endif
 
 #ifdef AutonavShield
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -601,10 +633,10 @@
    */
   void initPlatform() {
 
-    pinMode(LED2PIN, OUTPUT);
-    digitalWrite(LED2PIN, LOW);
-    pinMode(LED3PIN, OUTPUT);
-    digitalWrite(LED3PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
+    pinMode(LED_Yellow, OUTPUT);
+    digitalWrite(LED_Yellow, LOW);
 
     // pins set to INPUT for camera stabilization so won't interfere with new camera class
     pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
@@ -633,6 +665,10 @@
 #endif
 
 #ifdef ArduCopter
+  #define LED_Green 37
+  #define LED_Red 35
+  #define LED_Yellow 36
+
   #if defined (HeadingMagHold) || defined (AltitudeHold)
     #include <APM_ADC.h>
   #else
@@ -700,6 +736,10 @@
 #endif
 
 #ifdef AeroQuad_Wii
+  #define LED_Green 13
+  #define LED_Red 12
+  #define LED_Yellow 12
+
   #include <Device_I2C.h>
 
   // Platform Wii declaration
@@ -758,6 +798,10 @@
 #endif
 
 #ifdef AeroQuadMega_Wii
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   #include <Device_I2C.h>
 
   // Platform Wii declaration
@@ -817,6 +861,10 @@
 #endif
 
 #ifdef AeroQuadMega_CHR6DM
+  #define LED_Green 13
+  #define LED_Red 4
+  #define LED_Yellow 31
+
   #include <Device_I2C.h>
   #include <Platform_CHR6DM.h>
   CHR6DM chr6dm;
@@ -873,7 +921,6 @@
     gyroChr6dm = &chr6dm;
     accelChr6dm = &chr6dm;
     kinematicsChr6dm = &chr6dm;
-//    tempKinematics.setGyroscope(&gyroSpecific);
     compassChr6dm = &chr6dm;
   }
 
@@ -890,6 +937,10 @@
 #endif
 
 #ifdef APM_OP_CHR6DM
+  #define LED_Green 37
+  #define LED_Red 35
+  #define LED_Yellow 36
+
   #include <Device_I2C.h>
   #include <Platform_CHR6DM.h>
   CHR6DM chr6dm;
@@ -1115,8 +1166,8 @@
 // ************************************************************
 void setup() {
   SERIAL_BEGIN(BAUD);
-  pinMode(LEDPIN, OUTPUT);
-  digitalWrite(LEDPIN, LOW);
+  pinMode(LED_Green, OUTPUT);
+  digitalWrite(LED_Green, LOW);
 
 #ifdef DEBUG_LOOP
   pinMode(12, OUTPUT);
@@ -1222,7 +1273,7 @@ void setup() {
   setupFourthOrder();
 
   previousTime = micros();
-  digitalWrite(LEDPIN, HIGH);
+  digitalWrite(LED_Green, HIGH);
   safetyCheck = 0;
 }
 
