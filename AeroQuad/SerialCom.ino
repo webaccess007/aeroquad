@@ -54,7 +54,6 @@ void readSerialPID(unsigned char PIDid) {
 void readSerialCommand() {
   // Check for serial message
   if (SERIAL_AVAILABLE()) {
-    digitalWrite(LEDPIN, LOW);
     queryType = SERIAL_READ();
     switch (queryType) {
     case 'A': // Receive roll and pitch gyro PID
@@ -199,7 +198,6 @@ void readSerialCommand() {
       #endif
       break;
     }
-    digitalWrite(LEDPIN, HIGH);
   }
 }
 
