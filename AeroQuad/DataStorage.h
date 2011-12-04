@@ -21,6 +21,9 @@
 // Special thanks for 1k space optimization update from Ala42
 // http://aeroquad.com/showthread.php?1369-The-big-enhancement-addition-to-2.0-code&p=13359&viewfull=1#post13359
 
+#ifndef _AQ_DATA_STORAGE_H_
+#define _AQ_DATA_STORAGE_H_
+
 // Utilities for writing and reading from the EEPROM
 float nvrReadFloat(int address) {
   union floatStore {
@@ -118,8 +121,9 @@ void initializeEEPROM() {
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
   for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
-    if (i != ALTITUDE)
-        PID[i].windupGuard = windupGuard;
+    if (i != ALTITUDE) {
+      PID[i].windupGuard = windupGuard;
+    }
   }
     
   receiverXmitFactor = 1.0;
@@ -140,21 +144,6 @@ void initializeEEPROM() {
   headingHoldConfig = ON;
   minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
-  
-  /*#ifdef Camera
-    mCameraPitch = 11.11;   // scale angle to servo....  caculated as +/- 90 (ie 180) degrees maped to 1000-2000 
-    mCameraRoll = 11.11;        
-    mCameraYaw = 11.11;
-    centerPitch = 1500;       // (bCamera) Center of stabilisation in mode 1,  point here in mode 2  
-    centerRoll = 1500;        // 1000 - 2000 nornaly centered 1500
-    centerYaw = 1500;  
-    servoMinPitch = 1000;     // don't drive the servo past here  
-    servoMinRoll = 1000;
-    servoMinYaw = 1000;
-    servoMaxPitch = 2000;
-    servoMaxRoll = 2000;
-    servoMaxYaw = 2000;
-  #endif*/
 }
 
 void readEEPROM() {
@@ -197,8 +186,9 @@ void readEEPROM() {
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
   for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
-    if (i != ALTITUDE)
-        PID[i].windupGuard = windupGuard;
+    if (i != ALTITUDE) {
+      PID[i].windupGuard = windupGuard;
+    }
   }
     
   timeConstant = readFloat(FILTERTERM_ADR);
@@ -208,21 +198,6 @@ void readEEPROM() {
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   minAcro = readFloat(MINACRO_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
-  
-  /*#ifdef Camera
-  mCameraPitch = readFloat(MCAMERAPITCH_ADR);
-  mCameraRoll = readFloat(MCAMERAROLL_ADR);
-  mCameraYaw = readFloat(MCAMERAYAW_ADR);
-  centerPitch = readFloat(CENTERPITCH_ADR);
-  centerRoll = readFloat(CENTERROLL_ADR);
-  centerYaw = readFloat(CENTERYAW_ADR);
-  servoMinPitch = readFloat(SERVOMINPITCH_ADR);
-  servoMinRoll = readFloat(SERVOMINROLL_ADR);
-  servoMinYaw = readFloat(SERVOMINYAW_ADR);
-  servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
-  servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
-  servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
-  #endif*/
 }
 
 void writeEEPROM(){
@@ -277,21 +252,6 @@ void writeEEPROM(){
   writeFloat(accelOneG, ACCEL_1G_ADR);
   writeFloat(SOFTWARE_VERSION, SOFTWARE_VERSION_ADR);
     
-  /*#ifdef Camera
-  writeFloat(mCameraPitch, MCAMERAPITCH_ADR);
-  writeFloat(mCameraRoll, MCAMERAROLL_ADR);
-  writeFloat(mCameraYaw, MCAMERAYAW_ADR);
-  writeFloat(centerPitch, CENTERPITCH_ADR);
-  writeFloat(centerRoll, CENTERROLL_ADR);
-  writeFloat(centerYaw, CENTERYAW_ADR);
-  writeFloat(servoMinPitch, SERVOMINPITCH_ADR);
-  writeFloat(servoMinRoll, SERVOMINROLL_ADR);
-  writeFloat(servoMinYaw, SERVOMINYAW_ADR);
-  writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
-  writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
-  writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
-  #endif*/
-  
   sei(); // Restart interrupts
 }
 
@@ -335,3 +295,4 @@ void initReceiverFromEEPROM() {
   }
 }
 
+#endif // _AQ_DATA_STORAGE_H_

@@ -242,11 +242,6 @@ void sendSerialTelemetry() {
   update = 0;
   switch (queryType) {
   case '=': // Reserved debug command to view any variable from Serial Monitor
-    //PrintValueComma(kinematics->getData(ROLL));
-    //SERIAL_PRINT(G_Dt, 6);
-    //SERIAL_PRINTLN();
-    //printFreeMemory();
-    //queryType = 'X';
     break;
   case 'B': // Send roll and pitch gyro PID values
     PrintPID(ROLL);
@@ -604,35 +599,49 @@ void fastTelemetry()
     #ifdef OpenlogBinaryWrite
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
-//        printInt((int)flightMode);
-//       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyro->getData(axis));
-//       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(accel->getData(axis));
-//        sendBinaryFloat(accel->accelOneG);
+        printInt((int)flightMode);
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(gyroRate[axis]);
+       }
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(meterPerSec[axis]);
+       }
+       sendBinaryFloat(accelOneG);
        #ifdef HeadingMagHold
-//          sendBinaryFloat(compass->hdgX);
-//          sendBinaryFloat(compass->hdgY);
-//           sendBinaryFloat(compass->getRawData(XAXIS));
-//           sendBinaryFloat(compass->getRawData(YAXIS));
-//           sendBinaryFloat(compass->getRawData(ZAXIS));
+          sendBinaryFloat(hdgX);
+          sendBinaryFloat(hdgY);
+          sendBinaryFloat(getMagnetometerRawData(XAXIS));
+          sendBinaryFloat(getMagnetometerRawData(YAXIS));
+          sendBinaryFloat(getMagnetometerRawData(ZAXIS));
        #else
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
-//          sendBinaryFloat(0.0);
+         sendBinaryFloat(0.0);
        #endif
-//        for (byte axis = ROLL; axis < ZAXIS; axis++) sendBinaryFloat(kinematics->getData(axis));
+        for (byte axis = ROLL; axis < ZAXIS; axis++) {
+          sendBinaryFloat(kinematicsAngle[axis]);
+        }
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(gyroRate[axis]);
-       for (byte axis = XAXIS; axis < LASTAXIS; axis++) sendBinaryFloat(meterPerSec[axis]);
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(gyroRate[axis]);
+       }
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(meterPerSec[axis]);
+       }
        for (byte axis = ROLL; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
          sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(getGyroUnbias(axis));
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) sendBinaryFloat(kinematicsAngle[axis]);
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(getGyroUnbias(axis));
+       }
+       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+         sendBinaryFloat(kinematicsAngle[axis]);
+       }
        printInt(32767); // Stop word of 0x7FFF
     #endif
   }
