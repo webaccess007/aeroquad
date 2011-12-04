@@ -26,6 +26,10 @@
 // Includes re-write / fixes from Aadamson and ala42, special thanks to those guys!
 // http://aeroquad.com/showthread.php?1461-We-have-some-hidden-warnings&p=14618&viewfull=1#post14618
 
+#ifndef _AQ_SERIAL_COMM_
+#define _AQ_SERIAL_COMM_
+
+
 //***************************************************************************************************
 //********************************** Serial Commands ************************************************
 //***************************************************************************************************
@@ -646,5 +650,7 @@ void fastTelemetry()
     #endif
   }
 }
-#endif   
+#endif // BinaryWrite
+
+#endif // _AQ_SERIAL_COMM_
 
