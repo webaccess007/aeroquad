@@ -18,6 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#ifndef _AQ_PID_H_
+#define _AQ_PID_H_
 
 // PID Variables
 struct PIDdata {
@@ -62,5 +64,6 @@ void zeroIntegralError() {
   }
 }
 
+#endif // _AQ_PID_H_
 
 
