@@ -39,24 +39,6 @@
 #define ON 1
 #define OFF 0
 
-// PID Variables
-struct PIDdata {
-  float P, I, D;
-  float lastPosition;
-  // AKA experiments with PID
-  float previousPIDTime;
-  float integratedError;
-  float windupGuard; // Thinking about having individual wind up guards for each PID
-} PID[10];
-// This struct above declares the variable PID[] to hold each of the PID values for various functions
-// The following constants are declared in AeroQuad.h
-// ROLL = 0, PITCH = 1, YAW = 2 (used for Arcobatic Mode, gyros only)
-// ROLLLEVEL = 3, PITCHLEVEL = 4, LEVELGYROROLL = 6, LEVELGYROPITCH = 7 (used for Stable Mode, accels + gyros)
-// HEADING = 5 (used for heading hold)
-// ALTITUDE = 8 (used for altitude hold)
-// ZDAMPENING = 9 (used in altitude hold to dampen vertical accelerations)
-float windupGuard; // Read in from EEPROM
-
 // PID types
 #define NOTYPE 0
 #define TYPEPI 1
@@ -102,12 +84,10 @@ float levelAdjust[2] = {0.0,0.0};
 
 // Heading hold
 byte headingHoldConfig;
-//float headingScaleFactor;
 float commandedYaw = 0;
 float headingHold = 0; // calculated adjustment for quad to go to heading (PID output)
 float heading = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading = 0; // current heading the quad is set to (set point)
-//float absoluteHeading = 0;;
 float setHeading = 0;
 unsigned long headingTime = micros();
 byte headingHoldState = OFF;

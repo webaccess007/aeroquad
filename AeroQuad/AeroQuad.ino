@@ -39,9 +39,9 @@
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-//#define AutonavShield       // For the AutoNav shield build by blue23 on the forum, @see http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
+#define AutonavShield       // For the AutoNav shield build by blue23 on the forum, @see http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -52,18 +52,19 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
 
 //#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD ONLY
+//#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -81,7 +82,7 @@
 // *******************************************************************************************************************************
 // You must define one of the next 3 attitude stabilization modes or the software will not build
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables HMC5843 Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
@@ -89,10 +90,10 @@
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // *******************************************************************************************************************************
-#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
-#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
-#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
+//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -139,9 +140,6 @@
 //#define OSD
 // Menu system, currently only usable with OSD
 //#define OSD_SYSTEM_MENU
-
-
-//#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
 
 /****************************************************************************
  ****************************************************************************
