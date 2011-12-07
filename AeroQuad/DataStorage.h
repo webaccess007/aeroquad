@@ -103,7 +103,10 @@ void initializeEEPROM() {
     minThrottleAdjust = -50.0;
     maxThrottleAdjust = 50.0; //we don't want it to be able to take over totally
     baroSmoothFactor = 0.1;
+    altitudeHoldBump = 90;
+    altitudeHoldPanicStickMovement = 250;
   #endif
+  
   // Accel Cal
   accelScaleFactor[XAXIS] = 1.0;
   runTimeAccelBias[XAXIS] = 0.0;
@@ -142,8 +145,14 @@ void initializeEEPROM() {
   smoothHeading = 1.0;
   flightMode = ACRO;
   headingHoldConfig = ON;
-  minAcro = 1300;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
+  
+  // Battery Monitor
+  #ifdef BattMonitor
+    batteryMonitorAlarmVoltage = 10.0;
+    batteryMonitorThrottleTarget = 1450;
+    batteryMonitorGoinDownTime = 60000;
+  #endif
 }
 
 void readEEPROM() {
@@ -164,6 +173,8 @@ void readEEPROM() {
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
     baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
+    altitudeHoldBump = readFloat(ALTITUDE_BUMP_ADR);
+    altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
   #endif
   readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
 
@@ -181,9 +192,15 @@ void readEEPROM() {
     magBias[YAXIS] = readFloat(YAXIS_MAG_BIAS_ADR);
     magBias[ZAXIS] = readFloat(ZAXIS_MAG_BIAS_ADR);
   #endif
-
+  
+  // Battery Monitor
+  #ifdef BattMonitor
+    batteryMonitorAlarmVoltage = readFloat(BATT_ALARM_VOLTAGE_ADR);
+    batteryMonitorThrottleTarget = readFloat(BATT_THROTTLE_TARGET_ADR);
+    batteryMonitorGoinDownTime = readFloat(BATT_DOWN_TIME_ADR);
+  #endif
+  
   windupGuard = readFloat(WINDUPGUARD_ADR);
-
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
   for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
     if (i != ALTITUDE) {
@@ -196,7 +213,6 @@ void readEEPROM() {
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
-  minAcro = readFloat(MINACRO_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
 }
 
@@ -216,6 +232,8 @@ void writeEEPROM(){
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   #ifdef AltitudeHold    
     writeFloat(baroSmoothFactor, ALTITUDE_SMOOTH_ADR);
+    writeFloat(altitudeHoldBump, ALTITUDE_BUMP_ADR);
+    writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
@@ -248,10 +266,16 @@ void writeEEPROM(){
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);
-  writeFloat(minAcro, MINACRO_ADR);
   writeFloat(accelOneG, ACCEL_1G_ADR);
   writeFloat(SOFTWARE_VERSION, SOFTWARE_VERSION_ADR);
-    
+  
+  // Battery Monitor
+  #ifdef BattMonitor
+    writeFloat(batteryMonitorAlarmVoltage, BATT_ALARM_VOLTAGE_ADR);
+    writeFloat(batteryMonitorThrottleTarget, BATT_THROTTLE_TARGET_ADR);
+    writeFloat(batteryMonitorGoinDownTime, BATT_DOWN_TIME_ADR);
+  #endif
+  
   sei(); // Restart interrupts
 }
 
