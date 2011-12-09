@@ -96,6 +96,7 @@ byte headingHoldState = OFF;
 int throttle = 1000;
 int batteyMonitorThrottleCorrection = 0;
 #if defined (BattMonitor)
+  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
   float batteryMonitorAlarmVoltage = 10.0;
   int batteryMonitorStartThrottle = 0;
   int batteryMonitorThrottleTarget = 1450;

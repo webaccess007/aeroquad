@@ -128,6 +128,7 @@ void readSerialCommand() {
       break;
     case 'I': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
+      writeEEPROM();
       calibrateGyro();
       computeAccelBias();
       zeroIntegralError();
@@ -171,6 +172,10 @@ void readSerialCommand() {
         batteryMonitorAlarmVoltage = readFloatSerial();
         batteryMonitorThrottleTarget = readFloatSerial();
         batteryMonitorGoinDownTime = readFloatSerial();
+      #else
+        readFloatSerial();
+        readFloatSerial();
+        readFloatSerial();
       #endif
       break;
     case 'W': // Write all user configurable values to EEPROM
@@ -397,6 +402,10 @@ void sendSerialTelemetry() {
       PrintValueComma(batteryMonitorAlarmVoltage);
       PrintValueComma(batteryMonitorThrottleTarget);
       SERIAL_PRINTLN(batteryMonitorGoinDownTime);
+    #else
+      PrintValueComma(0);
+      PrintValueComma(0);
+      SERIAL_PRINTLN(0);
     #endif
     break;
   case 'r': // Vehicle attitude
@@ -446,12 +455,9 @@ void sendSerialTelemetry() {
     break;
   case 't': // Send processed transmitter values
     PrintValueComma(receiverXmitFactor);
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = 0; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverCommand[axis]);
     }
-    //for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-    //  PrintValueComma(motorCommand[axis]);
-    //}
     SERIAL_PRINTLN();
     break;
   case 'x': // Stop sending messages

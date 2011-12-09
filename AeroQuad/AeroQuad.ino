@@ -53,13 +53,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -99,9 +99,8 @@
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAlarmVoltage 10.0  // this have to be defined if BattMonitor is defined. default alarm voltage is 10 volt
 #define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -405,6 +404,7 @@
   #include <Accelerometer_ADXL500.h>
 
   // Reveiver declaration
+  #define OLD_RECEIVER_PIN_ORDER
   #define RECEIVER_MEGA
 
   // Motor declaration
@@ -1256,6 +1256,11 @@ void setup() {
   // Battery Monitor
   #ifdef BattMonitor
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData));
+    // batteryMonitorAlarmVoltage updated in readEEPROM()
+    for (int i = 0; i < numberOfBatteries;i++) {
+      batteryData[i].vAlarm = batteryMonitorAlarmVoltage;
+      batteryData[i].vWarning = batteryMonitorAlarmVoltage;
+    }
   #endif
 
   // Camera stabilization setup
