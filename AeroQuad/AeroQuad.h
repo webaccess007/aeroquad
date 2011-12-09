@@ -21,7 +21,6 @@
 #ifndef _AQ_GLOBAL_HEADER_DEFINITION_H_
 #define _AQ_GLOBAL_HEADER_DEFINITION_H_
 
-
 #include <stdlib.h>
 #include <math.h>
 #include "Arduino.h."
