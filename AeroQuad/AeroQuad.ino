@@ -88,6 +88,7 @@
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
+// IF you have the AeroQuad Mini shield you can ONLY choose HeadingMagHold OR Battery Monitor.  NOT BOTH as it wont upload to the Pro Mini
 // *******************************************************************************************************************************
 #define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHold // Enables BMP085 Barometer (experimental, use at your own risk)
@@ -97,6 +98,7 @@
 // *******************************************************************************************************************************
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
+// IF you have the AeroQuad Mini shield you can ONLY choose HeadingMagHold OR Battery Monitor.  NOT BOTH as it wont upload to the Pro Mini
 // *******************************************************************************************************************************
 #define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
 #define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
