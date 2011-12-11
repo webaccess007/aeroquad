@@ -80,14 +80,18 @@ void readSerialCommand() {
       headingHold = 0;
       break;
     case 'D': // Altitude hold PID
-      #ifdef AltitudeHold
+      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         readSerialPID(ALTITUDE);
         PID[ALTITUDE].windupGuard = readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
         maxThrottleAdjust = readFloatSerial();
-        baroSmoothFactor = readFloatSerial();
+        #if defined AltitudeHoldBaro
+          baroSmoothFactor = readFloatSerial();
+        #else 
+          readFloatSerial();
+        #endif
         readSerialPID(ZDAMPENING);
       #endif
       break;
@@ -135,7 +139,7 @@ void readSerialCommand() {
       #ifdef HeadingMagHold
         initializeMagnetometer();
       #endif
-      #ifdef AltitudeHold
+      #ifdef AltitudeHoldBaro
         initializeBaro();
       #endif
       break;
@@ -278,14 +282,18 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'd': // Altitude Hold
-    #ifdef AltitudeHold
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
       PrintPID(ALTITUDE);
       PrintValueComma(PID[ALTITUDE].windupGuard);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
       PrintValueComma(maxThrottleAdjust);
-      PrintValueComma(baroSmoothFactor);
+      #if defined AltitudeHoldBaro
+        PrintValueComma(baroSmoothFactor);
+      #else
+        PrintValueComma(0);
+      #endif
       PrintPID(ZDAMPENING);
     #else
       for(byte i=0; i<10; i++) {
@@ -426,8 +434,8 @@ void sendSerialTelemetry() {
     #else
       PrintValueComma(gyroHeading);
     #endif
-    #ifdef AltitudeHold
-      PrintValueComma(getBaroAltitude());
+    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+      PrintValueComma(getAltitudeFromSensors());
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);
