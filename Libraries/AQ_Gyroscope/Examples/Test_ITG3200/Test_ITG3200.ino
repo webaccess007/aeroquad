@@ -18,38 +18,43 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
-#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
+#include <Wire.h>
 
-#include <Axis.h>
 #include <AQMath.h>
-#include <Magnetometer_HMC5843.h>
+#include <Device_I2C.h>
+#include <Gyroscope_ITG3200.h>
+#include <GlobalDefined.h>
 
 unsigned long timer;
 
-void setup() {
-  
+void setup()
+{
   Serial.begin(115200);
-  Serial.println("Magnetometer library test (HMC5843)");
-  
+  Serial.println("Gyroscope library test (ITG3200)");
+
   Wire.begin();
-  initializeMagnetometer();
+
+  initializeGyro();
+  calibrateGyro();
+  timer = millis();
 }
 
-void loop() {
-  
+void loop(void) 
+{
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    //accel.measure();
-    measureMagnetometer(0.0,0.0);
+    measureGyro();
     
     Serial.print("Roll: ");
-    Serial.print(getMagnetometerRawData(XAXIS));
+    Serial.print(degrees(gyroRate[ROLL]));
     Serial.print(" Pitch: ");
-    Serial.print(getMagnetometerRawData(YAXIS));
+    Serial.print(degrees(gyroRate[PITCH]));
     Serial.print(" Yaw: ");
-    Serial.print(getMagnetometerRawData(ZAXIS));
+    Serial.print(degrees(gyroRate[YAW]));
+    Serial.print(" Heading: ");
+    Serial.print(degrees(gyroHeading));
     Serial.println();
   }
 }
+

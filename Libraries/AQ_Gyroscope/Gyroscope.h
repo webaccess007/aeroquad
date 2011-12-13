@@ -22,7 +22,7 @@
 #define _AEROQUAD_GYROSCOPE_H_
 
 #include "Arduino.h"
-#include <Axis.h>
+#include "GlobalDefined.h"
 
 float gyroRate[3] = {0.0,0.0,0.0};
 float gyroZero[3] = {0.0,0.0,0.0};

@@ -22,6 +22,7 @@
 #define _AQ_BAROMETRIC_SENSOR_
 
 #include "Arduino.h"
+#include "GlobalDefined.h"
 
 double baroAltitude = 0.0; 
 double baroRawAltitude = 0.0;

@@ -18,40 +18,42 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
-#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
-#include <Platform_CHR6DM.h>  // Arduino IDE bug, needed because that the CHR6DM use Wire!
+#include <Wire.h>             // @see Kenny, Arduino IDE compiliation bug
 
-#include <Axis.h>
-#include <APM_ADC.h>
 #include <AQMath.h>
-#include <Accelerometer_ADXL500.h>
+#include <Device_I2C.h>
+#include <Gyroscope_IDG_IDZ500.h>
+#include <GlobalDefined.h>
 
 unsigned long timer;
 
-void setup() {
-  
+void setup()
+{
   Serial.begin(115200);
-  Serial.println("Accelerometer library test (IDG500)");
-  
-  initializeAccel();
-  computeAccelBias();
+  Serial.println("Gyroscope library test (IDG_IDZ500)");
+
+  setGyroAref(3.3);
+  initializeGyro();
+  calibrateGyro();
+  timer = millis();
 }
 
-void loop() {
-  
+void loop(void) 
+{
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    //accel.measure();
-    measureAccel();
+    measureGyro();
     
     Serial.print("Roll: ");
-    Serial.print(meterPerSec[XAXIS]);
+    Serial.print(degrees(gyroRate[ROLL]));
     Serial.print(" Pitch: ");
-    Serial.print(meterPerSec[YAXIS]);
+    Serial.print(degrees(gyroRate[PITCH]));
     Serial.print(" Yaw: ");
-    Serial.print(meterPerSec[ZAXIS]);
+    Serial.print(degrees(gyroRate[YAW]));
+    Serial.print(" Heading: ");
+    Serial.print(degrees(gyroHeading));
     Serial.println();
   }
 }
+

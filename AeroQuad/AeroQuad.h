@@ -30,9 +30,9 @@
 // Flight Software Version
 #define SOFTWARE_VERSION 3.0
 
-//#define BAUD 115200
+#define BAUD 115200
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
-#define BAUD 57600
+//#define BAUD 57600
 
 
 
@@ -293,6 +293,9 @@ void initReceiverFromEEPROM();
 
 // defined in FlightCommand.pde
 void readPilotCommands(); 
+
+// defined in AltitudeControlProcessor.h
+float getAltitudeFromSensors();
 //////////////////////////////////////////////////////
 
 void calculateFlightError();

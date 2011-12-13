@@ -19,37 +19,46 @@
 */
 
 #include <Wire.h>
-#include <Device_I2C.h>
-#include <Axis.h>
+
 #include <AQMath.h>
-#include <Accelerometer_ADXL345.h>
+#include <GlobalDefined.h>
+#include <Device_I2C.h>
+#include <Platform_Wii.h>
+#include <Gyroscope_Wii.h>
+
 
 unsigned long timer;
 
-void setup() {
-  
+void setup()
+{
   Serial.begin(115200);
-  Serial.println("Accelerometer library test (ADXL345)");
+  Serial.println("Gyroscope library test (WII)");
 
   Wire.begin();
   
-  initializeAccel();
-  computeAccelBias();
+  initializeWiiSensors(true);
+  initializeGyro();
+  calibrateGyro();
+  timer = millis();
 }
 
-void loop() {
-  
+void loop(void) 
+{
   if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    measureAccel();
+    readWiiSensors();
+    measureGyro();
     
     Serial.print("Roll: ");
-    Serial.print(meterPerSec[XAXIS]);
+    Serial.print(degrees(gyroRate[ROLL]));
     Serial.print(" Pitch: ");
-    Serial.print(meterPerSec[YAXIS]);
+    Serial.print(degrees(gyroRate[PITCH]));
     Serial.print(" Yaw: ");
-    Serial.print(meterPerSec[ZAXIS]);
+    Serial.print(degrees(gyroRate[YAW]));
+    Serial.print(" Heading: ");
+    Serial.print(degrees(gyroHeading));
     Serial.println();
   }
 }
+

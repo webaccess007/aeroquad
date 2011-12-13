@@ -89,7 +89,7 @@ void readSerialCommand() {
         maxThrottleAdjust = readFloatSerial();
         #if defined AltitudeHoldBaro
           baroSmoothFactor = readFloatSerial();
-        #else 
+        #else
           readFloatSerial();
         #endif
         readSerialPID(ZDAMPENING);
@@ -108,27 +108,12 @@ void readSerialCommand() {
       }
       break;
     case 'G': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++)
         receiverSlope[channel] = readFloatSerial();
-        receiverOffset[channel] = readFloatSerial();
-      }
       break;
-    case 'H': //  read Camera values
-      #ifdef Camera
-        camera.setMode(readFloatSerial());
-        camera.setCenterPitch(readFloatSerial());
-        camera.setCenterRoll(readFloatSerial());
-        camera.setCenterYaw(readFloatSerial());
-        camera.setmCameraPitch(readFloatSerial());
-        camera.setmCameraRoll(readFloatSerial());
-        camera.setmCameraYaw(readFloatSerial());
-        camera.setServoMinPitch(readFloatSerial());
-        camera.setServoMinRoll(readFloatSerial());
-        camera.setServoMinYaw(readFloatSerial());
-        camera.setServoMaxPitch(readFloatSerial());
-        camera.setServoMaxRoll(readFloatSerial());
-        camera.setServoMaxYaw(readFloatSerial());
-      #endif
+    case 'H': // Receive transmitter calibration values
+      for(byte channel = ROLL; channel<LASTCHANNEL; channel++)
+        receiverOffset[channel] = readFloatSerial();
       break;
     case 'I': // Initialize EEPROM with default values
       initializeEEPROM(); // defined in DataStorage.h
@@ -182,9 +167,31 @@ void readSerialCommand() {
         readFloatSerial();
       #endif
       break;
+    case 'P': //  read Camera values
+      #ifdef Camera
+        camera.setMode(readFloatSerial());
+        camera.setCenterPitch(readFloatSerial());
+        camera.setCenterRoll(readFloatSerial());
+        camera.setCenterYaw(readFloatSerial());
+        camera.setmCameraPitch(readFloatSerial());
+        camera.setmCameraRoll(readFloatSerial());
+        camera.setmCameraYaw(readFloatSerial());
+        camera.setServoMinPitch(readFloatSerial());
+        camera.setServoMinRoll(readFloatSerial());
+        camera.setServoMinYaw(readFloatSerial());
+        camera.setServoMaxPitch(readFloatSerial());
+        camera.setServoMaxRoll(readFloatSerial());
+        camera.setServoMaxYaw(readFloatSerial());
+      #else
+        for (byte values = 0; values < 13; values++)
+          readFloatSerial();
+      #endif
+      break;
     case 'W': // Write all user configurable values to EEPROM
       writeEEPROM(); // defined in DataStorage.h
       zeroIntegralError();
+      break;
+    case 'X': // Stop sending messages
       break;
     case '1': // Calibrate ESCS's by setting Throttle high on all channels
         validateCalibrateCommand(1);
@@ -319,34 +326,16 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'g': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
+    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
       PrintValueComma(receiverSlope[axis]);
-      PrintValueComma(receiverOffset[axis]);
-    }
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
-  case 'h': // Send Camera values
-    #ifdef Camera
-      PrintValueComma(camera.getMode());
-      PrintValueComma(camera.getCenterPitch());
-      PrintValueComma(camera.getCenterRoll());
-      PrintValueComma(camera.getCenterYaw());
-      PrintValueComma(camera.getmCameraPitch(), 2);
-      PrintValueComma(camera.getmCameraRoll(), 2);
-      PrintValueComma(camera.getmCameraYaw(), 2);
-      PrintValueComma(camera.getServoMinPitch());
-      PrintValueComma(camera.getServoMinRoll());
-      PrintValueComma(camera.getServoMinYaw());
-      PrintValueComma(camera.getServoMaxPitch());
-      PrintValueComma(camera.getServoMaxRoll());
-      SERIAL_PRINTLN(camera.getServoMaxYaw());
-    #else
-      for (byte index=0; index < 12; index++) {
-        PrintValueComma(0);
-      }
-      SERIAL_PRINTLN(0);
-    #endif
+  case 'h': // Send transmitter calibration data
+    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
+      PrintValueComma(receiverOffset[axis]);
+    SERIAL_PRINTLN();
+    queryType = 'X';
     break;
   case 'i': // Send sensor data
     for (byte axis = ROLL; axis < LASTAXIS; axis++) {
@@ -415,6 +404,30 @@ void sendSerialTelemetry() {
       PrintValueComma(0);
       SERIAL_PRINTLN(0);
     #endif
+    queryType = 'X';
+    break;
+  case 'p': // Send Camera values
+    #ifdef Camera
+      PrintValueComma(camera.getMode());
+      PrintValueComma(camera.getCenterPitch());
+      PrintValueComma(camera.getCenterRoll());
+      PrintValueComma(camera.getCenterYaw());
+      PrintValueComma(camera.getmCameraPitch(), 2);
+      PrintValueComma(camera.getmCameraRoll(), 2);
+      PrintValueComma(camera.getmCameraYaw(), 2);
+      PrintValueComma(camera.getServoMinPitch());
+      PrintValueComma(camera.getServoMinRoll());
+      PrintValueComma(camera.getServoMinYaw());
+      PrintValueComma(camera.getServoMaxPitch());
+      PrintValueComma(camera.getServoMaxRoll());
+      SERIAL_PRINTLN(camera.getServoMaxYaw());
+    #else
+      for (byte index=0; index < 12; index++) {
+        PrintValueComma(0);
+      }
+      SERIAL_PRINTLN(0);
+    #endif
+    queryType = 'X';
     break;
   case 'r': // Vehicle attitude
     PrintValueComma(kinematicsAngle[ROLL]);
@@ -435,7 +448,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroHeading);
     #endif
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintValueComma(getAltitudeFromSensors());
+      PrintValueComma(getAltitudeFromSensors() == INVALID_ALTITUDE ? 0 : getAltitudeFromSensors());
       PrintValueComma((int)altitudeHoldState);
     #else
       PrintValueComma(0);
@@ -462,7 +475,6 @@ void sendSerialTelemetry() {
     SERIAL_PRINTLN();
     break;
   case 't': // Send processed transmitter values
-    PrintValueComma(receiverXmitFactor);
     for (byte axis = 0; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverCommand[axis]);
     }
@@ -560,7 +572,7 @@ float readFloatSerial() {
       timeout = 0;
       index++;
     }
-  } while ((index == 0 || data[index-1] != ';') && (timeout < 5) && (index < sizeof(data)-1));
+  } while ((index == 0 || data[index-1] != ';') && (timeout < 10) && (index < sizeof(data)-1));
   data[index] = '\0';
 
   return atof(data);
@@ -673,4 +685,5 @@ void fastTelemetry()
 #endif // BinaryWrite
 
 #endif // _AQ_SERIAL_COMM_
+
 

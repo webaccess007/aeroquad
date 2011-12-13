@@ -36,7 +36,7 @@
 
 #include "pins_arduino.h"
 #include <AQMath.h>
-#include <Axis.h>
+#include "GlobalDefined.h"
 
 volatile uint8_t *port_to_pcmask[] = {
   &PCMSK0,

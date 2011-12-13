@@ -18,42 +18,21 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>             // @see Kenny, Arduino IDE compiliation bug
+#include <MaxSonarRangeFinder.h>
 
-#include <AQMath.h>
-#include <Device_I2C.h>
-#include <Gyroscope_IDG_IDZ500.h>
-#include <Axis.h>
-
-unsigned long timer;
-
-void setup()
-{
+void setup() {
   Serial.begin(115200);
-  Serial.println("Gyroscope library test (IDG_IDZ500)");
-
-  setGyroAref(3.3);
-  initializeGyro();
-  calibrateGyro();
-  timer = millis();
+  inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
 }
 
-void loop(void) 
-{
-  if((millis() - timer) > 10) // 100Hz
-  {
-    timer = millis();
-    measureGyro();
-    
-    Serial.print("Roll: ");
-    Serial.print(degrees(gyroRate[ROLL]));
-    Serial.print(" Pitch: ");
-    Serial.print(degrees(gyroRate[PITCH]));
-    Serial.print(" Yaw: ");
-    Serial.print(degrees(gyroRate[YAW]));
-    Serial.print(" Heading: ");
-    Serial.print(degrees(gyroHeading));
-    Serial.println();
+void loop() {
+  
+  for (int i = 0; i < 20;i++) {
+    readRangeFinderDistanceSum(ALTITUDE_RANGE_FINDER_INDEX);
+    delay(10);
   }
+  evaluateDistanceFromSample(ALTITUDE_RANGE_FINDER_INDEX);
+  
+  Serial.print("Distance = ");
+  Serial.println(rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
 }
-

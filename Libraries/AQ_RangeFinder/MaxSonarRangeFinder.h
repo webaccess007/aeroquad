@@ -23,7 +23,25 @@
 
 // @see http://www.arduino.cc/playground/Main/MaxSonar
 
+#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+
 #include "RangeFinder.h"
+
+#define ALTITUDE_RANGE_FINDER_PIN 1 // analog
+#define FRONT_RANGE_FINDER_PIN    5	// analog
+#define RIGHT_RANGE_FINDER_PIN    4	// analog
+#define REAR_RANGE_FINDER_PIN     3	// analog
+#define LEFT_RANGE_FINDER_PIN     2	// analog
+
+
+
+
+byte rangeFinderPins[5] = {ALTITUDE_RANGE_FINDER_PIN,
+						   FRONT_RANGE_FINDER_PIN,
+						   RIGHT_RANGE_FINDER_PIN,
+						   REAR_RANGE_FINDER_PIN,
+						   LEFT_RANGE_FINDER_PIN};
 
 //
 // default unit are centimeter
@@ -33,8 +51,8 @@
 
 void inititalizeRangeFinder(byte idx) {
 
-  int maxRangeFinderRange = 700;
-  int minRangeFinderRange = 30;
+  maxRangeFinderRange = 3.0;
+  minRangeFinderRange = 0.25;
   
   pinMode(rangeFinderPins[idx], INPUT);
 }
@@ -43,12 +61,15 @@ void inititalizeRangeFinder(byte idx) {
  * inches * 2.54 = cm
  */
 void readRangeFinderDistanceSum(byte idx) {
-  rangeFinderRangeSum[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);// 2.54);
+  rangeFinderRangeSum[idx] += (analogRead(rangeFinderPins[idx]) * 1.8333);
   rangeFinderSampleCount[idx]++;
 }
 
 void evaluateDistanceFromSample(byte idx) {
-  rangeFinderRange[idx] = rangeFinderRangeSum[idx] / rangeFinderSampleCount[idx];
+  rangeFinderRange[idx] = ((float)rangeFinderRangeSum[idx] / (float)rangeFinderSampleCount[idx]) / 100;
+  if (!isInRangeOfRangeFinder(idx)) {
+    rangeFinderRange[idx] = INVALID_ALTITUDE;
+  }
   rangeFinderRangeSum[idx] = 0;
   rangeFinderSampleCount[idx] = 0;
 }
@@ -61,6 +82,7 @@ boolean isInRangeOfRangeFinder(byte idx) {
           (rangeFinderRange[idx] > minRangeFinderRange));
 }
 
+#endif 
 
 #endif
 

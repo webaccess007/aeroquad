@@ -40,9 +40,8 @@
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
-#define AutonavShield       // For the AutoNav shield build by blue23 on the forum, @see http://aeroquad.com/showthread.php?4106-New-Shield-available-Mega-AutoNav-Shield&highlight=autonav
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -53,13 +52,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -90,8 +89,8 @@
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
 //#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-#define AltitudeHoldRangeFinder // Enable altitude hold with range finder
+#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -119,7 +118,7 @@
 // Optional telemetry (for debug or ground station tracking purposes)
 // For more information on how to setup Telemetry please refer to http://aeroquad.com/showwiki.php?title=Xbee+Installation
 // *******************************************************************************************************************************
-#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
+//#define WirelessTelemetry  // Enables Wireless telemetry on Serial3  // Wireless telemetry enable
 //#define BinaryWrite // Enables fast binary transfer of flight data to Configurator
 //#define BinaryWritePID // Enables fast binary transfer of attitude PID data
 //#define OpenlogBinaryWrite // Enables fast binary transfer to serial1 and openlog hardware
@@ -173,7 +172,7 @@
 #include <EEPROM.h>
 #include <Wire.h>
 #include "AeroQuad.h"
-#include <Axis.h>
+#include <GlobalDefined.h>
 #include "PID.h"
 #include <AQMath.h>
 #include <FourtOrderFilter.h>
@@ -205,6 +204,7 @@
 
   // unsuported in v1
   #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
@@ -247,6 +247,7 @@
 
   // unsuported in v1
   #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
@@ -301,6 +302,7 @@
   #endif
 
   #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder
   #undef CameraControl
   #undef OSD
 
@@ -360,6 +362,7 @@
 
   // unsuported in mini
   #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder  
   #undef CameraControl
   #undef OSD
 
@@ -409,6 +412,7 @@
 
   // unsuported on mega v1
   #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder  
   #undef HeadingMagHold
   #undef BattMonitor
   #undef CameraControl
@@ -461,6 +465,9 @@
   // Altitude declaration
   #ifdef AltitudeHoldBaro    
     #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
   #endif
 
   // Battery Monitor declaration
@@ -544,6 +551,10 @@
   #ifdef AltitudeHoldBaro
     #define BMP085
   #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
 
   // Battery Monitor declaration
   #ifdef BattMonitor
@@ -562,86 +573,6 @@
 
   /**
    * Put AeroQuadMega_v21 specific intialization need here
-   */
-  void initPlatform() {
-
-    pinMode(LED_Red, OUTPUT);
-    digitalWrite(LED_Red, LOW);
-    pinMode(LED_Yellow, OUTPUT);
-    digitalWrite(LED_Yellow, LOW);
-
-    // pins set to INPUT for camera stabilization so won't interfere with new camera class
-    pinMode(33, INPUT); // disable SERVO 1, jumper D12 for roll
-    pinMode(34, INPUT); // disable SERVO 2, jumper D11 for pitch
-    pinMode(35, INPUT); // disable SERVO 3, jumper D13 for yaw
-    pinMode(43, OUTPUT); // LED 1
-    pinMode(44, OUTPUT); // LED 2
-    pinMode(45, OUTPUT); // LED 3
-    pinMode(46, OUTPUT); // LED 4
-    digitalWrite(43, HIGH); // LED 1 on
-    digitalWrite(44, HIGH); // LED 2 on
-    digitalWrite(45, HIGH); // LED 3 on
-    digitalWrite(46, HIGH); // LED 4 on
-
-    Wire.begin();
-    TWBR = 12;
-  }
-
-  /**
-   * Measure critical sensors
-   */
-  void measureCriticalSensors() {
-    measureAccelSum();
-    measureGyroSum();
-  }
-#endif
-
-#ifdef AutonavShield
-  #define LED_Green 13
-  #define LED_Red 4
-  #define LED_Yellow 31
-
-  #include <Device_I2C.h>
-
-  // Gyroscope declaration
-  #include <Gyroscope_ITG3200.h>
-
-  // Accelerometer declaration
-  #include <Accelerometer_BMA180.h>
-
-  // Receiver Declaration
-  #define RECEIVER_MEGA
-
-  // Motor declaration
-  #define MOTOR_PWM_Timer
-
-  // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #define SPARKFUN_9DOF
-    #define HMC5883L
-  #endif
-
-  // Altitude declaration
-  #ifdef AltitudeHoldBaro
-    #define BMP085
-  #endif
-  #ifdef AltitudeHoldRangeFinder
-    #define XLMAXSONAR
-  #endif
-
-  // Battery Monitor declaration
-  #undef BatteryMonitor // unsuported
-  #undef BattMonitorAlarmVoltage
-  #undef BattMonitorAutoDescent
-  #undef POWERED_BY_VIN
-
-
-  #ifdef OSD
-    #define MAX7456_OSD
-  #endif  
-
-  /**
-   * Put AeroQuadMega_v2 specific intialization need here
    */
   void initPlatform() {
 
@@ -705,6 +636,10 @@
   #ifdef HeadingMagHold
     #define HMC5843
   #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+
 
   // Altitude declaration
   #ifdef AltitudeHoldBaro
@@ -770,19 +705,13 @@
   #define MOTOR_PWM
 
   // heading mag hold declaration
-  #ifdef HeadingMagHold
-    #define HMC5843
-  #endif
-
-  // Battery monitor declaration
-  #ifdef BattMonitor
-    struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V( 0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
-  #endif
-
+  // unsuported on mega v1
+  #undef AltitudeHoldBaro
+  #undef AltitudeHoldRangeFinder  
+  #undef HeadingMagHold
+  #undef BattMonitor
   #undef CameraControl
   #undef OSD
-  #undef AltitudeHoldBaro
 
   /**
    * Put AeroQuad_Wii specific intialization need here
@@ -839,6 +768,9 @@
   // Altitude declaration
   #ifdef AltitudeHoldBaro
     #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
   #endif
 
   // Battery monitor declaration
@@ -908,6 +840,9 @@
   // Altitude declaration
   #ifdef AltitudeHoldBaro
     #define BMP085
+  #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
   #endif
 
   // Battery monitor declaration
@@ -981,6 +916,10 @@
   #ifdef AltitudeHoldBaro
     #define BMP085
   #endif
+  #ifdef AltitudeHoldRangeFinder
+    #define XLMAXSONAR 
+  #endif
+  
 
   // Battery monitor declaration
   #ifdef BattMonitor
@@ -1100,7 +1039,7 @@
   #include <BarometricSensor_BMP085.h>
 #endif
 #if defined (XLMAXSONAR)
-  #include <XLMaxSonarRangeFinder.h>
+  #include <MaxSonarRangeFinder.h>
 #endif 
 //********************************************************
 //*************** BATTERY MONITOR DECLARATION ************

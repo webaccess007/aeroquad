@@ -33,8 +33,6 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-#define INVALID_ALTITUDE -1000
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processAltitudeHold //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -44,8 +42,8 @@
   //
   float getAltitudeFromSensors() {
     
-    if (isInRangeOfRangeFinder(ALTITUDE_RANGE_FINDER_INDEX)) {
-      return ((float)rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]) / 100.0; // need to be in meter and the libraries work in cm
+    if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
+      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); // need to be in meter and the libraries work in cm
     }
     else {
       return getBaroAltitude();    
@@ -65,12 +63,7 @@
   // Used Just range finder
   //
   float getAltitudeFromSensors() {
-    if (isInRangeOfRangeFinder(ALTITUDE_RANGE_FINDER_INDEX)) {
-      return ((float)rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]) / 100.0; // need to be in meter and the libraries work in cm
-    }
-    else {
-      return INVALID_ALTITUDE;      
-    }
+    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); // need to be in meter and the libraries work in cm
   }
   
 #else

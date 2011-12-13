@@ -18,42 +18,38 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#include <Wire.h>
+#include <Device_I2C.h>
+#include <GlobalDefined.h>
 #include <AQMath.h>
-#include <Axis.h>
-#include <APM_RC.h>
-#include <Receiver_APM.h>
-
+#include <Accelerometer_ADXL345.h>
 
 unsigned long timer;
 
 void setup() {
   
   Serial.begin(115200);
-  Serial.println("Receiver library test (Receiver_APM)");
+  Serial.println("Accelerometer library test (ADXL345)");
 
-  initRC();  
-  initializeReceiver();
+  Wire.begin();
+  
+  initializeAccel();
+  computeAccelBias();
 }
 
 void loop() {
   
-  if((millis() - timer) > 50) // 20Hz
+  if((millis() - timer) > 10) // 100Hz
   {
     timer = millis();
-    readReceiver();
+    measureAccel();
     
-    Serial.print("Throttle: ");
-    Serial.print(receiverCommand[THROTTLE]);
-    Serial.print(" Yaw: ");
-    Serial.print(receiverCommand[YAW]);
-    Serial.print(" Roll: ");
-    Serial.print(receiverCommand[ROLL]);
+    Serial.print("Roll: ");
+    Serial.print(meterPerSec[XAXIS]);
     Serial.print(" Pitch: ");
-    Serial.print(receiverCommand[PITCH]);
-    Serial.print(" Mode: ");
-    Serial.print(receiverCommand[MODE]);
-    Serial.print(" Aux: ");
-    Serial.print(receiverCommand[AUX]);
+    Serial.print(meterPerSec[YAXIS]);
+    Serial.print(" Yaw: ");
+    Serial.print(meterPerSec[ZAXIS]);
     Serial.println();
   }
 }

@@ -18,8 +18,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_AXIS_DEFINES_H_
-#define _AEROQUAD_AXIS_DEFINES_H_
+#ifndef _AEROQUAD_GLOBAL_DEFINES_H_
+#define _AEROQUAD_GLOBAL_DEFINES_H_
 
 // Basic axis definitions
 #define ROLL 0
@@ -42,6 +42,8 @@
 #define LEVELGYROPITCH 7
 #define ALTITUDE 8
 #define ZDAMPENING 9
+
+#define INVALID_ALTITUDE -1000.0
 
 
 #endif

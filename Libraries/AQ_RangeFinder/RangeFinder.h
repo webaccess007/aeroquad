@@ -21,7 +21,8 @@
 #ifndef _AEROQUAD_RANGE_FINDER_H_
 #define _AEROQUAD_RANGE_FINDER_H_
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#include "Arduino.h"
+#include "GlobalDefined.h"
 
 #define ALTITUDE_RANGE_FINDER_INDEX 0
 #define FRONT_RANGE_FINDER_INDEX    1
@@ -29,24 +30,11 @@
 #define REAR_RANGE_FINDER_INDEX     3
 #define LEFT_RANGE_FINDER_INDEX     4
 
-// this should probably go somewhere else... @see Kenny... TBD
-#define ALTITUDE_RANGE_FINDER_PIN 7  	// analog
-#define FRONT_RANGE_FINDER_PIN    8		// analog
-#define RIGHT_RANGE_FINDER_PIN    9		// analog
-#define REAR_RANGE_FINDER_PIN     10	// analog
-#define LEFT_RANGE_FINDER_PIN     11	// analog
 
-
-
-byte rangeFinderPins[5] = {ALTITUDE_RANGE_FINDER_PIN,
-						   FRONT_RANGE_FINDER_PIN,
-						   RIGHT_RANGE_FINDER_PIN,
-						   REAR_RANGE_FINDER_PIN,
-						   LEFT_RANGE_FINDER_PIN};
 							
 byte rangeFinderSampleCount[5] = {0,0,0,0,0};							
-int rangeFinderRangeSum[5] = {0,0,0,0,0};								  
-int rangeFinderRange[5] = {0,0,0,0,0};
+int rangeFinderRangeSum[5]     = {0,0,0,0,0};								  
+float rangeFinderRange[5]      = {0.0,0.0,0.0,0.0,0.0};
 
 
 //
@@ -54,14 +42,12 @@ int rangeFinderRange[5] = {0,0,0,0,0};
 //
 
 // default min max range constrain
-int maxRangeFinderRange = 500;
-int minRangeFinderRange = 20;
+float maxRangeFinderRange = 3.0;
+float minRangeFinderRange = 0.25;
 
 void inititalizeRangeFinder(byte idx);
 void readRangeFinderDistanceSum(byte idx);
 void evaluateDistanceFromSample(byte idx);
 boolean isInRangeOfRangeFinder(byte idx);
-
-#endif  // #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #endif //  #ifdef _AEROQUAD_RANGE_FINDER_H_

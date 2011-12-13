@@ -28,7 +28,7 @@
 #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #include <AQMath.h>
-#include <Axis.h>
+#include "GlobalDefined.h"
 #include <APM_RC.h>
 
 int receiverPin[6] = {0,0,0,0,0,0};
