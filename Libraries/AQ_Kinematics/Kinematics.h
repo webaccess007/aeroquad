@@ -21,7 +21,7 @@
 #ifndef _AQ_KINEMATICS_
 #define _AQ_KINEMATICS_
 
-#include <Axis.h>
+#include "GlobalDefined.h"
 
 #define CF 0
 #define KF 1

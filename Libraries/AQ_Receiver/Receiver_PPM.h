@@ -32,7 +32,7 @@
 
 #include "pins_arduino.h"
 #include <AQMath.h>
-#include <Axis.h>
+#include "GlobalDefined.h"
 
 
 #define ROLL       0

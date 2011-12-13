@@ -18,41 +18,40 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>             // Arduino IDE bug, needed because that the ITG3200 use Wire!
-#include <Device_I2C.h>       // Arduino IDE bug, needed because that the ITG3200 use Wire!
-
-#include <Axis.h>
-#include <APM_ADC.h>
 #include <AQMath.h>
-#include <Accelerometer_APM.h>
+#include <GlobalDefined.h>
+#include <Receiver_328p.h>
+
 
 unsigned long timer;
 
 void setup() {
   
   Serial.begin(115200);
-  Serial.println("Accelerometer library test (APM)");
-  
-  initializeADC();
-  
-  initializeAccel();
-  computeAccelBias();
+  Serial.println("Receiver library test (Receiver_APM)");
 
+  initializeReceiver();  
 }
 
 void loop() {
   
-  if((millis() - timer) > 10) // 100Hz
+  if((millis() - timer) > 50) // 20Hz
   {
     timer = millis();
-    measureAccel();
+    readReceiver();
     
-    Serial.print("Roll: ");
-    Serial.print(meterPerSec[XAXIS]);
-    Serial.print(" Pitch: ");
-    Serial.print(meterPerSec[YAXIS]);
+    Serial.print("Throttle: ");
+    Serial.print(receiverCommand[THROTTLE]);
     Serial.print(" Yaw: ");
-    Serial.print(meterPerSec[ZAXIS]);
+    Serial.print(receiverCommand[YAW]);
+    Serial.print(" Roll: ");
+    Serial.print(receiverCommand[ROLL]);
+    Serial.print(" Pitch: ");
+    Serial.print(receiverCommand[PITCH]);
+    Serial.print(" Mode: ");
+    Serial.print(receiverCommand[MODE]);
+    Serial.print(" Aux: ");
+    Serial.print(receiverCommand[AUX]);
     Serial.println();
   }
 }

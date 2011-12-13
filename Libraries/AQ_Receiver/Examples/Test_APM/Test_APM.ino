@@ -19,8 +19,9 @@
 */
 
 #include <AQMath.h>
-#include <Axis.h>
-#include <Receiver_MEGA.h>
+#include <GlobalDefined.h>
+#include <APM_RC.h>
+#include <Receiver_APM.h>
 
 
 unsigned long timer;
@@ -30,7 +31,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Receiver library test (Receiver_APM)");
 
-  initializeReceiver();   
+  initRC();  
+  initializeReceiver();
 }
 
 void loop() {

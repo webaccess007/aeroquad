@@ -18,27 +18,23 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#include <Wire.h>             
-#include <Device_I2C.h>       
-#include <Axis.h>
+#include <Wire.h>
+#include <Device_I2C.h>
+#include <GlobalDefined.h>
 #include <AQMath.h>
-#include <Platform_Wii.h>
-#include <Accelerometer_WII.h>
+#include <Accelerometer_BMA180.h>
 
 unsigned long timer;
 
 void setup() {
   
   Serial.begin(115200);
-  Serial.println("Accelerometer library test (WII)");
-  
+  Serial.println("Accelerometer library test (BMA180)");
+
   Wire.begin();
   
-  initializeWiiSensors(true);
   initializeAccel();
   computeAccelBias();
-  
-  timer = millis();
 }
 
 void loop() {

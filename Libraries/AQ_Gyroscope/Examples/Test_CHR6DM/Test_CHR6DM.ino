@@ -19,23 +19,22 @@
 */
 
 #include <Wire.h>
-
+#include <Platform_CHR6DM.h> 
 #include <AQMath.h>
 #include <Device_I2C.h>
-#include <Gyroscope_ITG3200.h>
-#include <Axis.h>
+#include <Gyroscope_CHR6DM.h>
+#include <GlobalDefined.h>
 
 unsigned long timer;
+
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Gyroscope library test (ITG3200)");
+  Serial.println("Gyroscope library test (CHR6DM)");
 
-  Wire.begin();
-
-  initializeGyro();
   calibrateGyro();
+  
   timer = millis();
 }
 

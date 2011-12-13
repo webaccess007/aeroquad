@@ -143,39 +143,6 @@ void processHeading()
 
 
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processAltitudeHold //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processAltitudeHold()
-{
-  // ****************************** Altitude Adjust *************************
-  // Thanks to Honk for his work with altitude hold
-  // http://aeroquad.com/showthread.php?792-Problems-with-BMP085-I2C-barometer
-  // Thanks to Sherbakov for his work in Z Axis dampening
-  // http://aeroquad.com/showthread.php?359-Stable-flight-logic...&p=10325&viewfull=1#post10325
-  #ifdef AltitudeHold
-    if (altitudeHoldState == ON) {
-      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, getBaroAltitude(), &PID[ALTITUDE]);
-      altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
-      if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
-        altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD
-      } else {
-        if (receiverCommand[THROTTLE] > (altitudeHoldThrottle + altitudeHoldBump)) { // AKA changed to use holdThrottle + ALTBUMP - (was MAXCHECK) above 1900
-          altitudeToHoldTarget += 0.01;
-        }
-        if (receiverCommand[THROTTLE] < (altitudeHoldThrottle - altitudeHoldBump)) { // AKA change to use holdThorrle - ALTBUMP - (was MINCHECK) below 1100
-          altitudeToHoldTarget -= 0.01;
-        }
-      }
-      throttle = altitudeHoldThrottle + altitudeHoldThrottleCorrection;
-    }
-    else {
-      throttle = receiverCommand[THROTTLE];
-    }
-  #else
-    throttle = receiverCommand[THROTTLE];
-  #endif
-}
 
 #if defined BattMonitorAutoDescent
   void processBatteryMonitorThrottleAdjustment() {
@@ -186,7 +153,7 @@ void processAltitudeHold()
       }
     }
     else {
-      #ifdef AltitudeHold
+      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         if (altitudeHoldState == ON) {
           altitudeToHoldTarget -= 0.005;
         }
@@ -211,7 +178,7 @@ void processAltitudeHold()
           else {
             batteyMonitorThrottleCorrection = batteryMonitorThrottle - throttle;
           }
-      #ifdef AltitudeHold
+      #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         }
       #endif
     }
