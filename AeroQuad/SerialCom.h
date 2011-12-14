@@ -62,18 +62,18 @@ void readSerialCommand() {
     switch (queryType) {
     case 'A': // Receive roll and pitch rate mode PID
       readSerialPID(XAXIS);
-      readSerialPID(YAXIS);
+      readSerialPID(RATE_YAXIS_PID_IDX);
       break;
     case 'B': // Receive roll/pitch attitude mode PID
-      readSerialPID(LEVELROLL);
-      readSerialPID(LEVELPITCH);
-      readSerialPID(LEVELGYROROLL);
-      readSerialPID(LEVELGYROPITCH);
+      readSerialPID(ATTITUDE_XAXIS_PID_IDX);
+      readSerialPID(ATTITUDE_YAXIS_PID_IDX);
+      readSerialPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
+      readSerialPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
     case 'C': // Receive yaw PID
-      readSerialPID(ZAXIS);
-      readSerialPID(HEADING);
+      readSerialPID(ZAXIS_PID_IDX);
+      readSerialPID(HEADING_HOLD_PID_IDX);
       headingHoldConfig = readFloatSerial();
       heading = 0;
       relativeHeading = 0;
@@ -81,8 +81,8 @@ void readSerialCommand() {
       break;
     case 'D': // Altitude hold PID
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-        readSerialPID(ALTITUDE);
-        PID[ALTITUDE].windupGuard = readFloatSerial();
+        readSerialPID(ALTITUDE_HOLD_PID_IDX);
+        PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloatSerial();
         altitudeHoldBump = readFloatSerial();
         altitudeHoldPanicStickMovement = readFloatSerial();
         minThrottleAdjust = readFloatSerial();
@@ -92,7 +92,7 @@ void readSerialCommand() {
         #else
           readFloatSerial();
         #endif
-        readSerialPID(ZDAMPENING);
+        readSerialPID(ZDAMPENING_PID_IDX);
       #endif
       break;
     case 'E': // Receive sensor filtering values
@@ -269,29 +269,29 @@ void sendSerialTelemetry() {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     break;
   case 'a': // Send roll and pitch rate mode PID values
-    PrintPID(XAXIS);
-    PrintPID(YAXIS);
+    PrintPID(RATE_XAXIS_PID_IDX);
+    PrintPID(RATE_YAXIS_PID_IDX);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'b': // Send roll and pitch attitude mode PID values
-    PrintPID(LEVELROLL);
-    PrintPID(LEVELPITCH);
-    PrintPID(LEVELGYROROLL);
-    PrintPID(LEVELGYROPITCH);
+    PrintPID(ATTITUDE_XAXIS_PID_IDX);
+    PrintPID(ATTITUDE_YAXIS_PID_IDX);
+    PrintPID(ATTITUDE_GYRO_XAXIS_PID_IDX);
+    PrintPID(ATTITUDE_GYRO_YAXIS_PID_IDX);
     SERIAL_PRINTLN(windupGuard);
     queryType = 'X';
     break;
   case 'c': // Send yaw PID values
-    PrintPID(ZAXIS);
-    PrintPID(HEADING);
+    PrintPID(ZAXIS_PID_IDX);
+    PrintPID(HEADING_HOLD_PID_IDX);
     SERIAL_PRINTLN((int)headingHoldConfig);
     queryType = 'X';
     break;
   case 'd': // Altitude Hold
     #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      PrintPID(ALTITUDE);
-      PrintValueComma(PID[ALTITUDE].windupGuard);
+      PrintPID(ALTITUDE_HOLD_PID_IDX);
+      PrintValueComma(PID[ALTITUDE_HOLD_PID_IDX].windupGuard);
       PrintValueComma(altitudeHoldBump);
       PrintValueComma(altitudeHoldPanicStickMovement);
       PrintValueComma(minThrottleAdjust);
@@ -301,7 +301,7 @@ void sendSerialTelemetry() {
       #else
         PrintValueComma(0);
       #endif
-      PrintPID(ZDAMPENING);
+      PrintPID(ZDAMPENING_PID_IDX);
     #else
       for(byte i=0; i<10; i++) {
         PrintValueComma(0);
@@ -338,13 +338,13 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'i': // Send sensor data
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       PrintValueComma(gyroRate[axis]);
     }
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       PrintValueComma(meterPerSec[axis]);
     }
-    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
         PrintValueComma(getMagnetometerRawData(axis));
       #else

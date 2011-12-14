@@ -92,7 +92,7 @@ void processAltitudeHold()
         throttle = altitudeHoldThrottle;
         return;
       }
-      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentAltitude, &PID[ALTITUDE]);
+      int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
       altitudeHoldThrottleCorrection = constrain(altitudeHoldThrottleCorrection, minThrottleAdjust, maxThrottleAdjust);
       if (abs(altitudeHoldThrottle - receiverCommand[THROTTLE]) > altitudeHoldPanicStickMovement) {
         altitudeHoldState = ALTPANIC; // too rapid of stick movement so PANIC out of ALTHOLD

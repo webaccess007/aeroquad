@@ -52,7 +52,7 @@ void measureGyro() {
   gyroADC[YAXIS] = getWiiGyroADC(YAXIS) - gyroZero[YAXIS];
   gyroADC[ZAXIS] = gyroZero[ZAXIS] - getWiiGyroADC(ZAXIS);
 	
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) { 
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) { 
     float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
   }
@@ -67,7 +67,7 @@ void measureGyro() {
 
 void measureGyroSum() {
 /**
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     gyroSample[axis] += getWiiGyroADC(axis);
   }
   gyroSampleCount++;
@@ -77,7 +77,7 @@ void measureGyroSum() {
 void evaluateGyroRate() {
 /**
   int gyroADC[3];
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     if (axis == YAXIS) 
 	  gyroADC[axis] = gyroSample[axis]/gyroSampleCount - gyroZero[axis];
 	else

@@ -51,7 +51,7 @@ void initializeGyro() {
     
 void measureGyro() {
   int gyroADC;
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     if (axis == YAXIS)
       gyroADC = analogRead(gyroChannel[axis]) - gyroZero[axis];
     else
@@ -82,7 +82,7 @@ void calibrateGyro() {
   digitalWrite(AZPIN, LOW);
   delay(8);
 
-  for (byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
+  for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
     for (int i=0; i<FINDZERO; i++)
       findZero[i] = analogRead(gyroChannel[calAxis]);
     gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);

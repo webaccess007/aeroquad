@@ -29,7 +29,7 @@ void initializeAccel() {
   
 void measureAccel() {
 
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     const float rawADC = readADC(axis+3);
 	if (rawADC > 500) { // Check if measurement good
 	  meterPerSec[axis] = rawADC * accelScaleFactor[axis] + runTimeAccelBias[axis];
@@ -39,7 +39,7 @@ void measureAccel() {
 
 void measureAccelSum() {
 
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     const float rawADC = readADC(axis+3);
     if (rawADC > 500) { // Check if measurement good
 	  accelSample[axis] += rawADC;
