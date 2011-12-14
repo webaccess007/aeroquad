@@ -416,7 +416,7 @@ void displayAltitude() {
     int currentAltitude = getAltitudeFromSensors()*3.281;
     int currentHoldAltitude = altitudeToHoldTarget*3.281;
   #else // metric
-    int currentAltitude = getAltitudeFromSensors(); // 0.1m accuracy!!
+    int currentAltitude = getAltitudeFromSensors()*10.0; // 0.1m accuracy!!
     int currentHoldAltitude = altitudeToHoldTarget*10.0;
   #endif
   char buf[7];
