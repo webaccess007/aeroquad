@@ -47,11 +47,11 @@ void loop(void)
     measureGyro();
     
     Serial.print("Roll: ");
-    Serial.print(degrees(gyroRate[ROLL]));
+    Serial.print(degrees(gyroRate[XAXIS]));
     Serial.print(" Pitch: ");
-    Serial.print(degrees(gyroRate[PITCH]));
+    Serial.print(degrees(gyroRate[YAXIS]));
     Serial.print(" Yaw: ");
-    Serial.print(degrees(gyroRate[YAW]));
+    Serial.print(degrees(gyroRate[ZAXIS]));
     Serial.print(" Heading: ");
     Serial.print(degrees(gyroHeading));
     Serial.println();

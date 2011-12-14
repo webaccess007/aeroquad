@@ -58,7 +58,7 @@ float updatePID(float targetPosition, float currentPosition, struct PIDdata *PID
 
 void zeroIntegralError() __attribute__ ((noinline));
 void zeroIntegralError() {
-  for (byte axis = ROLL; axis < LASTLEVELAXIS; axis++) {
+  for (byte axis = 0; axis < LASTLEVELAXIS; axis++) {
     PID[axis].integratedError = 0;
     PID[axis].previousPIDTime = currentTime;
   }

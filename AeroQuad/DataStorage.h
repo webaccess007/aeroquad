@@ -65,15 +65,15 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM() {
-  PID[ROLL].P = 100.0;
-  PID[ROLL].I = 0.0;
-  PID[ROLL].D = -300.0;
-  PID[PITCH].P = 100.0;
-  PID[PITCH].I = 0.0;
-  PID[PITCH].D = -300.0;
-  PID[YAW].P = 200.0;
-  PID[YAW].I = 5.0;
-  PID[YAW].D = 0.0;
+  PID[XAXIS].P = 100.0;
+  PID[XAXIS].I = 0.0;
+  PID[XAXIS].D = -300.0;
+  PID[YAXIS].P = 100.0;
+  PID[YAXIS].I = 0.0;
+  PID[YAXIS].D = -300.0;
+  PID[ZAXIS].P = 200.0;
+  PID[ZAXIS].I = 5.0;
+  PID[ZAXIS].D = 0.0;
   PID[LEVELROLL].P = 4.0;
   PID[LEVELROLL].I = 0.0;
   PID[LEVELROLL].D = 0.0;
@@ -125,7 +125,7 @@ void initializeEEPROM() {
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
+  for (byte i = XAXIS; i <= ZDAMPENING; i++ ) {
     if (i != ALTITUDE) {
       PID[i].windupGuard = windupGuard;
     }
@@ -137,12 +137,12 @@ void initializeEEPROM() {
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   timeConstant = 7.0;
-  for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     receiverSlope[channel] = 1.0;
     receiverOffset[channel] = 0.0;
     receiverSmoothFactor[channel] = 1.0;
   }
-  receiverSmoothFactor[YAW] = 0.5;
+  receiverSmoothFactor[ZAXIS] = 0.5;
 
   smoothHeading = 1.0;
   flightMode = ACRO;
@@ -158,9 +158,9 @@ void initializeEEPROM() {
 }
 
 void readEEPROM() {
-  readPID(ROLL, ROLL_PID_GAIN_ADR);
-  readPID(PITCH, PITCH_PID_GAIN_ADR);
-  readPID(YAW, YAW_PID_GAIN_ADR);
+  readPID(XAXIS, ROLL_PID_GAIN_ADR);
+  readPID(YAXIS, PITCH_PID_GAIN_ADR);
+  readPID(ZAXIS, YAW_PID_GAIN_ADR);
   readPID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
   readPID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
   readPID(HEADING, HEADING_PID_GAIN_ADR);
@@ -206,7 +206,7 @@ void readEEPROM() {
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = ROLL; i <= ZDAMPENING; i++ ) {
+  for (byte i = XAXIS; i <= ZDAMPENING; i++ ) {
     if (i != ALTITUDE) {
       PID[i].windupGuard = windupGuard;
     }
@@ -222,11 +222,11 @@ void readEEPROM() {
 
 void writeEEPROM(){
   cli(); // Needed so that APM sensor data doesn't overflow
-  writePID(ROLL, ROLL_PID_GAIN_ADR);
-  writePID(PITCH, PITCH_PID_GAIN_ADR);
+  writePID(XAXIS, ROLL_PID_GAIN_ADR);
+  writePID(YAXIS, PITCH_PID_GAIN_ADR);
   writePID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
   writePID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
-  writePID(YAW, YAW_PID_GAIN_ADR);
+  writePID(ZAXIS, YAW_PID_GAIN_ADR);
   writePID(HEADING, HEADING_PID_GAIN_ADR);
   writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
@@ -264,7 +264,7 @@ void writeEEPROM(){
   writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
   writeFloat(timeConstant, FILTERTERM_ADR);
 
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
     writeFloat(receiverOffset[channel], RECEIVER_DATA[channel].offset);
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
@@ -289,9 +289,9 @@ void writeEEPROM(){
 
 void initSensorsZeroFromEEPROM() {
   // Gyro initialization from EEPROM
-  gyroZero[ROLL] = readFloat(GYRO_ROLL_ZERO_ADR);
-  gyroZero[PITCH] = readFloat(GYRO_PITCH_ZERO_ADR);
-  gyroZero[YAW] = readFloat(GYRO_YAW_ZERO_ADR);
+  gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
+  gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
+  gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
   gyroSmoothFactor = readFloat(GYROSMOOTH_ADR);
  
   // Accel initialization from EEPROM
@@ -304,9 +304,9 @@ void initSensorsZeroFromEEPROM() {
 
 void storeSensorsZeroToEEPROM() {
   // Store gyro data to EEPROM
-  writeFloat(gyroZero[ROLL], GYRO_ROLL_ZERO_ADR);
-  writeFloat(gyroZero[PITCH], GYRO_PITCH_ZERO_ADR);
-  writeFloat(gyroZero[YAW], GYRO_YAW_ZERO_ADR);
+  writeFloat(gyroZero[XAXIS], GYRO_ROLL_ZERO_ADR);
+  writeFloat(gyroZero[YAXIS], GYRO_PITCH_ZERO_ADR);
+  writeFloat(gyroZero[ZAXIS], GYRO_YAW_ZERO_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
   
   // Store accel data to EEPROM
@@ -320,7 +320,7 @@ void storeSensorsZeroToEEPROM() {
 void initReceiverFromEEPROM() {
   receiverXmitFactor = readFloat(XMITFACTOR_ADR);
   
-  for(byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+  for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     receiverSlope[channel] = readFloat(RECEIVER_DATA[channel].slope);
     receiverOffset[channel] = readFloat(RECEIVER_DATA[channel].offset);
     receiverSmoothFactor[channel] = readFloat(RECEIVER_DATA[channel].smooth_factor);

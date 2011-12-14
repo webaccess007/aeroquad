@@ -488,7 +488,7 @@ void displayAltitude() {
 int lastHeading = 361; // bogus to force update
 
 void displayHeading() {
-  int currentHeading = kinematicsGetDegreesHeading(YAW);
+  int currentHeading = kinematicsGetDegreesHeading(ZAXIS);
   if (currentHeading != lastHeading) {
     char buf[6];
     snprintf(buf,6,"\6%3d\7",currentHeading); // \6 is compass \7 is degree symbol
@@ -566,8 +566,8 @@ byte AIoldline[5] = {0,0,0,0,0};
 
 void displayArtificialHorizon() {
 
-  const float roll  = kinematicsAngle[ROLL];
-  const float pitch = kinematicsAngle[PITCH];
+  const float roll  = kinematicsAngle[XAXIS];
+  const float pitch = kinematicsAngle[YAXIS];
   short AIrows[5]   = {0,0,0,0,0};  //Holds the row, in pixels, of AI elements: pitch then roll from left to right.
 
   //Calculate row of new pitch lines

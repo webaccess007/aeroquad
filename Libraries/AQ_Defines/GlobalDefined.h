@@ -22,17 +22,14 @@
 #define _AEROQUAD_GLOBAL_DEFINES_H_
 
 // Basic axis definitions
-#define ROLL 0
-#define PITCH 1
-#define YAW 2
+#define XAXIS 0
+#define YAXIS 1
+#define ZAXIS 2
 #define THROTTLE 3
 #define MODE 4
 #define AUX 5
 #define AUX2 6
 #define AUX3 7
-#define XAXIS 0
-#define YAXIS 1
-#define ZAXIS 2
 #define LASTAXIS 3
 #define LEVELROLL 3
 #define LEVELPITCH 4

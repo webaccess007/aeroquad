@@ -39,10 +39,10 @@ float earthAccel[3] = {0.0,0.0,0.0};
 float accelCutoff = 0.0;
 
 void initializeBaseKinematicsParam(float hdgX, float hdgY) {
-  for (byte axis = ROLL; axis < LASTAXIS; axis++)
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++)
     kinematicsAngle[axis] = 0.0;
-  gyroAngle[ROLL] = 0;
-  gyroAngle[PITCH] = 0;
+  gyroAngle[XAXIS] = 0;
+  gyroAngle[YAXIS] = 0;
 }
 
 void initializeKinematics(float hdgX, float hdgY);

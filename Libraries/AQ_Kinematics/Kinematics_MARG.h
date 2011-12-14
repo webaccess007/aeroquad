@@ -126,9 +126,9 @@ void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, floa
   ezInt = ezInt + ezAcc*kiAcc + ezMag*kiMag;
     	
   // adjusted gyroscope measurements
-  correctedRateVector[ROLL] = gx = gx + exAcc*kpAcc + exMag*kpMag + exInt;
-  correctedRateVector[PITCH] = gy = gy + eyAcc*kpAcc + eyMag*kpMag + eyInt;
-  correctedRateVector[YAW] = gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
+  correctedRateVector[XAXIS] = gx = gx + exAcc*kpAcc + exMag*kpMag + exInt;
+  correctedRateVector[YAXIS] = gy = gy + eyAcc*kpAcc + eyMag*kpMag + eyInt;
+  correctedRateVector[ZAXIS] = gz = gz + ezAcc*kpAcc + ezMag*kpMag + ezInt;
     	
   // integrate quaternion rate and normalise
   q0i = (-q1*gx - q2*gy - q3*gz) * halfT;
@@ -148,16 +148,16 @@ void margUpdate(float gx, float gy, float gz, float ax, float ay, float az, floa
   q3 = q3 / norm;
     
   // save the adjusted gyroscope measurements
-  correctedRateVector[ROLL] = gx;
-  correctedRateVector[PITCH] = gy;
-  correctedRateVector[YAW] = gz;
+  correctedRateVector[XAXIS] = gx;
+  correctedRateVector[YAXIS] = gy;
+  correctedRateVector[ZAXIS] = gz;
 }
   
 void eulerAngles(void)
 {
-  kinematicsAngle[ROLL]  = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
-  kinematicsAngle[PITCH] = asin(2 * (q0*q2 - q1*q3));
-  kinematicsAngle[YAW]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
+  kinematicsAngle[XAXIS]  = atan2(2 * (q0*q1 + q2*q3), 1 - 2 *(q1*q1 + q2*q2));
+  kinematicsAngle[YAXIS] = asin(2 * (q0*q2 - q1*q3));
+  kinematicsAngle[ZAXIS]   = atan2(2 * (q0*q3 + q1*q2), 1 - 2 *(q2*q2 + q3*q3));
 }
 
   

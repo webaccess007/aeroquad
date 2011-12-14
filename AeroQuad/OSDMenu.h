@@ -581,8 +581,8 @@ void updateMenu(void) {
   }
 
 
-  const short roll  = receiverCommand[ROLL]  - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
-  const short pitch = receiverCommand[PITCH] - MENU_STICK_CENTER;
+  const short roll  = receiverCommand[XAXIS]  - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
+  const short pitch = receiverCommand[YAXIS] - MENU_STICK_CENTER;
 
   if (abs(roll) < MENU_STICK_NEUTRAL) {
     if (abs(pitch) < MENU_STICK_NEUTRAL) {

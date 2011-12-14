@@ -35,16 +35,16 @@
 #include "GlobalDefined.h"
 
 
-#define ROLL       0
-#define PITCH      1
-#define YAW        2
+#define XAXIS      0
+#define YAXIS      1
+#define ZAXIS      2
 #define THROTTLE   3
 #define AUX1       4
 #define AUX2       5
 
-#define SERIAL_SUM_PPM_1         PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,0,0 //For Graupner/Spektrum
-#define SERIAL_SUM_PPM_2         ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,0,0 //For Robe/Hitec/Futaba
-#define SERIAL_SUM_PPM_3         PITCH,ROLL,THROTTLE,YAW,AUX1,AUX2,0,0 //For some Hitec/Sanwa/Others
+#define SERIAL_SUM_PPM_1         YAXIS,ZAXIS,THROTTLE,XAXIS,AUX1,AUX2,0,0 //For Graupner/Spektrum
+#define SERIAL_SUM_PPM_2         XAXIS,YAXIS,THROTTLE,ZAXIS,AUX1,AUX2,0,0 //For Robe/Hitec/Futaba
+#define SERIAL_SUM_PPM_3         YAXIS,XAXIS,THROTTLE,ZAXIS,AUX1,AUX2,0,0 //For some Hitec/Sanwa/Others
 
 #if defined (SKETCH_SERIAL_SUM_PPM)
   #define SERIAL_SUM_PPM SKETCH_SERIAL_SUM_PPM
@@ -84,7 +84,7 @@ void initializeReceiver(int nbChannel) {
 
 void readReceiver() {
   
-  for(byte channel = ROLL; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastChannel; channel++) {
     uint8_t oldSREG;
     oldSREG = SREG;
     cli(); // Let's disable interrupts
@@ -99,7 +99,7 @@ void readReceiver() {
   }
 	
   // Reduce receiver commands using xmitFactor and center around 1500
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     if (channel < THROTTLE)
       receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
     else

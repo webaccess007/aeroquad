@@ -51,8 +51,8 @@ void initializeGyro() {
     
 void measureGyro() {
   int gyroADC;
-  for (byte axis = ROLL; axis < LASTAXIS; axis++) {
-    if (axis == PITCH)
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+    if (axis == YAXIS)
       gyroADC = analogRead(gyroChannel[axis]) - gyroZero[axis];
     else
       gyroADC = gyroZero[axis] - analogRead(gyroChannel[axis]);
@@ -61,8 +61,8 @@ void measureGyro() {
  
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }
@@ -82,7 +82,7 @@ void calibrateGyro() {
   digitalWrite(AZPIN, LOW);
   delay(8);
 
-  for (byte calAxis = ROLL; calAxis < LASTAXIS; calAxis++) {
+  for (byte calAxis = XAXIS; calAxis < LASTAXIS; calAxis++) {
     for (int i=0; i<FINDZERO; i++)
       findZero[i] = analogRead(gyroChannel[calAxis]);
     gyroZero[calAxis] = findMedianInt(findZero, FINDZERO);

@@ -104,10 +104,10 @@ SIGNAL(PCINT2_vect) {
 
 #ifdef OLD_RECEIVER_PIN_ORDER
   // arduino pins 67, 65, 64, 66, 63, 62
-  static byte receiverPin[6] = {5, 3, 2, 4, 1, 0}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+  static byte receiverPin[6] = {5, 3, 2, 4, 1, 0}; // bit number of PORTK used for XAXIS, YAXIS, ZAXIS, THROTTLE, MODE, AUX
 #else
   //arduino pins 63, 64, 65, 62, 66, 67
-  static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for ROLL, PITCH, YAW, THROTTLE, MODE, AUX
+  static byte receiverPin[8] = {1, 2, 3, 0, 4, 5, 6, 7}; // bit number of PORTK used for XAXIS, YAXIS, ZAXIS, THROTTLE, MODE, AUX
 #endif
 
 void initializeReceiver(int nbChannel = 6) {
@@ -119,13 +119,13 @@ void initializeReceiver(int nbChannel = 6) {
   PCMSK2 |= 0xFF;
   PCICR |= 0x1 << 2;
 
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
 }
 
 void readReceiver() {
   
-  for(byte channel = ROLL; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;
     cli();
@@ -140,7 +140,7 @@ void readReceiver() {
   }
 
   // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
+  for (byte channel = XAXIS; channel < THROTTLE; channel++)
     receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
   // No xmitFactor reduction applied for throttle, mode and AUX
   for (byte channel = THROTTLE; channel < lastChannel; channel++)

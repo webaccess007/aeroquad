@@ -53,25 +53,25 @@ void initializeReceiverParam(int nbChannel = 6) {
   
   lastChannel = nbChannel;
 
-  receiverCommand[ROLL] = 1500;
-  receiverCommand[PITCH] = 1500;
-  receiverCommand[YAW] = 1500;
+  receiverCommand[XAXIS] = 1500;
+  receiverCommand[YAXIS] = 1500;
+  receiverCommand[ZAXIS] = 1500;
   receiverCommand[THROTTLE] = 1000;
   receiverCommand[MODE] = 1000;
   receiverCommand[AUX] = 1000;
   receiverCommand[AUX+1] = 1000;
   receiverCommand[AUX+2] = 1000;
   
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     receiverCommandSmooth[channel] = 1.0;
-  for (byte channel = ROLL; channel < THROTTLE; channel++)
+  for (byte channel = XAXIS; channel < THROTTLE; channel++)
     receiverZero[channel] = 1500;
 	
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     receiverSlope[channel] = 1;
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     receiverOffset[channel] = 1;
-  for (byte channel = ROLL; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastChannel; channel++)
     receiverSmoothFactor[channel] = 1; 
 }
   

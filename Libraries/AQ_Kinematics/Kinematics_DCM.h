@@ -49,23 +49,23 @@ void matrixUpdate(float p, float q, float r, float G_Dt)
   float temporaryMatrix[9];
   float updateMatrix[9];
   
-  rateGyroVector[ROLL]  = p;
-  rateGyroVector[PITCH] = q;
-  rateGyroVector[YAW]   = r;
+  rateGyroVector[XAXIS]  = p;
+  rateGyroVector[YAXIS] = q;
+  rateGyroVector[ZAXIS]   = r;
   
-  vectorSubtract(3, &omega[ROLL], &rateGyroVector[ROLL], &omegaI[ROLL]);
-  vectorSubtract(3, &correctedRateVector[ROLL], &omega[ROLL], &omegaP[ROLL]); 
+  vectorSubtract(3, &omega[XAXIS], &rateGyroVector[XAXIS], &omegaI[XAXIS]);
+  vectorSubtract(3, &correctedRateVector[XAXIS], &omega[XAXIS], &omegaP[XAXIS]); 
   
   //Accel_adjust();//adjusting centrifugal acceleration. // Not used for quadcopter
   
   updateMatrix[0] =  0;
-  updateMatrix[1] = -G_Dt * correctedRateVector[YAW];    // -r
-  updateMatrix[2] =  G_Dt * correctedRateVector[PITCH];  //  q
-  updateMatrix[3] =  G_Dt * correctedRateVector[YAW];    //  r
+  updateMatrix[1] = -G_Dt * correctedRateVector[ZAXIS];    // -r
+  updateMatrix[2] =  G_Dt * correctedRateVector[YAXIS];  //  q
+  updateMatrix[3] =  G_Dt * correctedRateVector[ZAXIS];    //  r
   updateMatrix[4] =  0;
-  updateMatrix[5] = -G_Dt * correctedRateVector[ROLL];   // -p
-  updateMatrix[6] = -G_Dt * correctedRateVector[PITCH];  // -q
-  updateMatrix[7] =  G_Dt * correctedRateVector[ROLL];   //  p
+  updateMatrix[5] = -G_Dt * correctedRateVector[XAXIS];   // -p
+  updateMatrix[6] = -G_Dt * correctedRateVector[YAXIS];  // -q
+  updateMatrix[7] =  G_Dt * correctedRateVector[XAXIS];   //  p
   updateMatrix[8] =  0; 
 
   matrixMultiply(3, 3, 3, temporaryMatrix, dcmMatrix, updateMatrix); 
@@ -147,8 +147,8 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
     vectorScale(3, &scaledOmegaI[0] ,&errorYaw[0], kiYaw);
     vectorAdd(3, omegaI, omegaI, scaledOmegaI);
   #else
-    omegaP[YAW] = 0.0;
-    omegaI[YAW] = 0.0;
+    omegaP[ZAXIS] = 0.0;
+    omegaI[ZAXIS] = 0.0;
   #endif
 }
 
@@ -172,9 +172,9 @@ void driftCorrection(float ax, float ay, float az, float oneG, float magX, float
 
 void eulerAngles(void)
 {
-  kinematicsAngle[ROLL]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
-  kinematicsAngle[PITCH] =  -asin(dcmMatrix[6]);
-  kinematicsAngle[YAW]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
+  kinematicsAngle[XAXIS]  =  atan2(dcmMatrix[7], dcmMatrix[8]);
+  kinematicsAngle[YAXIS] =  -asin(dcmMatrix[6]);
+  kinematicsAngle[ZAXIS]   =  atan2(dcmMatrix[3], dcmMatrix[0]);
 } 
   
 ////////////////////////////////////////////////////////////////////////////////

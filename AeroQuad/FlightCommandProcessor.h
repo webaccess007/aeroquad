@@ -31,7 +31,7 @@ void readPilotCommands() {
     zeroIntegralError();
 
     // Disarm motors (left stick lower left corner)
-    if (receiverCommand[YAW] < MINCHECK && armed == ON) {
+    if (receiverCommand[ZAXIS] < MINCHECK && armed == ON) {
       commandAllMotors(MINCOMMAND);
       digitalWrite(LED_Red,LOW);
       armed = OFF;
@@ -48,7 +48,7 @@ void readPilotCommands() {
     }    
     
     // Zero Gyro and Accel sensors (left stick lower left, right stick lower right corner)
-    if ((receiverCommand[YAW] < MINCHECK) && (receiverCommand[ROLL] > MAXCHECK) && (receiverCommand[PITCH] < MINCHECK)) {
+    if ((receiverCommand[ZAXIS] < MINCHECK) && (receiverCommand[XAXIS] > MAXCHECK) && (receiverCommand[YAXIS] < MINCHECK)) {
       calibrateGyro();
       computeAccelBias();
       storeSensorsZeroToEEPROM();
@@ -58,7 +58,7 @@ void readPilotCommands() {
     }   
     
     // Arm motors (left stick lower right corner)
-    if (receiverCommand[YAW] > MAXCHECK && armed == OFF && safetyCheck == ON) {
+    if (receiverCommand[ZAXIS] > MAXCHECK && armed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
@@ -73,7 +73,7 @@ void readPilotCommands() {
       
     }
     // Prevents accidental arming of motor output if no transmitter command received
-    if (receiverCommand[YAW] > MINCHECK) {
+    if (receiverCommand[ZAXIS] > MINCHECK) {
       safetyCheck = ON; 
     }
   }

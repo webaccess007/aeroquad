@@ -56,13 +56,13 @@ void readWiiSensors()
       buffer[i] = Wire.read();
 		
     if ((buffer[5] & 0x02) == 0x02 && (buffer[5]&0x01) == 0) { //If WiiMP
-      wiiGyroADC[ROLL]  = (((buffer[5]>>2)<<8) +  buffer[2]);  // Configured for Paris MultiWii Board
-      wiiGyroADC[PITCH] = (((buffer[4]>>2)<<8) +  buffer[1]);  // Configured for Paris MultiWii Board
-      wiiGyroADC[YAW]   = (((buffer[3]>>2)<<8) +  buffer[0]);  // Configured for Paris MultiWii Board
+      wiiGyroADC[XAXIS]  = (((buffer[5]>>2)<<8) +  buffer[2]);  // Configured for Paris MultiWii Board
+      wiiGyroADC[YAXIS] = (((buffer[4]>>2)<<8) +  buffer[1]);  // Configured for Paris MultiWii Board
+      wiiGyroADC[ZAXIS]   = (((buffer[3]>>2)<<8) +  buffer[0]);  // Configured for Paris MultiWii Board
       
-      wmpSlow[ROLL]  = (buffer[4] & 0x02) >> 1 ;
-      wmpSlow[PITCH] = (buffer[3] & 0x01) >> 0 ;
-      wmpSlow[YAW]   = (buffer[3] & 0x02) >> 1 ;
+      wmpSlow[XAXIS]  = (buffer[4] & 0x02) >> 1 ;
+      wmpSlow[YAXIS] = (buffer[3] & 0x01) >> 0 ;
+      wmpSlow[ZAXIS]   = (buffer[3] & 0x02) >> 1 ;
     }
     else if ((buffer[5]&0x02) == 0 && (buffer[5]&0x01) == 0) {//If Nunchuk
       wiiAccelADC[XAXIS] = (buffer[2]<<1)|((buffer[5]>>4)&0x01);  // Configured for Paris MultiWii Board
