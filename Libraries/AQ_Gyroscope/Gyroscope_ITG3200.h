@@ -58,18 +58,18 @@ void measureGyro() {
   // orientation.  See TBD for details.  If your shield is not installed in this
   // orientation, this is where you make the changes.
   int gyroADC[3];
-  gyroADC[ROLL]  = ((Wire.read() << 8) | Wire.read())  - gyroZero[ROLL];
-  gyroADC[PITCH] = gyroZero[PITCH] - ((Wire.read() << 8) | Wire.read());
-  gyroADC[YAW]   = gyroZero[YAW] - ((Wire.read() << 8) | Wire.read());
+  gyroADC[XAXIS]  = ((Wire.read() << 8) | Wire.read())  - gyroZero[XAXIS];
+  gyroADC[YAXIS] = gyroZero[YAXIS] - ((Wire.read() << 8) | Wire.read());
+  gyroADC[ZAXIS]   = gyroZero[ZAXIS] - ((Wire.read() << 8) | Wire.read());
 
-  for (byte axis = 0; axis <= YAW; axis++) {
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
   }
  
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }
@@ -86,22 +86,22 @@ void measureGyroSum() {
 
 void evaluateGyroRate() {
   int gyroADC[3];
-  gyroADC[ROLL]  = (gyroSample[ROLL] / gyroSampleCount)  - gyroZero[ROLL];
-  gyroADC[PITCH] = gyroZero[PITCH] - (gyroSample[PITCH] / gyroSampleCount);
-  gyroADC[YAW]   = gyroZero[YAW] -   (gyroSample[YAW]   / gyroSampleCount);
+  gyroADC[XAXIS]  = (gyroSample[XAXIS] / gyroSampleCount)  - gyroZero[XAXIS];
+  gyroADC[YAXIS] = gyroZero[YAXIS] - (gyroSample[YAXIS] / gyroSampleCount);
+  gyroADC[ZAXIS]   = gyroZero[ZAXIS] -   (gyroSample[ZAXIS]   / gyroSampleCount);
   gyroSample[0] = 0.0;
   gyroSample[1] = 0.0;
   gyroSample[2] = 0.0;
   gyroSampleCount = 0;
 
-  for (byte axis = 0; axis <= YAW; axis++) {
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
   }
  
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }

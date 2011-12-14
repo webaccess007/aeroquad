@@ -47,11 +47,11 @@ void loop() {
     Serial.print(" Yaw: ");
     Serial.print(receiverCommand[YAW]);
     Serial.print(" Roll: ");
-    Serial.print(receiverCommand[ROLL]);
+    Serial.print(receiverCommand[XAXIS]);
     Serial.print(" Pitch: ");
-    Serial.print(receiverCommand[PITCH]);
+    Serial.print(receiverCommand[YAXIS]);
     Serial.print(" Mode: ");
-    Serial.print(receiverCommand[MODE]);
+    Serial.print(receiverCommand[ZAXIS]);
     Serial.print(" Aux: ");
     Serial.print(receiverCommand[AUX]);
     Serial.println();

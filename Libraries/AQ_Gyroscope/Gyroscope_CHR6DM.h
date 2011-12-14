@@ -34,18 +34,18 @@ void initializeGyro(){
 void measureGyro() {
   
   int gyroADC[3];
-  gyroADC[ROLL] = gyroChr6dm->data.rollRate - gyroZero[ROLL]; //gx yawRate
-  gyroADC[PITCH] = gyroZero[PITCH] - gyroChr6dm->data.pitchRate; //gy pitchRate
-  gyroADC[YAW] = gyroChr6dm->data.yawRate - gyroZero[ZAXIS]; //gz rollRate
+  gyroADC[XAXIS] = gyroChr6dm->data.rollRate - gyroZero[XAXIS]; //gx yawRate
+  gyroADC[YAXIS] = gyroZero[YAXIS] - gyroChr6dm->data.pitchRate; //gy pitchRate
+  gyroADC[ZAXIS] = gyroChr6dm->data.yawRate - gyroZero[ZAXIS]; //gz rollRate
 
-  gyroRate[ROLL] = filterSmooth(gyroADC[ROLL], gyroRate[ROLL], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-  gyroRate[PITCH] = filterSmooth(gyroADC[PITCH], gyroRate[PITCH], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
-  gyroRate[YAW] = filterSmooth(gyroADC[YAW], gyroRate[YAW], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+  gyroRate[XAXIS] = filterSmooth(gyroADC[XAXIS], gyroRate[XAXIS], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+  gyroRate[YAXIS] = filterSmooth(gyroADC[YAXIS], gyroRate[YAXIS], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
+  gyroRate[ZAXIS] = filterSmooth(gyroADC[ZAXIS], gyroRate[ZAXIS], gyroSmoothFactor); //expect 5ms = 5000Âµs = (current-previous) / 5000.0 to get around 1
 
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }

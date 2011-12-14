@@ -27,7 +27,7 @@
 void initializeReceiver(int nbChannel) {
 
   initializeReceiverParam(nbChannel);
-  for (byte channel = ROLL; channel < THROTTLE; channel++) {
+  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
     receiverCommand[channel] = 1500;
     receiverZero[channel] = 1500;
   }

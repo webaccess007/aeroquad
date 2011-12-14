@@ -39,10 +39,10 @@ void calculateKinematics(float rollRate,           float pitchRate,     float ya
 				         float oneG,               float magX,          float magY,
 				         float G_Dt) {
 				 
-  kinematicsAngle[ROLL]  =  kinematicsChr6dm->data.roll - zeroRoll;
-  kinematicsAngle[PITCH] =  kinematicsChr6dm->data.pitch - zeroPitch;
-  CHR_RollAngle = kinematicsAngle[ROLL]; //ugly since gotta access through accel class
-  CHR_PitchAngle = kinematicsAngle[PITCH];
+  kinematicsAngle[XAXIS]  =  kinematicsChr6dm->data.roll - zeroRoll;
+  kinematicsAngle[YAXIS] =  kinematicsChr6dm->data.pitch - zeroPitch;
+  CHR_RollAngle = kinematicsAngle[XAXIS]; //ugly since gotta access through accel class
+  CHR_PitchAngle = kinematicsAngle[YAXIS];
 }
   
  void calibrateKinematics() {

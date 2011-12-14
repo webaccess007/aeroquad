@@ -32,14 +32,14 @@
 void calculateFlightError()
 {
   if (flightMode == STABLE) {
-    float rollAttitudeCmd = updatePID((receiverCommand[ROLL] - receiverZero[ROLL]) * ATTITUDE_SCALING, kinematicsAngle[ROLL], &PID[LEVELROLL]);
-    float pitchAttitudeCmd = updatePID((receiverCommand[PITCH] - receiverZero[PITCH]) * ATTITUDE_SCALING, -kinematicsAngle[PITCH], &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, correctedRateVector[ROLL], &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -correctedRateVector[PITCH], &PID[LEVELGYROPITCH]);
+    float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[LEVELROLL]);
+    float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[LEVELPITCH]);
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, correctedRateVector[XAXIS], &PID[LEVELGYROROLL]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -correctedRateVector[YAXIS], &PID[LEVELGYROPITCH]);
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(ROLL), correctedRateVector[ROLL], &PID[ROLL]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(PITCH), -correctedRateVector[PITCH], &PID[PITCH]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), correctedRateVector[XAXIS], &PID[XAXIS]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -correctedRateVector[YAXIS], &PID[YAXIS]);
   }
 }
 
@@ -78,7 +78,7 @@ void processHeading()
   if (headingHoldConfig == ON) {
 
     #if defined(HeadingMagHold)
-      heading = degrees(kinematicsAngle[YAW]);
+      heading = degrees(kinematicsAngle[ZAXIS]);
     #else
       heading = degrees(gyroHeading);
     #endif
@@ -99,7 +99,7 @@ void processHeading()
     // Apply heading hold only when throttle high enough to start flight
     if (receiverCommand[THROTTLE] > MINCHECK ) { 
       
-      if ((receiverCommand[YAW] > (MIDCOMMAND + 25)) || (receiverCommand[YAW] < (MIDCOMMAND - 25))) {
+      if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
         
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
@@ -137,8 +137,8 @@ void processHeading()
     }
   }
   // NEW SI Version
-  commandedYaw = constrain(getReceiverSIData(YAW) + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[YAW], &PID[YAW]);
+  commandedYaw = constrain(getReceiverSIData(ZAXIS) + radians(headingHold), -PI, PI);
+  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS]);
 }
 
 
@@ -189,8 +189,8 @@ void processHeading()
 void processThrottleCorrection() {
  
   // Thank Ziojo for this little adjustment on throttle when manuevering!
-  int throttleAsjust = throttle / (cos (radians (kinematicsAngle[ROLL])) * cos (radians (kinematicsAngle[PITCH])));
-  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 160); //compensate max  +/- 25 deg ROLL or PITCH or  +/- 18 ( 18(ROLL) + 18(PITCH))
+  int throttleAsjust = throttle / (cos (radians (kinematicsAngle[XAXIS])) * cos (radians (kinematicsAngle[YAXIS])));
+  throttleAsjust = constrain ((throttleAsjust - throttle), 0, 160); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
   throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
 }
 
@@ -198,10 +198,10 @@ void processThrottleCorrection() {
 
 void processHardManuevers() {
   
-  if ((receiverCommand[ROLL] < MINCHECK) ||
-      (receiverCommand[ROLL] > MAXCHECK) ||
-      (receiverCommand[PITCH] < MINCHECK) ||
-      (receiverCommand[PITCH] > MAXCHECK)) {  
+  if ((receiverCommand[XAXIS] < MINCHECK) ||
+      (receiverCommand[XAXIS] > MAXCHECK) ||
+      (receiverCommand[YAXIS] < MINCHECK) ||
+      (receiverCommand[YAXIS] > MAXCHECK)) {  
         
     for (int motor = 0; motor < LASTMOTOR; motor++) {
       motorMinCommand[motor] = minAcro;

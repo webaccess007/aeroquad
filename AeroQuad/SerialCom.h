@@ -61,8 +61,8 @@ void readSerialCommand() {
     queryType = SERIAL_READ();
     switch (queryType) {
     case 'A': // Receive roll and pitch rate mode PID
-      readSerialPID(ROLL);
-      readSerialPID(PITCH);
+      readSerialPID(XAXIS);
+      readSerialPID(YAXIS);
       break;
     case 'B': // Receive roll/pitch attitude mode PID
       readSerialPID(LEVELROLL);
@@ -72,7 +72,7 @@ void readSerialCommand() {
       windupGuard = readFloatSerial(); // defaults found in setup() of AeroQuad.pde
       break;
     case 'C': // Receive yaw PID
-      readSerialPID(YAW);
+      readSerialPID(ZAXIS);
       readSerialPID(HEADING);
       headingHoldConfig = readFloatSerial();
       heading = 0;
@@ -103,16 +103,16 @@ void readSerialCommand() {
       break;
     case 'F': // Receive transmitter smoothing values
       receiverXmitFactor = readFloatSerial();
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++) {
+      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
         receiverSmoothFactor[channel] = readFloatSerial();
       }
       break;
     case 'G': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++)
+      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++)
         receiverSlope[channel] = readFloatSerial();
       break;
     case 'H': // Receive transmitter calibration values
-      for(byte channel = ROLL; channel<LASTCHANNEL; channel++)
+      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++)
         receiverOffset[channel] = readFloatSerial();
       break;
     case 'I': // Initialize EEPROM with default values
@@ -269,8 +269,8 @@ void sendSerialTelemetry() {
   case '=': // Reserved debug command to view any variable from Serial Monitor
     break;
   case 'a': // Send roll and pitch rate mode PID values
-    PrintPID(ROLL);
-    PrintPID(PITCH);
+    PrintPID(XAXIS);
+    PrintPID(YAXIS);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
@@ -283,7 +283,7 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'c': // Send yaw PID values
-    PrintPID(YAW);
+    PrintPID(ZAXIS);
     PrintPID(HEADING);
     SERIAL_PRINTLN((int)headingHoldConfig);
     queryType = 'X';
@@ -319,29 +319,29 @@ void sendSerialTelemetry() {
     break;
   case 'f': // Send transmitter smoothing values
     PrintValueComma(receiverXmitFactor);
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++) {
+    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
       PrintValueComma(receiverSmoothFactor[axis]);
     }
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'g': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
+    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++)
       PrintValueComma(receiverSlope[axis]);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'h': // Send transmitter calibration data
-    for (byte axis = ROLL; axis < LASTCHANNEL; axis++)
+    for (byte axis = XAXIS; axis < LASTCHANNEL; axis++)
       PrintValueComma(receiverOffset[axis]);
     SERIAL_PRINTLN();
     queryType = 'X';
     break;
   case 'i': // Send sensor data
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       PrintValueComma(gyroRate[axis]);
     }
-    for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+    for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
       PrintValueComma(meterPerSec[axis]);
     }
     for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
@@ -430,20 +430,20 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
   case 'r': // Vehicle attitude
-    PrintValueComma(kinematicsAngle[ROLL]);
-    PrintValueComma(kinematicsAngle[PITCH]);
+    PrintValueComma(kinematicsAngle[XAXIS]);
+    PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN(kinematicsAngle[YAW]);
+      SERIAL_PRINTLN(kinematicsAngle[ZAXIS]);
     #else
       SERIAL_PRINTLN(gyroHeading);
     #endif
     break;
   case 's': // Send all flight data
     PrintValueComma(armed);
-    PrintValueComma(kinematicsAngle[ROLL]);
-    PrintValueComma(kinematicsAngle[PITCH]);
+    PrintValueComma(kinematicsAngle[XAXIS]);
+    PrintValueComma(kinematicsAngle[YAXIS]);
     #if defined(HeadingMagHold) || defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
-      PrintValueComma(kinematicsAngle[YAW]);
+      PrintValueComma(kinematicsAngle[ZAXIS]);
     #else
       PrintValueComma(gyroHeading);
     #endif
@@ -454,7 +454,7 @@ void sendSerialTelemetry() {
       PrintValueComma(0);
       PrintValueComma(0);
     #endif
-    for (byte channel = ROLL; channel < LASTCHANNEL; channel++) {
+    for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
       PrintValueComma(receiverCommand[channel]);
     }
     for (byte channel = 0; channel < (8 - LASTCHANNEL); channel++) {// max of 8 transmitter channel supported
@@ -636,7 +636,7 @@ void fastTelemetry()
        printInt(21845); // Start word of 0x5555
        sendBinaryuslong(currentTime);
         printInt((int)flightMode);
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
@@ -654,28 +654,28 @@ void fastTelemetry()
          sendBinaryFloat(0.0);
          sendBinaryFloat(0.0);
        #endif
-        for (byte axis = ROLL; axis < ZAXIS; axis++) {
+        for (byte axis = XAXIS; axis < ZAXIS; axis++) {
           sendBinaryFloat(kinematicsAngle[axis]);
         }
        printInt(32767); // Stop word of 0x7FFF
     #else
        printInt(21845); // Start word of 0x5555
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
          sendBinaryFloat(gyroRate[axis]);
        }
        for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
          sendBinaryFloat(meterPerSec[axis]);
        }
-       for (byte axis = ROLL; axis < LASTAXIS; axis++)
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++)
        #ifdef HeadingMagHold
          sendBinaryFloat(getMagnetometerRawData(axis));
        #else
          sendBinaryFloat(0);
        #endif
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
          sendBinaryFloat(getGyroUnbias(axis));
        }
-       for (byte axis = ROLL; axis < LASTAXIS; axis++) {
+       for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
          sendBinaryFloat(kinematicsAngle[axis]);
        }
        printInt(32767); // Stop word of 0x7FFF

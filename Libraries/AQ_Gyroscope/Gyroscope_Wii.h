@@ -48,19 +48,19 @@ void initializeGyro() {
 
 void measureGyro() {
   int gyroADC[3];
-  gyroADC[ROLL] = gyroZero[ROLL] - getWiiGyroADC(ROLL);
-  gyroADC[PITCH] = getWiiGyroADC(PITCH) - gyroZero[PITCH];
-  gyroADC[YAW] = gyroZero[YAW] - getWiiGyroADC(YAW);
+  gyroADC[XAXIS] = gyroZero[XAXIS] - getWiiGyroADC(XAXIS);
+  gyroADC[YAXIS] = getWiiGyroADC(YAXIS) - gyroZero[YAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - getWiiGyroADC(ZAXIS);
 	
-  for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) { 
     float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
   }
   
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }
@@ -78,7 +78,7 @@ void evaluateGyroRate() {
 /**
   int gyroADC[3];
   for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
-    if (axis == PITCH) 
+    if (axis == YAXIS) 
 	  gyroADC[axis] = gyroSample[axis]/gyroSampleCount - gyroZero[axis];
 	else
       gyroADC[axis] = gyroZero[axis] - gyroSample[axis]/gyroSampleCount;
@@ -86,15 +86,15 @@ void evaluateGyroRate() {
   }
   gyroSampleCount = 0;
   
-  for (byte axis = ROLL; axis < LASTAXIS; axis++) { 
+  for (byte axis = XAXIS; axis < LASTAXIS; axis++) { 
     float gyroScaleFactor = getWmpSlow(axis) ? wmpLowRangeToRadPerSec : wmpHighRangeToRadPerSec ;  // if wmpSlow == 1, use low range conversion,
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor); 
   }
   
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    heading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    heading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 */  
@@ -103,7 +103,7 @@ void evaluateGyroRate() {
 void calibrateGyro() {
   int findZero[FINDZERO];
     
-  for (byte axis = ROLL; axis <= YAW; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     for (int i=0; i<FINDZERO; i++) {
 	  readWiiSensors();
       findZero[i] = getWiiGyroADC(axis);

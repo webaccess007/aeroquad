@@ -31,10 +31,10 @@ void initializeGyro() {
   
 void measureGyro() {
   int gyroADC;
-  for (byte axis = ROLL; axis <= YAW; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     float rawADC = readADC(axis);
     if (rawADC > 500) // Check if good measurement
-      if (axis == ROLL)
+      if (axis == XAXIS)
         gyroADC =  rawADC - gyroZero[axis];
       else
         gyroADC =  gyroZero[axis] - rawADC;
@@ -43,8 +43,8 @@ void measureGyro() {
   
   // Measure gyro heading
   long int currentTime = micros();
-  if (gyroRate[YAW] > radians(1.0) || gyroRate[YAW] < radians(-1.0)) {
-    gyroHeading += gyroRate[YAW] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
+  if (gyroRate[ZAXIS] > radians(1.0) || gyroRate[ZAXIS] < radians(-1.0)) {
+    gyroHeading += gyroRate[ZAXIS] * ((currentTime - gyroLastMesuredTime) / 1000000.0);
   }
   gyroLastMesuredTime = currentTime;
 }
