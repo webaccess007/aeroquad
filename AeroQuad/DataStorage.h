@@ -145,7 +145,7 @@ void initializeEEPROM() {
   receiverSmoothFactor[ZAXIS] = 0.5;
 
   smoothHeading = 1.0;
-  flightMode = ACRO;
+  flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
   

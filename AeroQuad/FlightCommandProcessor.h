@@ -83,10 +83,10 @@ void readPilotCommands() {
   #else
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {
-      flightMode = STABLE;
+      flightMode = ATTITUDE_FLIGHT_MODE;
    }
     else {
-      flightMode = ACRO;
+      flightMode = RATE_FLIGHT_MODE;
     }
   #endif  
   

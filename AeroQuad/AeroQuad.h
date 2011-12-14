@@ -58,8 +58,8 @@ float smoothHeading;
 #define YAWRATEPIN 5
 
 // Flight Mode
-#define ACRO 0
-#define STABLE 1
+#define RATE_FLIGHT_MODE 0
+#define ATTITUDE_FLIGHT_MODE 1
 byte flightMode;
 unsigned long frameCounter = 0; // main loop executive frame counter
 int minAcro; // Read in from EEPROM, defines min throttle during flips
