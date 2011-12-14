@@ -96,8 +96,8 @@ void readPilotCommands() {
        if (isStoreAltitudeNeeded) {
          altitudeToHoldTarget = getAltitudeFromSensors();
          altitudeHoldThrottle = receiverCommand[THROTTLE];
-         PID[ALTITUDE].integratedError = 0;
-         PID[ALTITUDE].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
+         PID[ALTITUDE_HOLD_PID_IDX].integratedError = 0;
+         PID[ALTITUDE_HOLD_PID_IDX].lastPosition = altitudeToHoldTarget;  // add to initialize hold position on switch turn on.
          isStoreAltitudeNeeded = false;
        }
        altitudeHoldState = ON;

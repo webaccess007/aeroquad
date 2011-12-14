@@ -30,14 +30,14 @@ void initializeAccel() {
 
 void measureAccel() {
 
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     meterPerSec[axis] = getWiiAccelADC(axis) * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }
 }
 
 void measureAccelSum() {
 
-  for (byte axis = XAXIS; axis < LASTAXIS; axis++) {
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
 	accelSample[axis] += getWiiAccelADC(axis);
   }
   accelSampleCount++;
@@ -54,7 +54,7 @@ void computeAccelBias() {
     measureAccelSum();
   }
 
-  for (byte axis = 0; axis < 3; axis++) {
+  for (byte axis = 0; axis <= ZAXIS; axis++) {
     meterPerSec[axis] = (float(accelSample[axis])/SAMPLECOUNT) * accelScaleFactor[axis];
     accelSample[axis] = 0;
   }

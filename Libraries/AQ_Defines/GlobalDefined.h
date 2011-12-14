@@ -30,15 +30,6 @@
 #define AUX 5
 #define AUX2 6
 #define AUX3 7
-#define LASTAXIS 3
-#define LEVELROLL 3
-#define LEVELPITCH 4
-#define LASTLEVELAXIS 5
-#define HEADING 5
-#define LEVELGYROROLL 6
-#define LEVELGYROPITCH 7
-#define ALTITUDE 8
-#define ZDAMPENING 9
 
 #define INVALID_ALTITUDE -1000.0
 

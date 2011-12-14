@@ -65,39 +65,39 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
 
 // contains all default values when re-writing EEPROM
 void initializeEEPROM() {
-  PID[XAXIS].P = 100.0;
-  PID[XAXIS].I = 0.0;
-  PID[XAXIS].D = -300.0;
-  PID[YAXIS].P = 100.0;
-  PID[YAXIS].I = 0.0;
-  PID[YAXIS].D = -300.0;
-  PID[ZAXIS].P = 200.0;
-  PID[ZAXIS].I = 5.0;
-  PID[ZAXIS].D = 0.0;
-  PID[LEVELROLL].P = 4.0;
-  PID[LEVELROLL].I = 0.0;
-  PID[LEVELROLL].D = 0.0;
-  PID[LEVELPITCH].P = 4.0;
-  PID[LEVELPITCH].I = 0.0;
-  PID[LEVELPITCH].D = 0.0;
-  PID[HEADING].P = 3.0;
-  PID[HEADING].I = 0.1;
-  PID[HEADING].D = 0.0;
+  PID[RATE_XAXIS_PID_IDX].P = 100.0;
+  PID[RATE_XAXIS_PID_IDX].I = 0.0;
+  PID[RATE_XAXIS_PID_IDX].D = -300.0;
+  PID[RATE_YAXIS_PID_IDX].P = 100.0;
+  PID[RATE_YAXIS_PID_IDX].I = 0.0;
+  PID[RATE_YAXIS_PID_IDX].D = -300.0;
+  PID[ZAXIS_PID_IDX].P = 200.0;
+  PID[ZAXIS_PID_IDX].I = 5.0;
+  PID[ZAXIS_PID_IDX].D = 0.0;
+  PID[ATTITUDE_XAXIS_PID_IDX].P = 4.0;
+  PID[ATTITUDE_XAXIS_PID_IDX].I = 0.0;
+  PID[ATTITUDE_XAXIS_PID_IDX].D = 0.0;
+  PID[ATTITUDE_YAXIS_PID_IDX].P = 4.0;
+  PID[ATTITUDE_YAXIS_PID_IDX].I = 0.0;
+  PID[ATTITUDE_YAXIS_PID_IDX].D = 0.0;
+  PID[HEADING_HOLD_PID_IDX].P = 3.0;
+  PID[HEADING_HOLD_PID_IDX].I = 0.1;
+  PID[HEADING_HOLD_PID_IDX].D = 0.0;
   // AKA PID experiements
-  PID[LEVELGYROROLL].P = 100.0;
-  PID[LEVELGYROROLL].I = 0.0;
-  PID[LEVELGYROROLL].D = -300.0;
-  PID[LEVELGYROPITCH].P = 100.0;
-  PID[LEVELGYROPITCH].I = 0.0;
-  PID[LEVELGYROPITCH].D = -300.0;
+  PID[ATTITUDE_GYRO_XAXIS_PID_IDX].P = 100.0;
+  PID[ATTITUDE_GYRO_XAXIS_PID_IDX].I = 0.0;
+  PID[ATTITUDE_GYRO_XAXIS_PID_IDX].D = -300.0;
+  PID[ATTITUDE_GYRO_YAXIS_PID_IDX].P = 100.0;
+  PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
+  PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -300.0;
 
-  PID[ALTITUDE].P = 25.0;
-  PID[ALTITUDE].I = 0.6;
-  PID[ALTITUDE].D = 0.0;
-  PID[ALTITUDE].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-  PID[ZDAMPENING].P = 0.0;
-  PID[ZDAMPENING].I = 0.0;
-  PID[ZDAMPENING].D = 0.0;
+  PID[ALTITUDE_HOLD_PID_IDX].P = 25.0;
+  PID[ALTITUDE_HOLD_PID_IDX].I = 0.6;
+  PID[ALTITUDE_HOLD_PID_IDX].D = 0.0;
+  PID[ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  PID[ZDAMPENING_PID_IDX].P = 0.0;
+  PID[ZDAMPENING_PID_IDX].I = 0.0;
+  PID[ZDAMPENING_PID_IDX].D = 0.0;
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     minThrottleAdjust = -50.0;
@@ -125,8 +125,8 @@ void initializeEEPROM() {
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i <= ZDAMPENING; i++ ) {
-    if (i != ALTITUDE) {
+  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
+    if (i != ALTITUDE_HOLD_PID_IDX) {
       PID[i].windupGuard = windupGuard;
     }
   }
@@ -161,16 +161,16 @@ void readEEPROM() {
   readPID(XAXIS, ROLL_PID_GAIN_ADR);
   readPID(YAXIS, PITCH_PID_GAIN_ADR);
   readPID(ZAXIS, YAW_PID_GAIN_ADR);
-  readPID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
-  readPID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
-  readPID(HEADING, HEADING_PID_GAIN_ADR);
-  readPID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
-  readPID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
+  readPID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
+  readPID(ATTITUDE_YAXIS_PID_IDX, LEVELPITCH_PID_GAIN_ADR);
+  readPID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
+  readPID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
+  readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
-  readPID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
-  PID[ALTITUDE].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
+  readPID(ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+  PID[ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
   minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
   maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
@@ -180,7 +180,7 @@ void readEEPROM() {
     altitudeHoldBump = readFloat(ALTITUDE_BUMP_ADR);
     altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
   #endif
-  readPID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
+  readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
 
   // Accel calibration
   accelScaleFactor[XAXIS] = readFloat(XAXIS_ACCEL_SCALE_FACTOR_ADR);
@@ -206,8 +206,8 @@ void readEEPROM() {
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i <= ZDAMPENING; i++ ) {
-    if (i != ALTITUDE) {
+  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
+    if (i != ALTITUDE_HOLD_PID_IDX) {
       PID[i].windupGuard = windupGuard;
     }
   }
@@ -224,14 +224,14 @@ void writeEEPROM(){
   cli(); // Needed so that APM sensor data doesn't overflow
   writePID(XAXIS, ROLL_PID_GAIN_ADR);
   writePID(YAXIS, PITCH_PID_GAIN_ADR);
-  writePID(LEVELROLL, LEVELROLL_PID_GAIN_ADR);
-  writePID(LEVELPITCH, LEVELPITCH_PID_GAIN_ADR);
+  writePID(ATTITUDE_XAXIS_PID_IDX, LEVELROLL_PID_GAIN_ADR);
+  writePID(ATTITUDE_YAXIS_PID_IDX, LEVELPITCH_PID_GAIN_ADR);
   writePID(ZAXIS, YAW_PID_GAIN_ADR);
-  writePID(HEADING, HEADING_PID_GAIN_ADR);
-  writePID(LEVELGYROROLL, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
-  writePID(LEVELGYROPITCH, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  writePID(ALTITUDE, ALTITUDE_PID_GAIN_ADR);
-  writeFloat(PID[ALTITUDE].windupGuard, ALTITUDE_WINDUP_ADR);
+  writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
+  writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
+  writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
+  writePID(ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+  writeFloat(PID[ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
   writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
   writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
@@ -245,7 +245,7 @@ void writeEEPROM(){
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
-  writePID(ZDAMPENING, ZDAMP_PID_GAIN_ADR);
+  writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   // Accel Cal
   writeFloat(accelScaleFactor[XAXIS], XAXIS_ACCEL_SCALE_FACTOR_ADR);
   writeFloat(runTimeAccelBias[XAXIS], XAXIS_ACCEL_BIAS_ADR);

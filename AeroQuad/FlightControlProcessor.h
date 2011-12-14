@@ -32,14 +32,14 @@
 void calculateFlightError()
 {
   if (flightMode == STABLE) {
-    float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[LEVELROLL]);
-    float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[LEVELPITCH]);
-    motorAxisCommandRoll = updatePID(rollAttitudeCmd, correctedRateVector[XAXIS], &PID[LEVELGYROROLL]);
-    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -correctedRateVector[YAXIS], &PID[LEVELGYROPITCH]);
+    float rollAttitudeCmd = updatePID((receiverCommand[XAXIS] - receiverZero[XAXIS]) * ATTITUDE_SCALING, kinematicsAngle[XAXIS], &PID[ATTITUDE_XAXIS_PID_IDX]);
+    float pitchAttitudeCmd = updatePID((receiverCommand[YAXIS] - receiverZero[YAXIS]) * ATTITUDE_SCALING, -kinematicsAngle[YAXIS], &PID[ATTITUDE_YAXIS_PID_IDX]);
+    motorAxisCommandRoll = updatePID(rollAttitudeCmd, correctedRateVector[XAXIS], &PID[ATTITUDE_GYRO_XAXIS_PID_IDX]);
+    motorAxisCommandPitch = updatePID(pitchAttitudeCmd, -correctedRateVector[YAXIS], &PID[ATTITUDE_GYRO_YAXIS_PID_IDX]);
   }
   else {
-    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), correctedRateVector[XAXIS], &PID[XAXIS]);
-    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -correctedRateVector[YAXIS], &PID[YAXIS]);
+    motorAxisCommandRoll = updatePID(getReceiverSIData(XAXIS), correctedRateVector[XAXIS], &PID[RATE_XAXIS_PID_IDX]);
+    motorAxisCommandPitch = updatePID(getReceiverSIData(YAXIS), -correctedRateVector[YAXIS], &PID[RATE_YAXIS_PID_IDX]);
   }
 }
 
@@ -104,14 +104,14 @@ void processHeading()
         // If commanding yaw, turn off heading hold and store latest heading
         setHeading = heading;
         headingHold = 0;
-        PID[HEADING].integratedError = 0;
+        PID[HEADING_HOLD_PID_IDX].integratedError = 0;
         headingHoldState = OFF;
         headingTime = currentTime;
       }
       else {
         if (relativeHeading < 0.25 && relativeHeading > -0.25) {
           headingHold = 0;
-          PID[HEADING].integratedError = 0;
+          PID[HEADING_HOLD_PID_IDX].integratedError = 0;
         }
         else if (headingHoldState == OFF) { // quick fix to soften heading hold on new heading
           if ((currentTime - headingTime) > 500000) {
@@ -124,7 +124,7 @@ void processHeading()
         else {
         // No new yaw input, calculate current heading vs. desired heading heading hold
         // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, &PID[HEADING]);
+          headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
           headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
         }
       }
@@ -133,12 +133,12 @@ void processHeading()
       // minimum throttle not reached, use off settings
       setHeading = heading;
       headingHold = 0;
-      PID[HEADING].integratedError = 0;
+      PID[HEADING_HOLD_PID_IDX].integratedError = 0;
     }
   }
   // NEW SI Version
   commandedYaw = constrain(getReceiverSIData(ZAXIS) + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS]);
+  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
 }
 
 
