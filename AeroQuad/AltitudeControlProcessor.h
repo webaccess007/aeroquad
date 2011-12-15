@@ -83,14 +83,6 @@
     return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
   }
   
-#else
-  // 
-  // Used no altitude sensors
-  //
-  float getAltitudeFromSensors() {
-    return INVALID_ALTITUDE;
-  }
-  
 #endif
 
 
@@ -106,7 +98,7 @@ void processAltitudeHold()
     if (altitudeHoldState == ON) {
       float currentAltitude = getAltitudeFromSensors();
       if (currentAltitude == INVALID_ALTITUDE) {
-        throttle = altitudeHoldThrottle;
+        throttle = receiverCommand[THROTTLE];
         return;
       }
       int altitudeHoldThrottleCorrection = updatePID(altitudeToHoldTarget, currentAltitude, &PID[ALTITUDE_HOLD_PID_IDX]);
