@@ -348,9 +348,8 @@ void detectVideoStandard() {
 
 #ifdef BattMonitor
 
-#include <BatteryMonitorTypes.h>
-
 byte    osdBatCounter = 0;
+boolean descentWarningShown = false;
 
 void displayVoltage() {
 
@@ -396,7 +395,13 @@ void displayVoltage() {
   
   #if defined (BattMonitorAutoDescent)
     if (batteryAlarm && armed) {
-      notifyOSD(OSD_CENTER|OSD_CRIT|OSD_BLINK, "BAT. CRITICAL - DESCENTING");
+      if (!descentWarningShown) {
+        notifyOSD(OSD_CENTER|OSD_CRIT|OSD_BLINK, "BAT. CRITICAL - DESCENTING");
+        descentWarningShown = true;
+      }
+    }
+    else {
+      descentWarningShown = false;
     }
   #endif
 }
@@ -612,7 +617,7 @@ void displayArtificialHorizon() {
 /////////////////////////// Reticle Display //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Reticle on the center of the screen
-// We have two reticles empty one for ACRO and one with (s) for 'STABLE' mode
+// We have two reticles empty one for RATE_FLIGHT_MODE and one with (s) for 'ATTITUDE_FLIGHT_MODE' mode
 #ifdef ShowReticle
 
 byte lastFlightMode = 9;
@@ -620,7 +625,7 @@ byte lastFlightMode = 9;
 void displayReticle() {
 
   if (lastFlightMode != flightMode) {
-    writeChars( (ACRO == flightMode) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+    writeChars( (RATE_FLIGHT_MODE == flightMode) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     lastFlightMode = flightMode;
   }
 }

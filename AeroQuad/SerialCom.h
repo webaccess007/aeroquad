@@ -161,6 +161,7 @@ void readSerialCommand() {
         batteryMonitorAlarmVoltage = readFloatSerial();
         batteryMonitorThrottleTarget = readFloatSerial();
         batteryMonitorGoinDownTime = readFloatSerial();
+        setBatteryCellVoltageThreshold(batteryMonitorAlarmVoltage);
       #else
         readFloatSerial();
         readFloatSerial();

@@ -34,13 +34,13 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
@@ -98,9 +98,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor //define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAutoDescent  // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define POWERED_BY_VIN // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -143,7 +144,6 @@
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
 //#define CameraControl
-
 
 //
 // *******************************************************************************************************************************
@@ -298,7 +298,7 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
   #endif
 
   #undef AltitudeHoldBaro
@@ -357,7 +357,7 @@
   // Battery Monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.53)};
   #endif
 
   // unsuported in mini
@@ -474,10 +474,10 @@
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
       struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
     #else
       struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
     #endif
   #endif
 
@@ -560,10 +560,10 @@
   #ifdef BattMonitor
     #ifdef POWERED_BY_VIN
       struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
+        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.0)};// v2 shield powered via VIN (no diode)
     #else
       struct BatteryData batteryData[] = {
-        BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1,BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
+        BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5),0.82)}; // v2 shield powered via power jack
     #endif
   #endif
 
@@ -649,7 +649,7 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.26) / 3.26), 0.306)};
   #endif
 
   #undef CameraControl
@@ -776,7 +776,7 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((5.0 / 1024.0) * (15.0 + 7.5) / 7.5), 0.9)};
   #endif
 
   #ifdef OSD
@@ -848,7 +848,7 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.9)};
   #endif
 
   /**
@@ -924,7 +924,7 @@
   // Battery monitor declaration
   #ifdef BattMonitor
     struct BatteryData batteryData[] = {
-      BM_DEFINE_BATTERY_V(0, BattMonitorAlarmVoltage*1.1, BattMonitorAlarmVoltage, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306)};
+      BM_DEFINE_BATTERY_V(BattCellCount, 0, ((3.27 / 1024.0) * (10.050 + 3.260) / 3.260), 0.306)};
   #endif
 
   #undef CameraControl
@@ -1110,7 +1110,6 @@
   #define SERIAL_PORT Serial
 #endif  
 
-
 // Include this last as it contains objects from above declarations
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
@@ -1192,12 +1191,8 @@ void setup() {
 
   // Battery Monitor
   #ifdef BattMonitor
-    initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData));
     // batteryMonitorAlarmVoltage updated in readEEPROM()
-    for (int i = 0; i < numberOfBatteries;i++) {
-      batteryData[i].vAlarm = batteryMonitorAlarmVoltage;
-      batteryData[i].vWarning = batteryMonitorAlarmVoltage;
-    }
+    initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
   #endif
 
   // Camera stabilization setup
@@ -1212,7 +1207,6 @@ void setup() {
   #if defined(MAX7456_OSD)
     initializeOSD();
   #endif
-
 
   #if defined(BinaryWrite) || defined(BinaryWritePID)
     #ifdef OpenlogBinaryWrite

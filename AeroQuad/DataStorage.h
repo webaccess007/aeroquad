@@ -151,7 +151,7 @@ void initializeEEPROM() {
   
   // Battery Monitor
   #ifdef BattMonitor
-    batteryMonitorAlarmVoltage = 10.0;
+    batteryMonitorAlarmVoltage = 3.33;
     batteryMonitorThrottleTarget = 1450;
     batteryMonitorGoinDownTime = 60000;
   #endif

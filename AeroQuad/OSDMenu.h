@@ -56,6 +56,8 @@ byte  menuEntry  = 255;     // Active menu entry
 byte  menuAtExit = 0;       // are we at the exit at the top
 byte  stickWaitNeutral = 1; // wait for stick to center
 
+boolean menuShouldExit();   // This can be used to check if continous output mode should be ended
+
 // DATA that menu functions can freely use to store state
 byte  menuFuncData[10];  // 10 bytes of data for funcs to use as they wish...
 float menuFuncDataFloat; // float for menufuncs use
@@ -375,6 +377,60 @@ void menuEeprom(byte mode, byte action) {
   }
 }
 
+#ifdef BattMonitor
+#include <BatteryMonitor.h>
+void menuHandleBatt(byte mode, byte action){
+
+  if (action == MENU_INIT) {
+  	switch (mode) {
+    case 0:
+      for (int i=0; i<numberOfBatteries; i++) {
+        resetBattery(i);
+      }
+      notifyOSD(OSD_NOCLEAR|OSD_CENTER, "Battery state reset!");
+      menuInFunc = 10;
+      return;
+    }
+  }
+  menuInFunc=0;
+}
+#endif
+
+#define PRFLOAT(x) ((x<0.0)?'-':' '),((int)abs(x)),(((int)(100*abs(x)))%100)
+
+void menuSensorInfo(byte mode, byte action){
+  switch (action) {
+    case MENU_CALLBACK:
+      if (menuShouldExit()) {
+         menuInFunc=0;
+         return;
+      }
+      // fallthru
+    case MENU_INIT:
+      switch (mode) {
+        case 0: // Accel
+          notifyOSD(OSD_NOCLEAR,"Acc: X%c%d.%02d Y%c%d.%02d Z%c%d.%02d",
+                    PRFLOAT(meterPerSec[XAXIS]),PRFLOAT(meterPerSec[YAXIS]),PRFLOAT(meterPerSec[ZAXIS]));
+          break;
+        case 1: // Gyro
+          notifyOSD(OSD_NOCLEAR,"Gyr: X%c%d.%02d Y%c%d.%02dZ %c%d.%02d",
+                    PRFLOAT(gyroRate[XAXIS]),PRFLOAT(gyroRate[YAXIS]),PRFLOAT(gyroRate[ZAXIS]));
+          break;
+        #if defined(HeadingMagHold)
+          case 2: // Mag
+            notifyOSD(OSD_NOCLEAR,"Mag: X%5d Y%5d Z%5d",
+                    getMagnetometerRawData(XAXIS),getMagnetometerRawData(YAXIS),getMagnetometerRawData(ZAXIS));
+            break;
+        #endif
+      }
+      menuInFunc=3;
+      break;
+    default:
+      menuInFunc=3;
+  }
+}
+                    
+
 const struct MenuItem menuData[] = {
 #if 0
   {0, "Waypoints",            MENU_NOFUNC,       0},
@@ -394,12 +450,22 @@ const struct MenuItem menuData[] = {
 #ifdef CameraControl
   {1,   "Camera stabilizer",  menuHandleCam,     0},
 #endif
+#ifdef BattMonitor
+  {1,   "Reset battery stats",menuHandleBatt,    0},
+#endif
   {1,   "OSD",                MENU_NOFUNC,       0},
   {2,     "Reset flightime",  menuHandleOSD,     0},
   {0, "Setup",                MENU_NOFUNC,       0},
   {1,   "Edit PIDs",          menuHandlePidTune, 0},
   {1,   "Save to EEPROM",     menuEeprom,        0},
   {1,   "Reinit EEPROM",      menuEeprom,        1},
+  {0, "Debug",                MENU_NOFUNC,       0},
+  {1,   "Sensors",            MENU_NOFUNC,       0},
+  {2,     "Accel Data",       menuSensorInfo,    0},
+  {2,     "Gyro Data",        menuSensorInfo,    1},
+#if defined(HeadingMagHold)
+  {2,     "Mag Data",         menuSensorInfo,    2}, 
+#endif
   };
 
 #define menuNumEntries (sizeof(menuData) / sizeof(MenuItem))
@@ -553,7 +619,16 @@ void menuExit() {
   menuShow(menuEntry);
 }
 
-void updateMenu(void) {
+boolean menuShouldExit() {
+  const short roll  = receiverCommand[XAXIS]  - MENU_STICK_CENTER;  // pitch/roll should be -500 - +500
+  if (roll < -MENU_STICK_ACTIVE) {
+    stickWaitNeutral = 1;
+    return true;
+  }
+  return false;
+}
+
+void updateMenu() {
 
   // check if armed, menu is only operational when not armed
   if (armed == true) {
