@@ -84,10 +84,8 @@ void initializeBaro() {
   // 3 = ultra high resolution
   overSamplingSetting = 3;
   pressure = 0;
-  groundPressure = 0;
   temperature = 0;
-  groundTemperature = 0;
-  groundAltitude = 0;
+  baroGroundAltitude = 0;
   pressureFactor = 1/5.255;
     
   sendByteI2C(BMP085_I2C_ADDRESS, 0xAA);
@@ -121,11 +119,11 @@ void initializeBaro() {
   delay(26); // delay for pressure
   measureGroundBaro();
   // check if measured ground altitude is valid
-  while (abs(baroRawAltitude - groundAltitude) > 10) {
+  while (abs(baroRawAltitude - baroGroundAltitude) > 10) {
     delay(26);
     measureGroundBaro();
   }
-  baroAltitude = groundAltitude;
+  baroAltitude = baroGroundAltitude;
 }
   
 void measureBaro() {

@@ -24,12 +24,10 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
-double baroAltitude = 0.0; 
-double baroRawAltitude = 0.0;
-float groundTemperature = 0.0; // remove later
-float groundPressure = 0.0; // remove later
-float groundAltitude = 0.0;
-float baroSmoothFactor = 0.02;
+double baroAltitude      = 0.0; 
+double baroRawAltitude   = 0.0;
+float baroGroundAltitude = 0.0;
+float baroSmoothFactor   = 0.02;
   
 // **********************************************************************
 // The following function calls must be defined inside any new subclasses
@@ -41,18 +39,18 @@ void measureBaro();
 // The following functions are common between all subclasses
 // *********************************************************
 const float getBaroAltitude() {
-  return baroAltitude - groundAltitude;
+  return baroAltitude - baroGroundAltitude;
 }
  
 void measureGroundBaro() {
   // measure initial ground pressure (multiple samples)
-  groundAltitude = 0;
+  baroGroundAltitude = 0;
   for (int i=0; i < 25; i++) {
     measureBaro();
     delay(26);
-    groundAltitude += baroRawAltitude;
+    baroGroundAltitude += baroRawAltitude;
   }
-  groundAltitude = groundAltitude / 25.0;
+  baroGroundAltitude = baroGroundAltitude / 25.0;
 }
 
 
