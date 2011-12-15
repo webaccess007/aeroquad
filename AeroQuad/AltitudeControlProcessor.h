@@ -33,6 +33,21 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
+//rawAltitude = 44330 (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters 
+//rawAltitude = (101325.0-pressure)/4096346;  
+//usAltitude = filterSmooth( constrain((float)(analogRead(A3)*0.01240),0.2,3.1), // (US voltage to meters an limited to 0.2-3.1) usAltitude,0.1);
+// Apply little filtering  
+//  if(usAltitude < 3.0) { 
+//    altitude = usAltitude; 
+//    setGroundAltitude(rawAltitude - usAltitude); 
+//  } 
+//  else { 
+//    altitude = filterSmooth(rawAltitude - getGroundAltitude(), altitude, smoothFactor); 
+//  }
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// processAltitudeHold //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -43,7 +58,9 @@
   float getAltitudeFromSensors() {
     
     if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); // need to be in meter and the libraries work in cm
+      // set the ground altitude back for a smooted sensors switch 
+      baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
+      return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
     }
     else {
       return getBaroAltitude();    
@@ -63,7 +80,7 @@
   // Used Just range finder
   //
   float getAltitudeFromSensors() {
-    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); // need to be in meter and the libraries work in cm
+    return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
   }
   
 #else
