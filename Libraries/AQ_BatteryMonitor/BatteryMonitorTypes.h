@@ -25,7 +25,7 @@
 
 struct BatteryData {
   byte  vPin,cPin;        // A/D pins for voltage and current sensors (255 = BM_NOPIN <=> no sensor)
-  float vWarning,vAlarm;  // Warning and Alarm voltage levels
+  byte  cells;            // Number of Cells (used for alarm/warning voltage
   float vScale,vBias;     // voltage polynom V = vbias + AnalogIn(vpin)*vscale
   float cScale,cBias;     // current polynom C = cbias + AnalogIn(cpin)*cscale
   float voltage;          // Current battery voltage
@@ -42,13 +42,17 @@ extern boolean            batteryAlarm;      // any battery in alarm state used 
 // Helper macros to make battery definitions cleaner
 
 // for defining battery with just voltage sensing
-#define BM_DEFINE_BATTERY_V(VPIN,VWARNING,VALARM,VSCALE,VBIAS) {VPIN,BM_NOPIN,VWARNING,VALARM,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+#define BM_DEFINE_BATTERY_V(CELLS,VPIN,VSCALE,VBIAS) {VPIN,BM_NOPIN,CELLS,VSCALE,VBIAS, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 
 // for defining battery with voltage and current sensors
-#define BM_DEFINE_BATTERY_VC(VPIN,VWARNING,VALARM,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,VWARNING,VALARM,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0},
+#define BM_DEFINE_BATTERY_VC(CELLS,VPIN,VSCALE,VBIAS,CPIN,CSCALE,CBIAS) {VPIN,CPIN,CELLS,VSCALE,VBIAS, CSCALE, CBIAS, 0.0, 0.0, 0.0, 0.0, 0.0},
 
-// Helper macros for battery state
-#define batteryIsAlarm(bat)   (batteryData[bat].voltage <= batteryData[bat].vAlarm)
-#define batteryIsWarning(bat) (batteryData[bat].voltage <= batteryData[bat].vWarning)
+// Function declarations
 
+boolean batteryIsAlarm(byte batteryNo);
+boolean batteryIsWarning(byte batteryNo);
+void resetBattery(byte batteryNo);
+void initializeBatteryMonitor(byte numberOfMonitoredBatteries, float alarmVoltage);
+void setBatteryCellVoltageThreshold(float alarmVoltage);
+void measureBatteryVoltage(float deltaTime);
 #endif
