@@ -228,9 +228,7 @@ void processFlightControl() {
   } 
 
   // *********************** process min max motor command *******************
-  if (receiverCommand[THROTTLE] <= MAXCHECK) { // if the throttle is about the max, we used true PID values! PATCH for max throttle bug
-    processMinMaxCommand();
-  }
+  processMinMaxCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   if (flightMode == RATE_FLIGHT_MODE) {
