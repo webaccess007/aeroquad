@@ -136,7 +136,6 @@ void initializeEEPROM() {
   accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
-  timeConstant = 7.0;
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     receiverSlope[channel] = 1.0;
     receiverOffset[channel] = 0.0;
@@ -144,7 +143,6 @@ void initializeEEPROM() {
   }
   receiverSmoothFactor[ZAXIS] = 0.5;
 
-  smoothHeading = 1.0;
   flightMode = RATE_FLIGHT_MODE;
   headingHoldConfig = ON;
   aref = 5.0; // Use 3.0 if using a v1.7 shield or use 2.8 for an AeroQuad Shield < v1.7
@@ -212,8 +210,6 @@ void readEEPROM() {
     }
   }
     
-  timeConstant = readFloat(FILTERTERM_ADR);
-  smoothHeading = readFloat(HEADINGSMOOTH_ADR);
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
@@ -262,7 +258,6 @@ void writeEEPROM(){
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
   writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
-  writeFloat(timeConstant, FILTERTERM_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
@@ -270,7 +265,6 @@ void writeEEPROM(){
     writeFloat(receiverSmoothFactor[channel], RECEIVER_DATA[channel].smooth_factor);
   }
 
-  writeFloat(smoothHeading, HEADINGSMOOTH_ADR);
   writeFloat(aref, AREF_ADR);
   writeFloat(flightMode, FLIGHTMODE_ADR);
   writeFloat(headingHoldConfig, HEADINGHOLD_ADR);

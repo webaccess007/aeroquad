@@ -24,6 +24,13 @@
 #ifndef _AQ_FLIGHT_COMMAND_READER_
 #define _AQ_FLIGHT_COMMAND_READER_
 
+
+/**
+ * readPilotCommands
+ * 
+ * This function is responsible to read receiver
+ * and process command from the users
+ */
 void readPilotCommands() {
   
   readReceiver(); // Read quad configuration commands from transmitter when throttle down
@@ -31,10 +38,10 @@ void readPilotCommands() {
     zeroIntegralError();
 
     // Disarm motors (left stick lower left corner)
-    if (receiverCommand[ZAXIS] < MINCHECK && armed == ON) {
+    if (receiverCommand[ZAXIS] < MINCHECK && motorArmed == ON) {
       commandAllMotors(MINCOMMAND);
       digitalWrite(LED_Red,LOW);
-      armed = OFF;
+      motorArmed = OFF;
             
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "MOTORS UNARMED");
@@ -58,13 +65,13 @@ void readPilotCommands() {
     }   
     
     // Arm motors (left stick lower right corner)
-    if (receiverCommand[ZAXIS] > MAXCHECK && armed == OFF && safetyCheck == ON) {
+    if (receiverCommand[ZAXIS] > MAXCHECK && motorArmed == OFF && safetyCheck == ON) {
       zeroIntegralError();
       for (byte motor = 0; motor < LASTMOTOR; motor++) {
         motorCommand[motor] = MINTHROTTLE;
       }
       digitalWrite(LED_Red,HIGH);
-      armed = ON;
+      motorArmed = ON;
     
       #ifdef OSD
         notifyOSD(OSD_CENTER|OSD_WARN, "!MOTORS ARMED!");

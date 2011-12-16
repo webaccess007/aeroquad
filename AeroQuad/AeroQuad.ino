@@ -88,7 +88,7 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 #define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
@@ -98,10 +98,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -143,16 +143,16 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-//#define CameraControl
+#define CameraControl
 
 //
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-//#define OSD
+#define OSD
 // Menu system, currently only usable with OSD
-//#define OSD_SYSTEM_MENU
+#define OSD_SYSTEM_MENU
 
 /****************************************************************************
  ****************************************************************************
@@ -1114,13 +1114,16 @@
 #include "AltitudeControlProcessor.h"
 #include "FlightControlProcessor.h"
 #include "FlightCommandProcessor.h"
+#include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
 #include "SerialCom.h"
 
 
-// ************************************************************
-// ********************** Setup AeroQuad **********************
-// ************************************************************
+/**
+ * Main setup function, called one time at bootup
+ * initalize all system and sub system of the 
+ * Aeroquad
+ */
 void setup() {
   SERIAL_BEGIN(BAUD);
   pinMode(LED_Green, OUTPUT);
@@ -1163,8 +1166,6 @@ void setup() {
   calibrateGyro();
   computeAccelBias();
   zeroIntegralError();
-  levelAdjust[XAXIS] = 0;
-  levelAdjust[YAXIS] = 0;
 
   // Flight angle estimation
   #ifdef HeadingMagHold
