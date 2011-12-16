@@ -631,7 +631,7 @@ boolean menuShouldExit() {
 void updateMenu() {
 
   // check if armed, menu is only operational when not armed
-  if (armed == true) {
+  if (motorArmed == true) {
     if (menuEntry != 255) {
       // BAIL OUT of menu if armed
       notifyOSD(0, NULL); // clear menuline

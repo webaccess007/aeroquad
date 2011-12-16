@@ -20,15 +20,20 @@
 
 // FlightControl.pde is responsible for combining sensor measurements and
 // transmitter commands into motor commands for the defined flight configuration (X, +, etc.)
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// calculateFlightError /////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef _AQ_PROCESS_FLIGHT_CONTROL_H_
 #define _AQ_PROCESS_FLIGHT_CONTROL_H_
 
 #define ATTITUDE_SCALING (0.75 * PWM2RAD)
 
+
+/**
+ * calculateFlightError
+ *
+ * Calculate roll/pitch axis error with gyro/accel data to
+ * compute motor command thrust so used command are executed
+ */
 void calculateFlightError()
 {
   if (flightMode == ATTITUDE_FLIGHT_MODE) {
@@ -43,9 +48,11 @@ void calculateFlightError()
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processCalibrateESC //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * processCalibrateESC
+ * 
+ * Proces esc calibration command with the help of the configurator
+ */
 void processCalibrateESC()
 {
   switch (calibrateESC) { // used for calibrating ESC's
@@ -70,81 +77,18 @@ void processCalibrateESC()
   writeMotors(); // Defined in Motors.h
 }
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processHeadingHold ///////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-void processHeading()
-{
-  if (headingHoldConfig == ON) {
-
-    #if defined(HeadingMagHold)
-      heading = degrees(kinematicsAngle[ZAXIS]);
-    #else
-      heading = degrees(gyroHeading);
-    #endif
-
-    // Always center relative heading around absolute heading chosen during yaw command
-    // This assumes that an incorrect yaw can't be forced on the AeroQuad >180 or <-180 degrees
-    // This is done so that AeroQuad does not accidentally hit transition between 0 and 360 or -180 and 180
-    // AKA - THERE IS A BUG HERE - if relative heading is greater than 180 degrees, the PID will swing from negative to positive
-    // Doubt that will happen as it would have to be uncommanded.
-    relativeHeading = heading - setHeading;
-    if (heading <= (setHeading - 180)) {
-      relativeHeading += 360;
-    }
-    if (heading >= (setHeading + 180)) {
-      relativeHeading -= 360;
-    }
-
-    // Apply heading hold only when throttle high enough to start flight
-    if (receiverCommand[THROTTLE] > MINCHECK ) { 
-      
-      if ((receiverCommand[ZAXIS] > (MIDCOMMAND + 25)) || (receiverCommand[ZAXIS] < (MIDCOMMAND - 25))) {
-        
-        // If commanding yaw, turn off heading hold and store latest heading
-        setHeading = heading;
-        headingHold = 0;
-        PID[HEADING_HOLD_PID_IDX].integratedError = 0;
-        headingHoldState = OFF;
-        headingTime = currentTime;
-      }
-      else {
-        if (relativeHeading < 0.25 && relativeHeading > -0.25) {
-          headingHold = 0;
-          PID[HEADING_HOLD_PID_IDX].integratedError = 0;
-        }
-        else if (headingHoldState == OFF) { // quick fix to soften heading hold on new heading
-          if ((currentTime - headingTime) > 500000) {
-            headingHoldState = ON;
-            headingTime = currentTime;
-            setHeading = heading;
-            headingHold = 0;
-          }
-        }
-        else {
-        // No new yaw input, calculate current heading vs. desired heading heading hold
-        // Relative heading is always centered around zero
-          headingHold = updatePID(0, relativeHeading, &PID[HEADING_HOLD_PID_IDX]);
-          headingTime = currentTime; // quick fix to soften heading hold, wait 100ms before applying heading hold
-        }
-      }
-    }
-    else {
-      // minimum throttle not reached, use off settings
-      setHeading = heading;
-      headingHold = 0;
-      PID[HEADING_HOLD_PID_IDX].integratedError = 0;
-    }
-  }
-  // NEW SI Version
-  commandedYaw = constrain(getReceiverSIData(ZAXIS) + radians(headingHold), -PI, PI);
-  motorAxisCommandYaw = updatePID(commandedYaw, gyroRate[ZAXIS], &PID[ZAXIS_PID_IDX]);
-}
-
-
-
-
-#if defined BattMonitorAutoDescent
+/**
+ * processBatteryMonitorThrottleAdjustment
+ *
+ * Check battery alarm and if in alarm, increment a counter
+ * When this counter reach BATTERY_MONITOR_MAX_ALARM_COUNT, then
+ * we are now in auto-descent mode.
+ *
+ * When in auto-descent mode, the user can pass throttle keep when the
+ * alarm was reach, and the throttle is slowly decrease for a minute til
+ * batteryMonitorThrottle that is configurable with the configurator
+ */
+#if defined BattMonitor && defined BattMonitorAutoDescent
   void processBatteryMonitorThrottleAdjustment() {
     
     if (batteryMonitorAlarmCounter < BATTERY_MONITOR_MAX_ALARM_COUNT) {
@@ -186,16 +130,30 @@ void processHeading()
 #endif  
 
 
+/**
+ * processThrottleCorrection
+ * 
+ * This function will add some throttle imput if the craft is angled
+ * this prevent the craft to loose altitude when angled.
+ * it also add the battery throttle correction in case
+ * of we are in auto-descent.
+ * 
+ * Special thank to Ziojo for this.
+ */
 void processThrottleCorrection() {
  
-  // Thank Ziojo for this little adjustment on throttle when manuevering!
   int throttleAsjust = throttle / (cos (radians (kinematicsAngle[XAXIS])) * cos (radians (kinematicsAngle[YAXIS])));
   throttleAsjust = constrain ((throttleAsjust - throttle), 0, 160); //compensate max  +/- 25 deg XAXIS or YAXIS or  +/- 18 ( 18(XAXIS) + 18(YAXIS))
   throttle = throttle + throttleAsjust + (int)batteyMonitorThrottleCorrection;
 }
 
 
-
+/**
+ * processHardManuevers
+ *
+ * In case of a roll/pitch stick at one edge to do a loop, this function
+ * will prevent the lower throttle motor side to have too much low throtte.
+ */
 void processHardManuevers() {
   
   if ((receiverCommand[XAXIS] < MINCHECK) ||
@@ -211,9 +169,12 @@ void processHardManuevers() {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processMinMaxCommand ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * processMinMaxCommand
+ *
+ * This function correct too low/max throttle when manuevering
+ * preventing some wobbling behavior
+ */
 void processMinMaxCommand()
 {
   for (byte motor = 0; motor < LASTMOTOR; motor++)
@@ -237,9 +198,11 @@ void processMinMaxCommand()
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processFlightControl main function ///////////////
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * processFlightControl
+ *
+ * Main flight control processos function
+ */
 void processFlightControl() {
   
   // ********************** Calculate Flight Error ***************************
@@ -252,7 +215,7 @@ void processFlightControl() {
     // ********************** Process Altitude hold **************************
     processAltitudeHold();
     // ********************** Process Battery monitor hold **************************
-    #if defined BattMonitorAutoDescent
+    #if defined BattMonitor && defined BattMonitorAutoDescent
       processBatteryMonitorThrottleAdjustment();
     #endif
     // ********************** Process throttle correction ********************
@@ -260,7 +223,7 @@ void processFlightControl() {
   }
 
   // ********************** Calculate Motor Commands *************************
-  if (armed && safetyCheck) {
+  if (motorArmed && safetyCheck) {
     applyMotorCommand();
   } 
 
@@ -287,12 +250,12 @@ void processFlightControl() {
   }
 
   // ESC Calibration
-  if (armed == OFF) {
+  if (motorArmed == OFF) {
     processCalibrateESC();
   }
 
   // *********************** Command Motors **********************
-  if (armed == ON && safetyCheck == ON) {
+  if (motorArmed == ON && safetyCheck == ON) {
     writeMotors();
   }
 }

@@ -24,6 +24,8 @@
 #include "Arduino.h"
 #include "GlobalDefined.h"
 
+#define FINDZERO 49
+
 float gyroRate[3] = {0.0,0.0,0.0};
 float gyroZero[3] = {0.0,0.0,0.0};
 float gyroSmoothFactor = 1.0;

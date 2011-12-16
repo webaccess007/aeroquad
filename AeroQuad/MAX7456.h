@@ -358,7 +358,7 @@ void displayVoltage() {
   boolean osdBatMinMax = osdBatCounter / numberOfBatteries / 4;
 
   // only show min/max values when not armed
-  if (armed == true) {
+  if (motorArmed == true) {
     osdBatMinMax = false;
   }
 
@@ -394,7 +394,7 @@ void displayVoltage() {
   }
   
   #if defined (BattMonitorAutoDescent)
-    if (batteryAlarm && armed) {
+    if (batteryAlarm && motorArmed) {
       if (!descentWarningShown) {
         notifyOSD(OSD_CENTER|OSD_CRIT|OSD_BLINK, "BAT. CRITICAL - DESCENTING");
         descentWarningShown = true;
@@ -513,7 +513,7 @@ unsigned int prevArmedTimeSecs = 111; // bogus to force update
 unsigned long armedTime = 0;          // time motors have spent armed
 
 void displayFlightTime() {
-  if (armed == ON) {
+  if (motorArmed == ON) {
     armedTime += ( currentTime-prevTime );
   }
 

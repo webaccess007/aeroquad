@@ -33,32 +33,20 @@
 #ifndef _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 #define _AQ_ALTITUDE_CONTROL_PROCESSOR_H_
 
-//rawAltitude = 44330 (1 - pow(pressure/101325.0, pressureFactor)); // returns absolute altitude in meters 
-//rawAltitude = (101325.0-pressure)/4096346;  
-//usAltitude = filterSmooth( constrain((float)(analogRead(A3)*0.01240),0.2,3.1), // (US voltage to meters an limited to 0.2-3.1) usAltitude,0.1);
-// Apply little filtering  
-//  if(usAltitude < 3.0) { 
-//    altitude = usAltitude; 
-//    setGroundAltitude(rawAltitude - usAltitude); 
-//  } 
-//  else { 
-//    altitude = filterSmooth(rawAltitude - getGroundAltitude(), altitude, smoothFactor); 
-//  }
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// processAltitudeHold //////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * getAltitudeFromSensors
+ *
+ * @return the current craft altitude depending of the sensors used
+ */
 #if defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-  // 
-  // Used both sensors
-  //
+
+  /**
+   * @return the most precise altitude, sonar if the reading is ok, otherwise baro
+   * it also correct the baro ground altitude to have a smoot sensor switch
+   */
   float getAltitudeFromSensors() {
     
     if (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX] != INVALID_ALTITUDE) {
-      // set the ground altitude back for a smooted sensors switch 
       baroGroundAltitude = baroRawAltitude - rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX];  
       return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]); 
     }
@@ -68,17 +56,18 @@
   }
   
 #elif defined (AltitudeHoldBaro) && !defined (AltitudeHoldRangeFinder)
-  // 
-  // Used Just Baro
-  //
+
+  /**
+   * @return the baro altitude
+   */
   float getAltitudeFromSensors() {
     return getBaroAltitude();
   }
   
 #elif !defined (AltitudeHoldBaro) && defined (AltitudeHoldRangeFinder)
-  // 
-  // Used Just range finder
-  //
+  /**
+   * @return the sonar altitude
+   */
   float getAltitudeFromSensors() {
     return (rangeFinderRange[ALTITUDE_RANGE_FINDER_INDEX]);
   }
@@ -86,7 +75,12 @@
 #endif
 
 
-
+/**
+ * processAltitudeHold
+ * 
+ * This function is responsible to process the throttle correction 
+ * to keep the current altitude if selected by the user 
+ */
 void processAltitudeHold()
 {
   // ****************************** Altitude Adjust *************************
