@@ -192,7 +192,7 @@ void processMinMaxCommand()
   }
     
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
-    if (maxMotor > MAXCHECK) {
+    if (maxMotor > MAXCOMMAND) {
       motorCommand[motor] =  motorCommand[motor] - (maxMotor - MAXCHECK);
     }
   }
@@ -228,14 +228,10 @@ void processFlightControl() {
   } 
 
   // *********************** process min max motor command *******************
-  if (receiverCommand[THROTTLE] <= MAXCHECK) { // if the throttle is about the max, we used true PID 
-    processMinMaxCommand();
-  }
+  processMinMaxCommand();
 
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
-  if (flightMode == RATE_FLIGHT_MODE) {
-    processHardManuevers();    // This is not a good way to handle loop, just learn to pilot and do it normally!
-  }
+  processHardManuevers();    
   
   // Apply limits to motor commands
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
