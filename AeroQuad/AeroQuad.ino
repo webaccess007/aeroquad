@@ -88,9 +88,9 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
+//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -98,10 +98,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -143,16 +143,26 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 
 //
 // *******************************************************************************************************************************
-// On screen display implementation using MAX7456 chip. See OSD.h for more info and configuration.
+// On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-#define OSD
+//#define OSD
+#define ShowReticle            //Displays a reticle in the centre of the screen.
+#define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
+#define ShowAttitudeIndicator
+#define ShowCallSign
+//#define ShowRSSI
+//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
+//Choose your (default in case autodetect enabled) video standard: default=NTSC
+//#define PAL
+#define AUTODETECT_VIDEO_STANDARD // detect automatically
+
 // Menu system, currently only usable with OSD
-#define OSD_SYSTEM_MENU
+//#define OSD_SYSTEM_MENU
 
 /****************************************************************************
  ****************************************************************************
@@ -171,14 +181,16 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include "AeroQuad.h"
 #include <GlobalDefined.h>
+#include "AeroQuad.h"
 #include "PID.h"
 #include <AQMath.h>
 #include <FourtOrderFilter.h>
 #ifdef BattMonitor
   #include <BatteryMonitorTypes.h>
 #endif
+
+
 
 //********************************************************
 //********************************************************
@@ -1085,6 +1097,8 @@
 //****************** OSD DEVICE DECLARATION **************
 //********************************************************
 #ifdef MAX7456_OSD     // only OSD supported for now is the MAX7456
+  #include <Device_SPI.h>
+  #include "OSDDisplayController.h"
   #include "MAX7456.h"
   #ifdef OSD_SYSTEM_MENU
     #include "OSDMenu.h"
@@ -1117,6 +1131,7 @@
 #include "HeadingHoldProcessor.h"
 #include "DataStorage.h"
 #include "SerialCom.h"
+
 
 
 /**
@@ -1206,6 +1221,7 @@ void setup() {
   #endif
 
   #if defined(MAX7456_OSD)
+    initializeSPI();
     initializeOSD();
   #endif
 
@@ -1393,7 +1409,7 @@ void loop () {
       sendSerialTelemetry(); // defined in SerialCom.pde
 
       #ifdef OSD_SYSTEM_MENU
-        updateMenu();
+        updateOSDMenu();
       #endif
 
       #ifdef MAX7456_OSD
