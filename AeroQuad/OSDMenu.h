@@ -628,7 +628,7 @@ boolean menuShouldExit() {
   return false;
 }
 
-void updateMenu() {
+void updateOSDMenu() {
 
   // check if armed, menu is only operational when not armed
   if (motorArmed == true) {

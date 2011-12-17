@@ -54,18 +54,8 @@
 #ifndef _AQ_OSD_MAX7456_H_
 #define _AQ_OSD_MAX7456_H_
 
-
-/*********************** User configuration section ***************************************/
-#define ShowReticle            //Displays a reticle in the centre of the screen.
-#define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
-#define ShowAttitudeIndicator
-#define ShowCallSign
-//#define ShowRSSI
-//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
-
-//Choose your (default in case autodetect enabled) video standard: default=NTSC
-#define PAL
-#define AUTODETECT // detect automatically
+#include "OSD.h"
+#include "GlobalDefined.h"
 
 // You can configure positioning of various display elements below.
 // '#defines' for elements which will not be displayed, can be ignored.
@@ -121,11 +111,6 @@ const char *callsign = "AeroQD";
 
 /********************** End of user configuration section ********************************/
 
-//OSD pins on AQ v2 shield:
-#define CS   22 //SS_OSD
-#define DOUT 51 //MOSI
-#define DIN  50 //MISO
-#define SCK  52 //SCLK
 
 //MAX7456 register write addresses - see datasheet for lots of info
 #define DMM   0x04 //Display memory mode register - for choosing 16bit/8bit write mode, clearing display memory, enabling auto-increment
@@ -187,35 +172,13 @@ static const byte ROLL_COLUMNS[4] = {10,12,17,19};  // columns where the roll li
 #define OSD_CENTER  0x01 // Justify at center
 
 
+byte osdNotificationTimeToShow = 0;
+byte osdNotificationFlags      = 0;
+byte osdNotificationCursorL    = 0;
+byte osdNotificationCursorR    = 0;
+char osdNotificationBuffer[29];     // do not change this
 
-//////////////////////////////////////////////////////////////
-//Performs an 8-bit SPI transfer operation
-byte spi_transfer( byte data ) {
-
-  SPDR = data; //transfer data with hardware SPI
-  while ( !(SPSR & _BV(SPIF)) ) ;
-  return SPDR;
-}
-
-void spi_writereg(byte r, byte d) {
-
-  spi_transfer(r);
-  spi_transfer(d);
-}
-
-byte spi_readreg(byte r) {
-
-  spi_transfer(r);
-  return spi_transfer(0);
-}
-
-void spi_select() {
-  digitalWrite( CS, LOW );
-}
-
-void spi_deselect() {
-  digitalWrite( CS, HIGH );
-}
+#define notifyOSD(flags,fmt,args...) notifyOSDmenu(flags,255,255,fmt, ## args)
 
 // Writes 'len' character address bytes to the display memory corresponding to row y, column x
 // - uses autoincrement mode when writing more than one character
@@ -245,17 +208,6 @@ void writeChars( const char* buf, byte len, byte flags, byte y, byte x ) {
   // finished writing
   spi_deselect();
 }
-
-
-byte osdNotificationTimeToShow = 0;
-byte osdNotificationFlags      = 0;
-byte osdNotificationCursorL    = 0;
-byte osdNotificationCursorR    = 0;
-char osdNotificationBuffer[29];     // do not change this
-
-#define notifyOSD(flags,fmt,args...) notifyOSDmenu(flags,255,255,fmt, ## args)
-
-byte displayNotify(); // declare update function here as it may be called by notifyOSD
 
 byte notifyOSDmenu(byte flags, byte cursorLeft, byte cursorRight, const char *fmt, ...) {
 
@@ -310,7 +262,7 @@ void detectVideoStandard() {
   #ifdef PAL
     pal = true;
   #endif
-  #ifdef AUTODETECT
+  #ifdef AUTODETECT_VIDEO_STANDARD
     // if autodetect enabled modify the default if signal is present on either standard
     // otherwise default is preserved
     spi_select();
@@ -348,20 +300,22 @@ void detectVideoStandard() {
 
 #ifdef BattMonitor
 
+#include "BatteryMonitorTypes.h"
+
 byte    osdBatCounter = 0;
 boolean descentWarningShown = false;
 
-void displayVoltage() {
+void displayVoltage(byte areMotorsArmed) {
 
-  int currentValue;
   byte    osdBatNo     = osdBatCounter % numberOfBatteries;
   boolean osdBatMinMax = osdBatCounter / numberOfBatteries / 4;
 
   // only show min/max values when not armed
-  if (motorArmed == true) {
+  if (areMotorsArmed == true) {
     osdBatMinMax = false;
   }
 
+  int currentValue;
   if (osdBatMinMax) {
     currentValue = batteryData[osdBatNo].minVoltage*10.0;
   }
@@ -394,7 +348,7 @@ void displayVoltage() {
   }
   
   #if defined (BattMonitorAutoDescent)
-    if (batteryAlarm && motorArmed) {
+    if (batteryAlarm && areMotorsArmed) {
       if (!descentWarningShown) {
         notifyOSD(OSD_CENTER|OSD_CRIT|OSD_BLINK, "BAT. CRITICAL - DESCENTING");
         descentWarningShown = true;
@@ -416,13 +370,13 @@ int lastAltitude     = 12345;     // bogus initial values to force update
 int lastHoldAltitude = 12345;
 byte lastHoldState   = 6;
 
-void displayAltitude() {
+void displayAltitude(float readedAltitude, float desiredAltitudeToKeep, boolean altHoldState) {
   #ifdef feet
-    int currentAltitude = getAltitudeFromSensors()*3.281;
-    int currentHoldAltitude = altitudeToHoldTarget*3.281;
+    int currentAltitude = readedAltitude*3.281;
+    int currentHoldAltitude = desiredAltitudeToKeep*3.281;
   #else // metric
-    int currentAltitude = getAltitudeFromSensors()*10.0; // 0.1m accuracy!!
-    int currentHoldAltitude = altitudeToHoldTarget*10.0;
+    int currentAltitude = readedAltitude*10.0; // 0.1m accuracy!!
+    int currentHoldAltitude = desiredAltitudeToKeep*10.0;
   #endif
   char buf[7];
 
@@ -445,17 +399,17 @@ void displayAltitude() {
   // - show hold altitude when it is active
   // - show "panic" if 'paniced' out
   boolean isWriteNeeded = false;
-  switch (altitudeHoldState) {
+  switch (altHoldState) {
   case OFF:
     if (lastHoldState != OFF) {
-      lastHoldState=OFF;
+      lastHoldState = OFF;
       memset(buf,0,6);
       isWriteNeeded = true;
     }
     break;
   case ON:
     if ((lastHoldState != ON) || (lastHoldAltitude != currentHoldAltitude)) {
-      lastHoldState=ON;
+      lastHoldState = ON;
       lastHoldAltitude=currentHoldAltitude;
       #ifdef feet
         snprintf(buf,7,"\11%4df",currentHoldAltitude);
@@ -471,8 +425,8 @@ void displayAltitude() {
     }
     break;
   case ALTPANIC:
-    if (lastHoldState!=ALTPANIC) {
-      lastHoldState=ALTPANIC;
+    if (lastHoldState != ALTPANIC) {
+      lastHoldState = ALTPANIC;
       snprintf(buf,7,"\11panic");
       isWriteNeeded = true;
     }
@@ -492,8 +446,8 @@ void displayAltitude() {
 
 int lastHeading = 361; // bogus to force update
 
-void displayHeading() {
-  int currentHeading = kinematicsGetDegreesHeading(ZAXIS);
+void displayHeading(int currentHeading) {
+  
   if (currentHeading != lastHeading) {
     char buf[6];
     snprintf(buf,6,"\6%3d\7",currentHeading); // \6 is compass \7 is degree symbol
@@ -512,8 +466,8 @@ unsigned long prevTime = 0;           // previous time since start when OSD.upda
 unsigned int prevArmedTimeSecs = 111; // bogus to force update
 unsigned long armedTime = 0;          // time motors have spent armed
 
-void displayFlightTime() {
-  if (motorArmed == ON) {
+void displayFlightTime(byte areMotorsArmed) {
+  if (areMotorsArmed == ON) {
     armedTime += ( currentTime-prevTime );
   }
 
@@ -569,12 +523,9 @@ void displayRSSI() {
 
 byte AIoldline[5] = {0,0,0,0,0};
 
-void displayArtificialHorizon() {
+void displayArtificialHorizon(float roll, float pitch) {
 
-  const float roll  = kinematicsAngle[XAXIS];
-  const float pitch = kinematicsAngle[YAXIS];
   short AIrows[5]   = {0,0,0,0,0};  //Holds the row, in pixels, of AI elements: pitch then roll from left to right.
-
   //Calculate row of new pitch lines
   AIrows[0] = constrain( (int)AI_CENTRE + (int)((pitch/AI_MAX_PITCH_ANGLE)*(AI_CENTRE-AI_TOP_PIXEL) ), AI_TOP_PIXEL, AI_BOTTOM_PIXEL );  //centre + proportion of full scale
   char pitchLine = LINE_ROW_0 + (AIrows[0] % 18);
@@ -622,10 +573,10 @@ void displayArtificialHorizon() {
 
 byte lastFlightMode = 9;
 
-void displayReticle() {
+void displayReticle(byte flightMode) {
 
   if (lastFlightMode != flightMode) {
-    writeChars( (RATE_FLIGHT_MODE == flightMode) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
+    writeChars( (flightMode == 0) ? "\1\2" : "\3\4", 2, 0, RETICLE_ROW, RETICLE_COL ); //write 2 chars to row (middle), column 14
     lastFlightMode = flightMode;
   }
 }
@@ -673,66 +624,7 @@ byte displayNotify(){
   return 0; // nothing was done
 }
 
-
-byte OSDsched = 0;
-
-void updateOSD() {
-
-  // OSD is updated fully in 4 rounds, these are (using bit)
-  // 0x01 - Attitude Indicator
-  // 0x02 - Altitude, Heading, Timer, RSSI, Reticle
-  // 0x04 - Attitude Indicator
-  // 0x08 - Battery info
-
-  // Check notify first, if it did something we dont't have time for other stuff
-  if (displayNotify()) {
-    return;
-  }
-
-  #ifdef ShowAttitudeIndicator
-    if ((OSDsched&0x01) || (OSDsched&0x04)) {
-      displayArtificialHorizon();
-    }
-  #endif
-
-  if (OSDsched&0x02) {
-    #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-      displayAltitude();
-    #endif
-    #ifdef HeadingMagHold
-      displayHeading();
-    #endif
-    #ifdef ShowFlightTimer
-      displayFlightTime();
-    #endif
-    #ifdef ShowRSSI
-      displayRSSI();
-    #endif
-    #ifdef ShowReticle
-      displayReticle();
-    #endif
-  }
-
-  if (OSDsched&0x08) {
-    #ifdef BattMonitor
-      displayVoltage();
-    #endif
-  }
-  OSDsched <<= 1;
-  if (OSDsched & 0x10) {
-    OSDsched = 0x01;
-  }
-}
-
 void initializeOSD() {
-
-  pinMode( CS, OUTPUT );
-  pinMode( 53, OUTPUT ); //Default CS pin - needs to be output or SPI peripheral will behave as a slave instead of master
-  digitalWrite( CS, HIGH );
-
-  pinMode( DOUT, OUTPUT );
-  pinMode( DIN, INPUT );
-  pinMode( SCK, OUTPUT );
 
   // SPCR = 01010000
   // interrupt disabled,spi enabled,msb 1st,master,clk low when idle,

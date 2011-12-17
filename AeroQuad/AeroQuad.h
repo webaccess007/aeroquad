@@ -34,9 +34,6 @@
 //#define BAUD 111111 // use this to be compatible with USB and XBee connections
 //#define BAUD 57600
 
-#define ON 1
-#define OFF 0
-
 // Analog Reference Value
 // This value provided from Configurator
 // Use a DMM to measure the voltage between AREF and GND
@@ -118,7 +115,7 @@ void processAltitudeHold();
  * Altitude control global declaration
  */
 #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
-  #define ALTPANIC 2 // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+ // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
   int altitudeHoldBump = 90;
   int altitudeHoldPanicStickMovement = 250;
 
