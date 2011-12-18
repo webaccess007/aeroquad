@@ -146,7 +146,6 @@ void readReceiver() {
   // No xmitFactor reduction applied for throttle, mode and AUX
   for (byte channel = THROTTLE; channel < lastChannel; channel++) {
     receiverCommand[channel] = receiverCommandSmooth[channel];
-	receiverCommand[channel] = receiverCommand[channel] - (receiverCommand[channel] % 8);
   }	
 }
   
