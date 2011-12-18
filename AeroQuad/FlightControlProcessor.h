@@ -193,7 +193,7 @@ void processMinMaxCommand()
     
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     if (maxMotor > MAXCOMMAND) {
-      motorCommand[motor] =  motorCommand[motor] - (maxMotor - MAXCHECK);
+      motorCommand[motor] =  motorCommand[motor] - (maxMotor - MAXCOMMAND);
     }
   }
 }
