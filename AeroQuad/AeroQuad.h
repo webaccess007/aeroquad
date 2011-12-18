@@ -87,7 +87,7 @@ int testCommand = 1000;
 #define ATTITUDE_FLIGHT_MODE 1
 byte flightMode = RATE_FLIGHT_MODE;
 unsigned long frameCounter = 0; // main loop executive frame counter
-int minAcro = 0; // Read in from EEPROM, defines min throttle during flips
+int minAcro = 1150; // Read in from EEPROM, defines min throttle during flips
 
 float G_Dt = 0.002; 
 int throttle = 1000;

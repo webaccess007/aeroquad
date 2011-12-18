@@ -82,6 +82,8 @@ void initializeReceiver(int nbChannel) {
   PPM_PIN_INTERRUPT
 }
 
+//int oldReceiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+
 void readReceiver() {
   
   for(byte channel = XAXIS; channel < lastChannel; channel++) {
@@ -107,9 +109,9 @@ void readReceiver() {
       // No xmitFactor reduction applied for throttle, mode and
       receiverCommand[channel] = receiverCommandSmooth[channel];
 	}
-	receiverCommand[channel] = receiverCommand[channel] - (receiverCommand[channel] % 8);
   }
 }
+
 
 #endif
 

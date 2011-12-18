@@ -52,13 +52,13 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-#define quadXConfig
+//#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-//#define hexY6Config
+#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -69,10 +69,10 @@
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
 // Please refer to the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// Also check the http://aeroquad.com/showwiki.php?title=Flight+Configurations for more detail on the 3.0 motor changes 
+// Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
+//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -98,10 +98,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-//#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
-//#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
-//#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
+#define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
+#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -1112,11 +1112,7 @@
 //********************************************************
 #if defined (WirelessTelemetry) 
   #if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-    #if defined (AutonavShield)
-      #define SERIAL_PORT Serial2
-    #else
-      #define SERIAL_PORT Serial3
-    #endif
+    #define SERIAL_PORT Serial3
   #else    // force 328p to use the normal port
     #define SERIAL_PORT Serial
   #endif

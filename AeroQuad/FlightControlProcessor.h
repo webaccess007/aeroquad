@@ -168,7 +168,6 @@ void processHardManuevers() {
   }
 }
 
-
 /**
  * processMinMaxCommand
  *
@@ -179,7 +178,7 @@ void processMinMaxCommand()
 {
   for (byte motor = 0; motor < LASTMOTOR; motor++)
   {
-    motorMinCommand[motor] = MINTHROTTLE;
+    motorMinCommand[motor] = minAcro;
     motorMaxCommand[motor] = MAXCOMMAND;
   }
 
@@ -233,17 +232,18 @@ void processFlightControl() {
   // Allows quad to do acrobatics by lowering power to opposite motors during hard manuevers
   processHardManuevers();    
   
+    // If throttle in minimum position, don't apply yaw
+  if (receiverCommand[THROTTLE] < MINCHECK) {
+    for (byte motor = 0; motor < LASTMOTOR; motor++) {
+      motorMinCommand[motor] = minAcro;
+    }
+  }
+  
   // Apply limits to motor commands
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     motorCommand[motor] = constrain(motorCommand[motor], motorMinCommand[motor], motorMaxCommand[motor]);
   }
 
-  // If throttle in minimum position, don't apply yaw
-  if (receiverCommand[THROTTLE] < MINCHECK) {
-    for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motorCommand[motor] = MINTHROTTLE;
-    }
-  }
 
   // ESC Calibration
   if (motorArmed == OFF) {
