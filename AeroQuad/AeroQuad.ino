@@ -34,13 +34,13 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
@@ -151,15 +151,15 @@
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
 //#define OSD
-#define ShowReticle            //Displays a reticle in the centre of the screen.
-#define ShowFlightTimer        //Displays how long the motors have been armed for since the Arduino was last reset
-#define ShowAttitudeIndicator
-#define ShowCallSign
-//#define ShowRSSI
-//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
 //#define PAL
-#define AUTODETECT_VIDEO_STANDARD // detect automatically
+//#define AUTODETECT_VIDEO_STANDARD // detect automatically
+//#define ShowReticle            // Displays a reticle in the centre of the screen.
+//#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
+//#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
+//#define ShowCallSign           // Show AQ string 
+//#define ShowRSSI               // Show Receiver RSSI
+//#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 // Menu system, currently only usable with OSD
 //#define OSD_SYSTEM_MENU
