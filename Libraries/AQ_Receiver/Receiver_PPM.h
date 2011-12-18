@@ -99,12 +99,16 @@ void readReceiver() {
   }
 	
   // Reduce receiver commands using xmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
-    if (channel < THROTTLE)
+  for (byte channel = XAXIS; channel < lastChannel; channel++) {
+    if (channel < THROTTLE) {
       receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-    else
+    }	  
+    else {
       // No xmitFactor reduction applied for throttle, mode and
       receiverCommand[channel] = receiverCommandSmooth[channel];
+	}
+	receiverCommand[channel] = receiverCommand[channel] - (receiverCommand[channel] % 8);
+  }
 }
 
 #endif
