@@ -33,13 +33,7 @@
  */
 void readPilotCommands() {
   
-  readReceiver(); // Read quad configuration commands from transmitter when throttle down
-  
-  // limmit the receiver so that user can still control the craft at about max throttle.
-  // Process still have an offset to correct the the attitude with motor throttle 
-  // This may be not necessaire... @see kenny
-  receiverCommand[THROTTLE] = constrain(receiverCommand[THROTTLE],MINCOMMAND,MAXCHECK-50);  
-  //////////////////
+  readReceiver(); 
   if (receiverCommand[THROTTLE] < MINCHECK) {
     zeroIntegralError();
 
