@@ -34,13 +34,13 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
@@ -52,18 +52,25 @@
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
 
 //#define CHANGE_YAW_DIRECTION // if you want to reverse the yaw correction direction
+
+// ******************************************************************************************************************************
+// Define minimum speed for your motors to run.  this also defines minimum throttle during flips
+// Some motors or ESC setups may need more or less define here to start all the montors evenly.
+// ******************************************************************************************************************************
+#define MIN_ARMED_THROTTLE 1150
+
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -88,8 +95,8 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
@@ -98,10 +105,10 @@
 // Battery Monitor Options
 // For more information on how to setup Battery Monitor please refer to http://aeroquad.com/showwiki.php?title=BatteryMonitor+h
 // *******************************************************************************************************************************
-#define BattMonitor            // define your personal specs in BatteryMonitor.h! Full documentation with schematic there
+#define BattMonitor            // Enable Battery monitor
 #define BattMonitorAutoDescent // if you want the craft to auto descent when the battery reach the alarm voltage
 #define BattCellCount 3        // set number of Cells (0 == autodetect 1S-3S)
-#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
+//#define POWERED_BY_VIN         // Uncomment this if your v2.x is powered directly by the vin/gnd of the arduino
 
 //
 // *******************************************************************************************************************************
@@ -109,7 +116,8 @@
 // *******************************************************************************************************************************
 //#define RemotePCReceiver // EXPERIMENTAL Use PC as transmitter via serial communicator with XBEE
 //#define ReceiverPPM // Use a ppm receiver
-// You need to select one of those channel order definition with PPM receiver
+//#define ReceiverHWPPM // Use a ppm receiver with HW timer, needs a HW modification (see Libraries/AQ_Receiver/Receiver_HWPPM.h)
+// You need to select one of these channel order definitions for PPM receiver
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_1 //For Graupner/Spektrum (DEFAULT)
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_2 //For Robe/Hitec/Futaba
 //#define SKETCH_SERIAL_SUM_PPM SERIAL_SUM_PPM_3 //For some Hitec/Sanwa/Others
@@ -153,7 +161,7 @@
 //#define OSD
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
 //#define PAL
-//#define AUTODETECT_VIDEO_STANDARD // detect automatically
+//#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
 //#define ShowReticle            // Displays a reticle in the centre of the screen.
 //#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
 //#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
@@ -164,11 +172,6 @@
 // Menu system, currently only usable with OSD
 //#define OSD_SYSTEM_MENU
 
-// ******************************************************************************************************************************
-// Define minimum speed for your motors to run.  this also defines minimum throttle during flips
-// Some motors or ESC setups may need more or less define here to start all the montors evenly.
-// ******************************************************************************************************************************
-#define MIN_MOTOR_COMMAND 1150;
 
 
 /****************************************************************************
@@ -1011,7 +1014,9 @@
 //********************************************************
 //******************** RECEIVER DECLARATION **************
 //********************************************************
-#if defined ReceiverPPM
+#if defined ReceiverHWPPM
+  #include <Receiver_HWPPM.h>
+#elif defined ReceiverPPM
   #include <Receiver_PPM.h>
 #elif defined (AeroQuad_Mini) && (defined (hexPlusConfig) || defined (hexXConfig) || defined (hexY6Config))
   #include <Receiver_PPM.h>
