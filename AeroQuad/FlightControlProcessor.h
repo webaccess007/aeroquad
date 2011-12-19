@@ -162,7 +162,7 @@ void processHardManuevers() {
       (receiverCommand[YAXIS] > MAXCHECK)) {  
         
     for (int motor = 0; motor < LASTMOTOR; motor++) {
-      motorMinCommand[motor] = minAcro;
+      motorMinCommand[motor] = minArmedThrottle;
       motorMaxCommand[motor] = MAXCOMMAND;
     }
   }
@@ -178,7 +178,7 @@ void processMinMaxCommand()
 {
   for (byte motor = 0; motor < LASTMOTOR; motor++)
   {
-    motorMinCommand[motor] = minAcro;
+    motorMinCommand[motor] = minArmedThrottle;
     motorMaxCommand[motor] = MAXCOMMAND;
   }
 
@@ -235,7 +235,7 @@ void processFlightControl() {
     // If throttle in minimum position, don't apply yaw
   if (receiverCommand[THROTTLE] < MINCHECK) {
     for (byte motor = 0; motor < LASTMOTOR; motor++) {
-      motorMinCommand[motor] = minAcro;
+      motorMinCommand[motor] = minArmedThrottle;
     }
   }
   
@@ -243,7 +243,6 @@ void processFlightControl() {
   for (byte motor = 0; motor < LASTMOTOR; motor++) {
     motorCommand[motor] = constrain(motorCommand[motor], motorMinCommand[motor], motorMaxCommand[motor]);
   }
-
 
   // ESC Calibration
   if (motorArmed == OFF) {
