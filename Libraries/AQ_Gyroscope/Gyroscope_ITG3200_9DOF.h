@@ -18,20 +18,20 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef _AEROQUAD_GYROSCOPE_ITG3200_H_
-#define _AEROQUAD_GYROSCOPE_ITG3200_H_
+#ifndef _AEROQUAD_GYROSCOPE_ITG3200_9DOF_H_
+#define _AEROQUAD_GYROSCOPE_ITG3200_9DOF_H_
 
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
 #include <Gyroscope_ITG3200Defines.h>
 
-#define ITG3200_ADDRESS					0x69
+#define ITG3200_ADDRESS					0x68
 
 int gyroAddress = ITG3200_ADDRESS;
   
 void initializeGyro() {
 
-  if (readWhoI2C(gyroAddress) != gyroAddress) {
+  if (readWhoI2C(gyroAddress) != gyroAddress+1) {
 	sensorsState |= GYRO_BIT_STATE;
   }
 	
@@ -50,9 +50,9 @@ void measureGyro() {
   // orientation.  See TBD for details.  If your shield is not installed in this
   // orientation, this is where you make the changes.
   int gyroADC[3];
-  gyroADC[XAXIS]  = ((Wire.read() << 8) | Wire.read())  - gyroZero[XAXIS];
-  gyroADC[YAXIS] = gyroZero[YAXIS] - ((Wire.read() << 8) | Wire.read());
-  gyroADC[ZAXIS]   = gyroZero[ZAXIS] - ((Wire.read() << 8) | Wire.read());
+  gyroADC[YAXIS] = ((Wire.read() << 8) | Wire.read()) - gyroZero[YAXIS];
+  gyroADC[XAXIS] = ((Wire.read() << 8) | Wire.read()) - gyroZero[XAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - ((Wire.read() << 8) | Wire.read());
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
@@ -70,17 +70,19 @@ void measureGyroSum() {
   sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
   
-  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    gyroSample[axis] += (Wire.read() << 8) | Wire.read();
-  }
+  gyroSample[YAXIS] += ((Wire.read() << 8) | Wire.read());
+  gyroSample[XAXIS] += ((Wire.read() << 8) | Wire.read());
+  gyroSample[ZAXIS] += ((Wire.read() << 8) | Wire.read());
+  
   gyroSampleCount++;
 }
 
 void evaluateGyroRate() {
+
   int gyroADC[3];
-  gyroADC[XAXIS]  = (gyroSample[XAXIS] / gyroSampleCount)  - gyroZero[XAXIS];
-  gyroADC[YAXIS] = gyroZero[YAXIS] - (gyroSample[YAXIS] / gyroSampleCount);
-  gyroADC[ZAXIS]   = gyroZero[ZAXIS] -   (gyroSample[ZAXIS]   / gyroSampleCount);
+  gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount)  - gyroZero[XAXIS];
+  gyroADC[YAXIS] = (gyroSample[YAXIS] / gyroSampleCount)  - gyroZero[YAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] -   (gyroSample[ZAXIS]   / gyroSampleCount);
   gyroSample[0] = 0.0;
   gyroSample[1] = 0.0;
   gyroSample[2] = 0.0;
@@ -100,15 +102,22 @@ void evaluateGyroRate() {
 
 void calibrateGyro() {
   int findZero[FINDZERO];
-    
-  for (byte axis = 0; axis < 3; axis++) {
-    for (int i=0; i<FINDZERO; i++) {
-      sendByteI2C(gyroAddress, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
-      findZero[i] = readWordI2C(gyroAddress);
-      delay(10);
+    for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+        findZero[i] = readWordI2C(gyroAddress);
+        delay(10);
+      }
+      if (calAxis == XAXIS) {
+        gyroZero[YAXIS] = findMedianInt(findZero, FINDZERO);
+      }
+      else if (calAxis == YAXIS) {
+        gyroZero[XAXIS] = findMedianInt(findZero, FINDZERO);
+      }
+      else {
+        gyroZero[ZAXIS] = findMedianInt(findZero, FINDZERO);
+      }
     }
-    gyroZero[axis] = findMedianInt(findZero, FINDZERO);
-  }
 }
 
 #endif

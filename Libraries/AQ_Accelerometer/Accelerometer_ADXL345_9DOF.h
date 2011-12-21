@@ -32,8 +32,8 @@ void initializeAccel() {
     sensorsState |= ACCEL_BIT_STATE;
   }
 	
-  updateRegisterI2C(ACCEL_ADDRESS, 0x2D, 1<<3); 	// set device to *measure*
-  updateRegisterI2C(ACCEL_ADDRESS, 0x31, 0x08); 	// set full range and +/- 2G
+  updateRegisterI2C(ACCEL_ADDRESS, 0x2D, 1<<3); // set device to *measure*
+  updateRegisterI2C(ACCEL_ADDRESS, 0x31, 0x08); // set full range and +/- 2G
   updateRegisterI2C(ACCEL_ADDRESS, 0x2C, 8+2+1);    // 200hz sampling
   delay(10); 
 }
@@ -43,18 +43,19 @@ void measureAccel() {
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
 
-  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[axis] + runTimeAccelBias[axis];
-  }
+  meterPerSec[YAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSec[XAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSec[ZAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
 }
 
 void measureAccelSum() {
 
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
-  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    accelSample[axis] += ((Wire.read()|(Wire.read() << 8)));
-  }
+  
+  accelSample[YAXIS] += ((Wire.read()|(Wire.read() << 8)));
+  accelSample[XAXIS] += ((Wire.read()|(Wire.read() << 8)));
+  accelSample[ZAXIS] += ((Wire.read()|(Wire.read() << 8)));
   accelSampleCount++;
 }
 
