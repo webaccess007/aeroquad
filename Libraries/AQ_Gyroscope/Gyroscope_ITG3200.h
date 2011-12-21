@@ -23,17 +23,9 @@
 
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
+#include <Gyroscope_ITG3200Defines.h>
 
 #define ITG3200_ADDRESS					0x69
-#define ITG3200_MEMORY_ADDRESS			0x1D
-#define ITG3200_BUFFER_SIZE				6
-#define ITG3200_RESET_ADDRESS			0x3E
-#define ITG3200_RESET_VALUE				0x80
-#define ITG3200_LOW_PASS_FILTER_ADDR	0x16
-#define ITG3200_LOW_PASS_FILTER_VALUE	0x1D	// 10Hz low pass filter
-#define ITG3200_OSCILLATOR_ADDR			0x3E
-#define ITG3200_OSCILLATOR_VALUE		0x01	// use X gyro oscillator
-#define ITG3200_SCALE_TO_RADIANS		823.626831 // 14.375 LSBs per °/sec, / Pi / 180
 
 int gyroAddress = ITG3200_ADDRESS;
   
@@ -105,8 +97,6 @@ void evaluateGyroRate() {
   }
   gyroLastMesuredTime = currentTime;
 }
-
-
 
 void calibrateGyro() {
   int findZero[FINDZERO];

@@ -82,10 +82,7 @@ void initializeMagnetometer() {
 }
 
 void measureMagnetometer(float roll, float pitch) {
-  float magX;
-  float magY;
-  float tmp;
-    
+   
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
@@ -119,14 +116,14 @@ void measureMagnetometer(float roll, float pitch) {
   float cosPitch = cos(pitch);
   float sinPitch = sin(pitch);
 
-  magX = (float)measuredMagX * cosPitch + 
+  float magX = (float)measuredMagX * cosPitch + 
          (float)measuredMagY * sinRoll * sinPitch + 
          (float)measuredMagZ * cosRoll * sinPitch;
            
-  magY = (float)measuredMagY * cosRoll - 
+  float magY = (float)measuredMagY * cosRoll - 
          (float)measuredMagZ * sinRoll;
 		 
-  tmp  = sqrt(magX * magX + magY * magY);
+  float tmp = sqrt(magX * magX + magY * magY);
     
   hdgX = magX / tmp;
   hdgY = -magY / tmp;

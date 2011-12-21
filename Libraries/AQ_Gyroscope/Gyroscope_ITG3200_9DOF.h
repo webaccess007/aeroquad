@@ -23,6 +23,7 @@
 
 #include <Gyroscope.h>
 #include <SensorsStatus.h>
+#include <Gyroscope_ITG3200Defines.h>
 
 #define ITG3200_ADDRESS					0x68
 
@@ -34,15 +35,15 @@ void initializeGyro() {
 	sensorsState |= GYRO_BIT_STATE;
   }
 	
-  gyroScaleFactor = radians(1.0 / 14.375);    //  ITG3200 14.375 LSBs per °/sec
-  updateRegisterI2C(gyroAddress, 0x3E, 0x80); // send a reset to the device
-  updateRegisterI2C(gyroAddress, 0x16, 0x1D); // 10Hz low pass filter
-  updateRegisterI2C(gyroAddress, 0x3E, 0x01); // use internal oscillator 
+  gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec
+  updateRegisterI2C(gyroAddress, ITG3200_RESET_ADDRESS, ITG3200_RESET_VALUE); // send a reset to the device
+  updateRegisterI2C(gyroAddress, ITG3200_LOW_PASS_FILTER_ADDR, ITG3200_MEMORY_ADDRESS); // 10Hz low pass filter
+  updateRegisterI2C(gyroAddress, ITG3200_RESET_ADDRESS, ITG3200_OSCILLATOR_VALUE); // use internal oscillator 
 }
     
 void measureGyro() {
-  sendByteI2C(gyroAddress, 0x1D);
-  Wire.requestFrom(gyroAddress, 6);
+  sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
     
   // The following 3 lines read the gyro and assign it's data to gyroADC
   // in the correct order and phase to suit the standard shield installation
@@ -66,17 +67,18 @@ void measureGyro() {
 }
 
 void measureGyroSum() {
-  sendByteI2C(gyroAddress, 0x1D);
-  Wire.requestFrom(gyroAddress, 6);
+  sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
+  Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
   
-  gyroSample[YAXIS] = ((Wire.read() << 8) | Wire.read());
-  gyroSample[XAXIS] = ((Wire.read() << 8) | Wire.read());
-  gyroSample[ZAXIS] = ((Wire.read() << 8) | Wire.read());
-
+  gyroSample[YAXIS] += ((Wire.read() << 8) | Wire.read());
+  gyroSample[XAXIS] += ((Wire.read() << 8) | Wire.read());
+  gyroSample[ZAXIS] += ((Wire.read() << 8) | Wire.read());
+  
   gyroSampleCount++;
 }
 
 void evaluateGyroRate() {
+
   int gyroADC[3];
   gyroADC[XAXIS] = (gyroSample[XAXIS] / gyroSampleCount)  - gyroZero[XAXIS];
   gyroADC[YAXIS] = (gyroSample[YAXIS] / gyroSampleCount)  - gyroZero[YAXIS];
@@ -98,29 +100,24 @@ void evaluateGyroRate() {
   gyroLastMesuredTime = currentTime;
 }
 
-
-
 void calibrateGyro() {
   int findZero[FINDZERO];
-  for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
-    for (int i=0; i<FINDZERO; i++) {
-      sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
-      findZero[i] = readWordI2C(gyroAddress);
-      delay(10);
+    for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
+      for (int i=0; i<FINDZERO; i++) {
+        sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
+        findZero[i] = readWordI2C(gyroAddress);
+        delay(10);
+      }
+      if (calAxis == XAXIS) {
+        gyroZero[YAXIS] = findMedianInt(findZero, FINDZERO);
+      }
+      else if (calAxis == YAXIS) {
+        gyroZero[XAXIS] = findMedianInt(findZero, FINDZERO);
+      }
+      else {
+        gyroZero[ZAXIS] = findMedianInt(findZero, FINDZERO);
+      }
     }
-    if (calAxis == XAXIS) {
-      gyroZero[YAXIS] = findMedianInt(findZero, FINDZERO);
-	  Serial.print("Y = ");Serial.print(gyroZero[YAXIS]);Serial.print(",");
-	}
-    else if (calAxis == YAXIS) {
-      gyroZero[XAXIS] = findMedianInt(findZero, FINDZERO);
-	  Serial.print("X = ");Serial.print(gyroZero[YAXIS]);Serial.print(",");
-	}
-    else {
-      gyroZero[ZAXIS] = findMedianInt(findZero, FINDZERO);
-	  Serial.print("Z = ");Serial.print(gyroZero[YAXIS]);Serial.print(",");
-	}
-  }
 }
 
 #endif
