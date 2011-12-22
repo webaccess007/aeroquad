@@ -56,7 +56,7 @@ void applyMotorCommand() {
   motorCommand[FRONT_LEFT]    = throttle + motorAxisCommandRoll - motorAxisCommandPitch*2/3;
   motorCommand[FRONT_RIGHT]   = throttle - motorAxisCommandRoll - motorAxisCommandPitch*2/3;
   motorCommand[REAR]          = throttle + motorAxisCommandPitch*4/3;
-  const float yawMotorCommand = constrain(motorAxisCommandYaw,-MAX_RECEIVER_OFFSET-abs(receiverCommand[YAW]),+MAX_RECEIVER_OFFSET+abs(receiverCommand[YAW]));
+  const float yawMotorCommand = constrain(motorAxisCommandYaw,-MAX_RECEIVER_OFFSET-abs(receiverCommand[ZAXIS]),+MAX_RECEIVER_OFFSET+abs(receiverCommand[ZAXIS]));
   motorCommand[SERVO]         = constrain(TRI_YAW_MIDDLE + YAW_DIRECTION * yawMotorCommand, TRI_YAW_CONSTRAINT_MIN, TRI_YAW_CONSTRAINT_MAX);
 }
 
