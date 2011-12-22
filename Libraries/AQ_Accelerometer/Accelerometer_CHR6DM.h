@@ -27,6 +27,7 @@
 CHR6DM *accelChr6dm;
 
 void initializeAccel() {
+  vehicleState |= ACCEL_DETECTED;
 }
 
 void measureAccel() {

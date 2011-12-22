@@ -151,6 +151,7 @@ void sendBinaryFloat(float);
 void sendBinaryuslong(unsigned long);
 void fastTelemetry();
 void comma();
+void reportVehicleState();
 //////////////////////////////////////////////////////
 
 /**

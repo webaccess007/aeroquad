@@ -53,6 +53,7 @@ void inititalizeRangeFinder(byte idx) {
 
   maxRangeFinderRange = 3.0;
   minRangeFinderRange = 0.25;
+  vehicleState |= RANGE_ENABLED;
   
   pinMode(rangeFinderPins[idx], INPUT);
 }

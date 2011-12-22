@@ -29,7 +29,9 @@
 CHR6DM *compassChr6dm;
 float absoluteHeading = 0.0;
 
-void initializeMagnetometer() {}
+void initializeMagnetometer() {
+  vehicleState |= MAG_DETECTED;
+}
 
 void measureMagnetometer(float roll, float pitch) {
   heading = compassChr6dm->data.yaw; //this hardly needs any filtering :)

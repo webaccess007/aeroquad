@@ -212,8 +212,12 @@ void readEEPROM() {
     
   aref = readFloat(AREF_ADR);
   flightMode = readFloat(FLIGHTMODE_ADR);
-  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
   accelOneG = readFloat(ACCEL_1G_ADR);
+  headingHoldConfig = readFloat(HEADINGHOLD_ADR);
+  if (headingHoldConfig)
+    vehicleState |= 1<<HEADINGHOLD_ENABLED;
+  else
+    vehicleState |= 0<<HEADINGHOLD_ENABLED;
 }
 
 void writeEEPROM(){

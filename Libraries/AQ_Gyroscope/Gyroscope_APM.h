@@ -27,6 +27,7 @@
 
 void initializeGyro() {
   gyroScaleFactor = radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
+	vehicleState |= GYRO_DETECTED;
 }
   
 void measureGyro() {

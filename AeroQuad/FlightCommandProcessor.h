@@ -108,12 +108,14 @@ void readPilotCommands() {
          isStoreAltitudeNeeded = false;
        }
        altitudeHoldState = ON;
+       vehicleState |= ALTITUDEHOLD_ENABLED;
      }
      // note, Panic will stay set until Althold is toggled off/on
    } 
    else {
      isStoreAltitudeNeeded = true;
      altitudeHoldState = OFF;
+     vehicleState |= 0<<ALTITUDEHOLD_ENABLED;
    }
   #endif
 }

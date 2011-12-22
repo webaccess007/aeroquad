@@ -28,7 +28,8 @@
 
 CHR6DM *gyroChr6dm;
   
-void initializeGyro(){
+void initializeGyro() {
+  vehicleState |= GYRO_DETECTED;
 }
   
 void measureGyro() {

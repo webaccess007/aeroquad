@@ -40,6 +40,10 @@ void initializeMagnetometer() {
 
   delay(10);                             // Power up delay **
    
+  if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
+	  vehicleState |= MAG_DETECTED;
+  }    
+
   updateRegisterI2C(COMPASS_ADDRESS, 0x01, SENSOR_GAIN); // Gain as defined above
   delay(20);
   updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
