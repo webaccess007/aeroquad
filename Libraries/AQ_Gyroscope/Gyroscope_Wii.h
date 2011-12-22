@@ -44,6 +44,7 @@ float wmpLowRangeToRadPerSec  = 0.001082308;
 float wmpHighRangeToRadPerSec = 0.005844461;
   
 void initializeGyro() {
+	vehicleState |= GYRO_DETECTED;
 }
 
 void measureGyro() {

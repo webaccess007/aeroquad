@@ -82,6 +82,10 @@ void readSerialCommand() {
       heading = 0;
       relativeHeading = 0;
       headingHold = 0;
+      if (headingHoldConfig)
+        vehicleState |= 1<<HEADINGHOLD_ENABLED;
+      else
+        vehicleState |= 0<<HEADINGHOLD_ENABLED;
       break;
       
     case 'D': // Altitude hold PID
@@ -472,6 +476,11 @@ void sendSerialTelemetry() {
     #endif
     queryType = 'X';
     break;
+
+  case 'q': // Send Vehicle State Value
+    SERIAL_PRINTLN(vehicleState);
+    queryType = 'X';
+    break;
     
   case 'r': // Vehicle attitude
     PrintValueComma(kinematicsAngle[XAXIS]);
@@ -535,63 +544,8 @@ void sendSerialTelemetry() {
     queryType = 'X';
     break;
     
-  case '#': // Send software configuration
-    // Determine which hardware is used to define max/min sensor values for Configurator plots
-    SERIAL_PRINT("SW Version: ");
-    SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
-    SERIAL_PRINT("Board Type: ");
-    #if defined(AeroQuad_v1)
-      SERIAL_PRINTLN("v1.x");
-    #elif defined(AeroQuadMega_v1)
-      SERIAL_PRINTLN("Mega v1.x");
-    #elif defined(AeroQuad_v18)
-      SERIAL_PRINTLN("v1.8 and greater");
-    #elif defined(AeroQuadMega_v2)
-      SERIAL_PRINTLN("Mega v2");
-    #elif defined(AeroQuadMega_v21)
-      SERIAL_PRINTLN("Mega v21");
-    #elif defined(AutonavShield)
-      SERIAL_PRINTLN("AutonavShield");
-    #elif defined(AeroQuad_Wii)
-      SERIAL_PRINTLN("Wii");
-    #elif defined(AeroQuadMega_Wii)
-      SERIAL_PRINTLN("Mega Wii");
-    #elif defined(ArduCopter)
-      SERIAL_PRINTLN("ArduCopter");
-    #elif defined(AeroQuadMega_CHR6DM)
-      SERIAL_PRINTLN("CHR6DM");
-    #elif defined(APM_OP_CHR6DM)
-      SERIAL_PRINTLN("APM w/ CHR6DM");
-    #elif defined(AeroQuad_Mini)
-      SERIAL_PRINTLN("Mini");
-    #endif
-    // Determine which motor flight configuration for Configurator GUI
-    SERIAL_PRINT("Flight Config: ");
-    #if defined(quadPlusConfig)
-      SERIAL_PRINTLN("Quad +");
-    #elif defined(quadXConfig) 
-      SERIAL_PRINTLN("Quad X");
-    #elif defined (quadY4Config)
-      SERIAL_PRINTLN("Quad Y4");
-    #elif defined (triConfig)
-      SERIAL_PRINTLN("Tri");
-    #elif defined(hexPlusConfig)
-      SERIAL_PRINTLN("Hex +");
-    #elif defined(hexXConfig)
-      SERIAL_PRINTLN("Hex X");
-    #elif defined(hexY6Config)
-      SERIAL_PRINTLN("Hex Y6");
-    #elif defined(octoX8Config)
-      SERIAL_PRINTLN("Octo X8");
-    #elif defined(octoXConfig)
-      SERIAL_PRINTLN("Octo X");
-    #elif defined(octoXPlusConfig)
-      SERIAL_PRINTLN("Octo X+");
-    #endif
-    SERIAL_PRINT("Receiver Ch's: ");
-    SERIAL_PRINTLN(LASTCHANNEL);
-    SERIAL_PRINT("Motors: ");
-    SERIAL_PRINTLN(LASTMOTOR);
+  case '#': // Send configuration
+    reportVehicleState();
     queryType = 'X';
     break;
     
@@ -736,6 +690,80 @@ void fastTelemetry()
 }
 #endif // BinaryWrite
 
+void printVehicleState(char *sensorName, unsigned long state, char *message) {
+  SERIAL_PRINT(sensorName);
+  SERIAL_PRINT(": ");
+  if (!(vehicleState & state))
+    SERIAL_PRINT("Not ");
+  SERIAL_PRINTLN(message);
+}
+
+void reportVehicleState() {
+  // Tell Configuraotr how many vehicle state values to expect
+  SERIAL_PRINTLN(14);
+  SERIAL_PRINT("SW Version: ");
+  SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
+  SERIAL_PRINT("Board Type: ");
+  #if defined(AeroQuad_v1)
+    SERIAL_PRINTLN("v1.x");
+  #elif defined(AeroQuadMega_v1)
+    SERIAL_PRINTLN("Mega v1.x");
+  #elif defined(AeroQuad_v18)
+    SERIAL_PRINTLN("v1.8 and greater");
+  #elif defined(AeroQuadMega_v2)
+    SERIAL_PRINTLN("Mega v2");
+  #elif defined(AeroQuadMega_v21)
+    SERIAL_PRINTLN("Mega v21");
+  #elif defined(AutonavShield)
+    SERIAL_PRINTLN("AutonavShield");
+  #elif defined(AeroQuad_Wii)
+    SERIAL_PRINTLN("Wii");
+  #elif defined(AeroQuadMega_Wii)
+    SERIAL_PRINTLN("Mega Wii");
+  #elif defined(ArduCopter)
+    SERIAL_PRINTLN("ArduCopter");
+  #elif defined(AeroQuadMega_CHR6DM)
+    SERIAL_PRINTLN("CHR6DM");
+  #elif defined(APM_OP_CHR6DM)
+    SERIAL_PRINTLN("APM w/ CHR6DM");
+  #elif defined(AeroQuad_Mini)
+    SERIAL_PRINTLN("Mini");
+  #endif
+  SERIAL_PRINT("Flight Config: ");
+  #if defined(quadPlusConfig)
+    SERIAL_PRINTLN("Quad +");
+  #elif defined(quadXConfig) 
+    SERIAL_PRINTLN("Quad X");
+  #elif defined (quadY4Config)
+    SERIAL_PRINTLN("Quad Y4");
+  #elif defined (triConfig)
+    SERIAL_PRINTLN("Tri");
+  #elif defined(hexPlusConfig)
+    SERIAL_PRINTLN("Hex +");
+  #elif defined(hexXConfig)
+    SERIAL_PRINTLN("Hex X");
+  #elif defined(hexY6Config)
+    SERIAL_PRINTLN("Hex Y6");
+  #elif defined(octoX8Config)
+    SERIAL_PRINTLN("Octo X8");
+  #elif defined(octoXConfig)
+    SERIAL_PRINTLN("Octo X");
+  #elif defined(octoXPlusConfig)
+    SERIAL_PRINTLN("Octo X+");
+  #endif
+  SERIAL_PRINT("Receiver Ch's: ");
+  SERIAL_PRINTLN(LASTCHANNEL);
+  SERIAL_PRINT("Motors: ");
+  SERIAL_PRINTLN(LASTMOTOR);
+  printVehicleState("Gyroscope", GYRO_DETECTED, "Detected");
+  printVehicleState("Accelerometer", ACCEL_DETECTED, "Detected");
+  printVehicleState("Barometer", BARO_DETECTED, "Detected");
+  printVehicleState("Magnetometer", MAG_DETECTED, "Detected");
+  printVehicleState("Heading Hold", HEADINGHOLD_ENABLED, "Enabled");
+  printVehicleState("Altitude Hold", ALTITUDEHOLD_ENABLED, "Enabled");
+  printVehicleState("Battery Monitor", BATTMONITOR_ENABLED, "Enabled");
+  printVehicleState("Camera Stability", CAMERASTABLE_ENABLED, "Enabled");
+  printVehicleState("Range Detection", RANGE_ENABLED, "Enabled");
+}
+
 #endif // _AQ_SERIAL_COMM_
-
-

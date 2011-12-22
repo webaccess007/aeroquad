@@ -29,7 +29,7 @@
 void initializeAccel() {
 
   if (readWhoI2C(ACCEL_ADDRESS) !=  0xE5) { 			// page 14 of datasheet
-    sensorsState |= ACCEL_BIT_STATE;
+    vehicleState |= ACCEL_DETECTED;
   }
 	
   updateRegisterI2C(ACCEL_ADDRESS, 0x2D, 1<<3); // set device to *measure*

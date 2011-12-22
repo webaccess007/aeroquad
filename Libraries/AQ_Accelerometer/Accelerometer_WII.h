@@ -25,7 +25,7 @@
 #include <Platform_Wii.h>
 
 void initializeAccel() {
-  // do nothing here
+  vehicleState |= ACCEL_DETECTED;
 }
 
 void measureAccel() {

@@ -24,7 +24,7 @@
 #include <Accelerometer.h>
 
 void initializeAccel() {
-  // do nothing here
+  vehicleState |= ACCEL_DETECTED;
 }
   
 void measureAccel() {

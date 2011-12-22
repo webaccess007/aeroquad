@@ -46,7 +46,11 @@ void initializeMagnetometer() {
   magCalibration[XAXIS] = 1.0;
   magCalibration[YAXIS] = 1.0;
   magCalibration[ZAXIS] = 1.0;
-    
+
+  if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
+	  vehicleState |= MAG_DETECTED;
+  }    
+
   while (success == false && numAttempts < 5 ) {
      
     numAttempts++;

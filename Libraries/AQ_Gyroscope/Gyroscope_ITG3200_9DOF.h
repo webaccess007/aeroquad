@@ -31,8 +31,8 @@ int gyroAddress = ITG3200_ADDRESS;
   
 void initializeGyro() {
 
-  if (readWhoI2C(gyroAddress) != gyroAddress+1) {
-	sensorsState |= GYRO_BIT_STATE;
+  if (readWhoI2C(gyroAddress) != gyroAddress) {
+	  vehicleState |= GYRO_DETECTED;
   }
 	
   gyroScaleFactor = radians(1.0 / 14.375);  //  ITG3200 14.375 LSBs per °/sec

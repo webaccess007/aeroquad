@@ -71,7 +71,6 @@
 // ******************************************************************************************************************************
 #define MIN_ARMED_THROTTLE 1150
 
-
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
@@ -88,14 +87,14 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-#define FlightAngleARG // Use this if you do not have a magnetometer installed
+//#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
 #define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
 //#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
@@ -1218,6 +1217,9 @@ void setup() {
   #ifdef BattMonitor
     // batteryMonitorAlarmVoltage updated in readEEPROM()
     initializeBatteryMonitor(sizeof(batteryData) / sizeof(struct BatteryData), batteryMonitorAlarmVoltage);
+    vehicleState |= 1<<
+  #else
+    vehicleState |= 0<<BATTMONITOR_ENABLED;
   #endif
 
   // Camera stabilization setup
@@ -1227,6 +1229,9 @@ void setup() {
     setCenterRoll(1500); // Need to figure out nice way to set center position
     setmCameraPitch(318.3);
     setCenterPitch(1300);
+    vehicleState |= 1<<CAMERASTABLE_ENABLED;
+  #else
+    vehicleState |= 0<<CAMERASTABLE_ENABLED;
   #endif
 
   #if defined(MAX7456_OSD)

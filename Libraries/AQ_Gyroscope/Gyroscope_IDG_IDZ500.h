@@ -35,6 +35,7 @@ void setGyroAref(float _aref) {
 } 
 
 void initializeGyro() {
+	vehicleState |= GYRO_DETECTED;
   analogReference(EXTERNAL);
   // Configure gyro auto zero pins
   pinMode (AZPIN, OUTPUT);
