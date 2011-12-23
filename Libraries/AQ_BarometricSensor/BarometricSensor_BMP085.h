@@ -49,17 +49,11 @@ void requestRawPressure() {
   updateRegisterI2C(BMP085_I2C_ADDRESS, 0xF4, 0x34+(overSamplingSetting<<6));
 }
   
-long readRawPressure() {
-  unsigned char msb, lsb, xlsb;
+long readRawPressure(void) {
+
   sendByteI2C(BMP085_I2C_ADDRESS, 0xF6);
   Wire.requestFrom(BMP085_I2C_ADDRESS, 3); // request three bytes
-  while(!Wire.available()); // wait until data available
-  msb = Wire.read();
-  while(!Wire.available()); // wait until data available
-  lsb = Wire.read();
-  while(!Wire.available()); // wait until data available
-  xlsb = Wire.read();
-  return (((long)msb<<16) | ((long)lsb<<8) | ((long)xlsb)) >>(8-overSamplingSetting);
+  return (((unsigned long)Wire.read() << 16) | ((unsigned long)Wire.read() << 8) | ((unsigned long)Wire.read())) >> (8-overSamplingSetting);
 }
 
 void requestRawTemperature() {
@@ -93,27 +87,18 @@ void initializeBaro() {
   }
   
   sendByteI2C(BMP085_I2C_ADDRESS, 0xAA);
-  ac1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xAC);
-  ac2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xAE);
-  ac3 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xB0);
-  ac4 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xB2);
-  ac5 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xB4);
-  ac6 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xB6);
-  b1 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xB8);
-  b2 = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xBA);
-  mb = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xBC);
-  mc = readWordWaitI2C(BMP085_I2C_ADDRESS);
-  sendByteI2C(BMP085_I2C_ADDRESS, 0xBE);
-  md = readWordWaitI2C(BMP085_I2C_ADDRESS);
+  Wire.requestFrom(BMP085_I2C_ADDRESS, 22);
+  ac1 = readShortI2C();
+  ac2 = readShortI2C();
+  ac3 = readShortI2C();
+  ac4 = readWordI2C();
+  ac5 = readWordI2C();
+  ac6 = readWordI2C();
+  b1 = readShortI2C();
+  b2 = readShortI2C();
+  mb = readShortI2C();
+  mc = readShortI2C();
+  md = readShortI2C();
   requestRawTemperature(); // setup up next measure() for temperature
   select = TEMPERATURE;
   pressureCount = 0;

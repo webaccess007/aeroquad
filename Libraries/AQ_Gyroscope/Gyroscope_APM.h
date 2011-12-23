@@ -22,6 +22,7 @@
 #define _AEROQUAD_GYROSCOPE_APM_H_
 
 #include <Gyroscope.h>
+#include <SensorsStatus.h>
 
 //#define APM_SCALE_TO_RADIANS radians((3.3/4096) / 0.002);  // IDG/IXZ500 sensitivity = 2mV/(deg/sec)
 

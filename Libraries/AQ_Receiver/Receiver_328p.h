@@ -133,7 +133,7 @@ static byte receiverPin[6] = {2, 5, 6, 4, 7, 8}; // pins used for XAXIS, YAXIS, 
 void initializeReceiver(int nbChannel = 6) {
 
   initializeReceiverParam(nbChannel);
-  for (byte channel = XAXIS; channel < lastChannel; channel++) {
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     pinMode(receiverPin[channel], INPUT);
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
     attachPinChangeInterrupt(receiverPin[channel]);
@@ -142,7 +142,7 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver()
  {
-  for(byte channel = XAXIS; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;
     cli();
@@ -157,7 +157,7 @@ void readReceiver()
   }
   
   // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < lastChannel; channel++) {
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     if (channel < THROTTLE) {
       receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
 	}  

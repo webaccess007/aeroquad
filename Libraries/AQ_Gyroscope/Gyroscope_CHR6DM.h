@@ -24,6 +24,7 @@
 #include <Gyroscope.h>
 #include <Platform_CHR6DM.h>
 #include <AQMath.h>
+#include <SensorsStatus.h>
 
 
 CHR6DM *gyroChr6dm;

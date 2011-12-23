@@ -21,46 +21,59 @@
 // I2C functions
 #include "Device_I2C.h"
 
-void sendByteI2C(int deviceAddress, byte dataValue) 
-{
+void sendByteI2C(int deviceAddress, byte dataValue) {
+
   Wire.beginTransmission(deviceAddress);
   Wire.write(dataValue);
   Wire.endTransmission();
 }
 
-byte readByteI2C(int deviceAddress) 
-{
+byte readByteI2C(int deviceAddress) {
+
     Wire.requestFrom(deviceAddress, 1);
     return Wire.read();
 }
 
-int readWordI2C(int deviceAddress) 
-{
+int readWordI2C(int deviceAddress) {
+
   Wire.requestFrom(deviceAddress, 2);
   return (Wire.read() << 8) | Wire.read();
 }
 
-int readWordWaitI2C(int deviceAddress) 
-{
-  unsigned char msb, lsb;
+int readWordI2C() {
+
+  return (Wire.read() << 8) | Wire.read();
+}
+
+int readShortI2C() {
+
+  return (signed short)readWordI2C();
+}
+
+int readReverseShortI2C() {
+
+  return (signed short)( Wire.read() | (Wire.read() << 8));
+}
+
+int readWordWaitI2C(int deviceAddress) {
+
   Wire.requestFrom(deviceAddress, 2); // request two bytes
   while(!Wire.available()); // wait until data available
-  msb = Wire.read();
+  unsigned char msb = Wire.read();
   while(!Wire.available()); // wait until data available
-  lsb = Wire.read();
+  unsigned char lsb = Wire.read();
   return (((int)msb<<8) | ((int)lsb));
 }
 
-int readReverseWordI2C(int deviceAddress) 
-{
-  byte lowerByte;
+int readReverseWordI2C(int deviceAddress) {
+
   Wire.requestFrom(deviceAddress, 2);
-  lowerByte = Wire.read();
+  byte lowerByte = Wire.read();
   return (Wire.read() << 8) | lowerByte;
 }
 
-byte readWhoI2C(int deviceAddress) 
-{
+byte readWhoI2C(int deviceAddress) {
+
   // read the ID of the I2C device
   Wire.beginTransmission(deviceAddress);
   Wire.write((byte)0);
@@ -70,11 +83,13 @@ byte readWhoI2C(int deviceAddress)
   return Wire.read();
 }
 
-void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) 
-{
+void updateRegisterI2C(int deviceAddress, byte dataAddress, byte dataValue) {
+
   Wire.beginTransmission(deviceAddress);
   Wire.write(dataAddress);
   Wire.write(dataValue);
   Wire.endTransmission();
 }  
+
+
 

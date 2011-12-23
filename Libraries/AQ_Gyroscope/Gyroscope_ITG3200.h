@@ -50,9 +50,9 @@ void measureGyro() {
   // orientation.  See TBD for details.  If your shield is not installed in this
   // orientation, this is where you make the changes.
   int gyroADC[3];
-  gyroADC[XAXIS]  = ((Wire.read() << 8) | Wire.read())  - gyroZero[XAXIS];
-  gyroADC[YAXIS] = gyroZero[YAXIS] - ((Wire.read() << 8) | Wire.read());
-  gyroADC[ZAXIS]   = gyroZero[ZAXIS] - ((Wire.read() << 8) | Wire.read());
+  gyroADC[XAXIS] = readShortI2C()  - gyroZero[XAXIS];
+  gyroADC[YAXIS] = gyroZero[YAXIS] - readShortI2C();
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - readShortI2C();
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);

@@ -104,7 +104,7 @@ void initializeReceiver(int nbChannel) {
 
 void readReceiver(void) {
   
-  for(byte channel = 0; channel < lastChannel; channel++) {
+  for(byte channel = 0; channel < lastReceiverChannel; channel++) {
     uint8_t oldSREG = SREG;
     cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
 

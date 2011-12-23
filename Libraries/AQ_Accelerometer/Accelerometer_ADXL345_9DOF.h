@@ -43,9 +43,9 @@ void measureAccel() {
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
 
-  meterPerSec[YAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
-  meterPerSec[XAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
-  meterPerSec[ZAXIS] = ((Wire.read()|(Wire.read() << 8))) * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
+  meterPerSec[YAXIS] = readReverseShortI2C() * accelScaleFactor[YAXIS] + runTimeAccelBias[YAXIS];
+  meterPerSec[XAXIS] = readReverseShortI2C() * accelScaleFactor[XAXIS] + runTimeAccelBias[XAXIS];
+  meterPerSec[ZAXIS] = readReverseShortI2C() * accelScaleFactor[ZAXIS] + runTimeAccelBias[ZAXIS];
 }
 
 void measureAccelSum() {
@@ -53,9 +53,9 @@ void measureAccelSum() {
   sendByteI2C(ACCEL_ADDRESS, 0x32);
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
-  accelSample[YAXIS] += ((Wire.read()|(Wire.read() << 8)));
-  accelSample[XAXIS] += ((Wire.read()|(Wire.read() << 8)));
-  accelSample[ZAXIS] += ((Wire.read()|(Wire.read() << 8)));
+  accelSample[YAXIS] += readReverseShortI2C() ;
+  accelSample[XAXIS] += readReverseShortI2C() ;
+  accelSample[ZAXIS] += readReverseShortI2C() ;
   accelSampleCount++;
 }
 

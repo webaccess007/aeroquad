@@ -50,9 +50,9 @@ void measureGyro() {
   // orientation.  See TBD for details.  If your shield is not installed in this
   // orientation, this is where you make the changes.
   int gyroADC[3];
-  gyroADC[YAXIS] = ((Wire.read() << 8) | Wire.read()) - gyroZero[YAXIS];
-  gyroADC[XAXIS] = ((Wire.read() << 8) | Wire.read()) - gyroZero[XAXIS];
-  gyroADC[ZAXIS] = gyroZero[ZAXIS] - ((Wire.read() << 8) | Wire.read());
+  gyroADC[YAXIS] = readShortI2C() - gyroZero[YAXIS];
+  gyroADC[XAXIS] = readShortI2C() - gyroZero[XAXIS];
+  gyroADC[ZAXIS] = gyroZero[ZAXIS] - readShortI2C();
 
   for (byte axis = 0; axis <= ZAXIS; axis++) {
     gyroRate[axis] = filterSmooth(gyroADC[axis] * gyroScaleFactor, gyroRate[axis], gyroSmoothFactor);
@@ -70,9 +70,9 @@ void measureGyroSum() {
   sendByteI2C(gyroAddress, ITG3200_MEMORY_ADDRESS);
   Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
   
-  gyroSample[YAXIS] += ((Wire.read() << 8) | Wire.read());
-  gyroSample[XAXIS] += ((Wire.read() << 8) | Wire.read());
-  gyroSample[ZAXIS] += ((Wire.read() << 8) | Wire.read());
+  gyroSample[YAXIS] += readShortI2C();
+  gyroSample[XAXIS] += readShortI2C();
+  gyroSample[ZAXIS] += readShortI2C();
   
   gyroSampleCount++;
 }

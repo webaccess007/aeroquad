@@ -22,6 +22,7 @@
 #define _AEROQUAD_GYROSCOPE_IDG_IDZ500_H_
 
 #include <Gyroscope.h>
+#include <SensorsStatus.h>
 
 #define AZPIN 12 // Auto zero pin for IDG500 gyros
 

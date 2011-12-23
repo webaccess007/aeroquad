@@ -37,11 +37,10 @@
 #define LEVELOFF 100
 #define MAX_NB_CHANNEL 8
 
-int lastChannel = 0;
+int lastReceiverChannel = 0;
 
 float receiverXmitFactor = 0.0;
 int receiverData[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
-//int receiverTrim[3] = {0,0,0};
 int receiverZero[3] = {0,0,0};
 int receiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
 int receiverCommandSmooth[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
@@ -51,7 +50,7 @@ float receiverSmoothFactor[MAX_NB_CHANNEL] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
 void initializeReceiverParam(int nbChannel = 6) {
   
-  lastChannel = nbChannel;
+  lastReceiverChannel = nbChannel;
 
   receiverCommand[XAXIS] = 1500;
   receiverCommand[YAXIS] = 1500;
@@ -62,17 +61,22 @@ void initializeReceiverParam(int nbChannel = 6) {
   receiverCommand[AUX+1] = 1000;
   receiverCommand[AUX+2] = 1000;
   
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverCommandSmooth[channel] = 1.0;
-  for (byte channel = XAXIS; channel < THROTTLE; channel++)
+  }
+  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
     receiverZero[channel] = 1500;
+  }
 	
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverSlope[channel] = 1;
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
+  }	
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverOffset[channel] = 1;
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
+  }
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     receiverSmoothFactor[channel] = 1; 
+  }
 }
   
 void readReceiver();
