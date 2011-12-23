@@ -60,11 +60,9 @@ void measureMagnetometer(float roll, float pitch) {
   sendByteI2C(COMPASS_ADDRESS, 0x03);
   Wire.requestFrom(COMPASS_ADDRESS, 6);
 
-  rawMag[XAXIS] =  ((Wire.read() << 8) | Wire.read());
-  rawMag[YAXIS] = -((Wire.read() << 8) | Wire.read());
-  rawMag[ZAXIS] = -((Wire.read() << 8) | Wire.read());
-
-  Wire.endTransmission();
+  rawMag[XAXIS] =  readShortI2C();
+  rawMag[YAXIS] = -readShortI2C();
+  rawMag[ZAXIS] = -readShortI2C();
 
   updateRegisterI2C(COMPASS_ADDRESS, 0x02, 0x01); // start single conversion
 

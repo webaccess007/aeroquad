@@ -83,7 +83,7 @@ void measureAccel() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    meterPerSec[axis] = ((Wire.read()|(Wire.read() << 8)) >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+    meterPerSec[axis] = (readReverseShortI2C() >> 2) * accelScaleFactor[axis] + runTimeAccelBias[axis];
   }  
 }
 
@@ -95,7 +95,7 @@ void measureAccelSum() {
   Wire.requestFrom(ACCEL_ADDRESS, 6);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    accelSample[axis] += ((Wire.read()|(Wire.read() << 8)) >> 2);
+    accelSample[axis] += (readReverseShortI2C() >> 2);
   }
   accelSampleCount++;  
 }

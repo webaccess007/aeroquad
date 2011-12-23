@@ -22,6 +22,7 @@
 #define _AEROQUAD_GYROSCOPE_WII_H_
 
 #include <Gyroscope.h>
+#include <SensorsStatus.h>
 #include "../AQ_Platform_Wii/Platform_Wii.h"
 
 

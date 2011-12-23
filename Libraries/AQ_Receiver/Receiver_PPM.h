@@ -86,7 +86,7 @@ void initializeReceiver(int nbChannel) {
 
 void readReceiver() {
   
-  for(byte channel = XAXIS; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     uint8_t oldSREG;
     oldSREG = SREG;
     cli(); // Let's disable interrupts
@@ -101,7 +101,7 @@ void readReceiver() {
   }
 	
   // Reduce receiver commands using xmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < lastChannel; channel++) {
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     if (channel < THROTTLE) {
       receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
     }	  

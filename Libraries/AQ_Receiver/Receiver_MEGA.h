@@ -116,16 +116,16 @@ void initializeReceiver(int nbChannel = 6) {
   
   DDRK = 0;
   PORTK = 0;
-  PCMSK2 |= 0xFF;
+  PCMSK2 |=(1<<lastReceiverChannel)-1;
   PCICR |= 0x1 << 2;
 
-  for (byte channel = XAXIS; channel < lastChannel; channel++)
+  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++)
     pinData[receiverPin[channel]].edge = FALLING_EDGE;
 }
 
 void readReceiver() {
   
-  for(byte channel = XAXIS; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     byte pin = receiverPin[channel];
     uint8_t oldSREG = SREG;
     cli();
@@ -144,7 +144,7 @@ void readReceiver() {
     receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
   }	
   // No xmitFactor reduction applied for throttle, mode and AUX
-  for (byte channel = THROTTLE; channel < lastChannel; channel++) {
+  for (byte channel = THROTTLE; channel < lastReceiverChannel; channel++) {
     receiverCommand[channel] = receiverCommandSmooth[channel];
   }	
 }

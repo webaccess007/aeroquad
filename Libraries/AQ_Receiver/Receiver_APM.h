@@ -46,7 +46,7 @@ void initializeReceiver(int nbChannel = 6) {
 
 void readReceiver() {
 
-  for(byte channel = XAXIS; channel < lastChannel; channel++) {
+  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
     // Apply receiver calibration adjustment
     receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
     // Smooth the flight control receiver inputs
@@ -58,7 +58,7 @@ void readReceiver() {
     receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
   }	
   // No receiverXmitFactor reduction applied for throttle, mode and
-  for (byte channel = THROTTLE; channel < lastChannel; channel++) {
+  for (byte channel = THROTTLE; channel < lastReceiverChannel; channel++) {
     receiverCommand[channel] = receiverCommandSmooth[channel];
   }
 }
