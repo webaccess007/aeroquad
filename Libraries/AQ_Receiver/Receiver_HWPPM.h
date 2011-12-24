@@ -102,30 +102,18 @@ void initializeReceiver(int nbChannel) {
   sei();
 }
 
-void readReceiver(void) {
+
+int getRawChannelValue(byte channel) {
+  uint8_t oldSREG = SREG;
+  cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
+
+  // Apply receiver calibration adjustment
+  int receiverRawValue = ((PWM_RAW[rcChannel[channel]]+800)/2);
+
+  SREG = oldSREG;
+  sei(); // Re-enable interrupts   
   
-  for(byte channel = 0; channel < lastReceiverChannel; channel++) {
-    uint8_t oldSREG = SREG;
-    cli(); // Disable interrupts to prevent race with ISR updating PWM_RAW
-
-    // Apply receiver calibration adjustment
-    receiverData[channel] = (receiverSlope[channel] * ((PWM_RAW[rcChannel[channel]]+800)/2)) + receiverOffset[channel];
-
-    SREG = oldSREG;
-    sei(); // Re-enable interrupts 
-
-    // Apply smoothing
-    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-
-    // Reduce receiver commands using xmitFactor and center around 1500
-    if (channel < THROTTLE) {
-      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-    }
-    else {
-      // No xmitFactor reduction applied for throttle, mode and AUX*
-      receiverCommand[channel] = receiverCommandSmooth[channel];
-    }
-  }
+  return receiverRawValue;
 }
 
 #endif

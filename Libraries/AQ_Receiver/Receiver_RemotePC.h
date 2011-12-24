@@ -39,8 +39,8 @@ void initializeReceiver(int nbChannel) {
   receiverZero[AUX] = 0;
 }
 
-void readReceiver() {
-  // do nothing here
+int getRawChannelValue(byte channel) {
+  return receiverCommand[channel];
 }
   
 void setChannelValue(byte channel,int value) {

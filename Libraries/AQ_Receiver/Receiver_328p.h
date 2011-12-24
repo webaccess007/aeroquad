@@ -140,32 +140,15 @@ void initializeReceiver(int nbChannel = 6) {
   }
 }
 
-void readReceiver()
- {
-  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    byte pin = receiverPin[channel];
-    uint8_t oldSREG = SREG;
-    cli();
-    // Get receiver value read by pin change interrupt handler
-    uint16_t lastGoodWidth = pinData[pin].lastGoodWidth;
-    SREG = oldSREG;
-
-    // Apply receiver calibration adjustment
-    receiverData[channel] = (receiverSlope[channel] * lastGoodWidth) + receiverOffset[channel];
-    // Smooth the flight control receiver inputs
-    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-  }
+int getRawChannelValue(byte channel) {
+  byte pin = receiverPin[channel];
+  uint8_t oldSREG = SREG;
+  cli();
+  // Get receiver value read by pin change interrupt handler
+  uint16_t receiverRawValue = pinData[pin].lastGoodWidth;
+  SREG = oldSREG;
   
-  // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    if (channel < THROTTLE) {
-      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-	}  
-    else {
-      // No receiverXmitFactor reduction applied for throttle, mode and
-      receiverCommand[channel] = receiverCommandSmooth[channel];
-	}
-  }
+  return receiverRawValue;
 }
 
 #endif
