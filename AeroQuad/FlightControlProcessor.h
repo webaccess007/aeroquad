@@ -99,7 +99,7 @@ void processCalibrateESC()
     else {
       #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
         if (altitudeHoldState == ON) {
-          altitudeToHoldTarget -= 0.005;
+          altitudeToHoldTarget -= 0.01;
         }
         else {
       #endif

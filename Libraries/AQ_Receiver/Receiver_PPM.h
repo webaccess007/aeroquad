@@ -82,34 +82,16 @@ void initializeReceiver(int nbChannel) {
   PPM_PIN_INTERRUPT
 }
 
-//int oldReceiverCommand[MAX_NB_CHANNEL] = {0,0,0,0,0,0,0,0};
+int getRawChannelValue(byte channel) {
+  uint8_t oldSREG;
+  oldSREG = SREG;
+  cli(); // Let's disable interrupts
 
-void readReceiver() {
+  int rawChannelValue = rcValue[rcChannel[channel]];
+  SREG = oldSREG;
+  sei();// Let's enable the interrupts	
   
-  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    uint8_t oldSREG;
-    oldSREG = SREG;
-    cli(); // Let's disable interrupts
-
-    receiverData[channel] = (receiverSlope[channel] * rcValue[rcChannel[channel]]) + receiverOffset[channel];
-
-	SREG = oldSREG;
-    sei();// Let's enable the interrupts	
-	
-    // Smooth the flight control receiver inputs
-    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-  }
-	
-  // Reduce receiver commands using xmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    if (channel < THROTTLE) {
-      receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-    }	  
-    else {
-      // No xmitFactor reduction applied for throttle, mode and
-      receiverCommand[channel] = receiverCommandSmooth[channel];
-	}
-  }
+  return rawChannelValue;
 }
 
 

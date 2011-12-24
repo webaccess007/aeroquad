@@ -31,40 +31,18 @@
 #include "GlobalDefined.h"
 #include <APM_RC.h>
 
-int receiverPin[6] = {0,0,0,0,0,0};
+byte receiverPin[8] = {0,1,3,2,4,5,6,7};
   
 void initializeReceiver(int nbChannel = 6) {
 
   initializeReceiverParam(nbChannel);
-  receiverPin[XAXIS] = 0;
-  receiverPin[YAXIS] = 1;
-  receiverPin[ZAXIS] = 3;
-  receiverPin[THROTTLE] = 2;
-  receiverPin[MODE] = 4;
-  receiverPin[AUX] = 5;
-}
-
-void readReceiver() {
-
-  for(byte channel = XAXIS; channel < lastReceiverChannel; channel++) {
-    // Apply receiver calibration adjustment
-    receiverData[channel] = (receiverSlope[channel] * ((readReceiverChannel(receiverPin[channel])))) + receiverOffset[channel];
-    // Smooth the flight control receiver inputs
-    receiverCommandSmooth[channel] = filterSmooth(receiverData[channel], receiverCommandSmooth[channel], receiverSmoothFactor[channel]);
-  }
-
-  // Reduce receiver commands using receiverXmitFactor and center around 1500
-  for (byte channel = XAXIS; channel < THROTTLE; channel++) {
-    receiverCommand[channel] = ((receiverCommandSmooth[channel] - receiverZero[channel]) * receiverXmitFactor) + receiverZero[channel];
-  }	
-  // No receiverXmitFactor reduction applied for throttle, mode and
-  for (byte channel = THROTTLE; channel < lastReceiverChannel; channel++) {
-    receiverCommand[channel] = receiverCommandSmooth[channel];
-  }
 }
 
 
-  
+int getRawChannelValue(byte channel) {
+  return readReceiverChannel(receiverPin[channel]);
+}
+
 void setChannelValue(byte channel,int value) {
 }
   
