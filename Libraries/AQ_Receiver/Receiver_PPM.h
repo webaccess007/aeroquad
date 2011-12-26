@@ -22,9 +22,9 @@
 #define _AEROQUAD_RECEIVER_PPM_H_
 
 #if defined (__AVR_ATmega328P__) || defined(__AVR_ATmegaUNO__)
-  #define PPM_PIN_INTERRUPT          attachInterrupt(0, rxInt, RISING); //PIN 0
+  #define PPM_PIN_INTERRUPT()          attachInterrupt(0, rxInt, RISING) //PIN 0
 #else
-  #define PPM_PIN_INTERRUPT          attachInterrupt(4, rxInt, RISING);  //PIN 19, also used for Spektrum satellite option
+  #define PPM_PIN_INTERRUPT()          attachInterrupt(4, rxInt, RISING) //PIN 19, also used for Spektrum satellite option
 #endif
 
 #include "Arduino.h"
@@ -79,7 +79,7 @@ static void rxInt() {
 void initializeReceiver(int nbChannel) {
 
   initializeReceiverParam(nbChannel);
-  PPM_PIN_INTERRUPT
+  PPM_PIN_INTERRUPT();
 }
 
 int getRawChannelValue(byte channel) {
