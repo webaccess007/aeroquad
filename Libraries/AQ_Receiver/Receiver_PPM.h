@@ -74,8 +74,6 @@ static void rxInt() {
   }
 }
 
-
-
 void initializeReceiver(int nbChannel) {
 
   initializeReceiverParam(nbChannel);
@@ -89,7 +87,6 @@ int getRawChannelValue(byte channel) {
 
   int rawChannelValue = rcValue[rcChannel[channel]];
   SREG = oldSREG;
-  sei();// Let's enable the interrupts	
   
   return rawChannelValue;
 }
