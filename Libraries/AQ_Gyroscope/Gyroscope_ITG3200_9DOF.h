@@ -105,7 +105,7 @@ void calibrateGyro() {
     for (byte calAxis = XAXIS; calAxis <= ZAXIS; calAxis++) {
       for (int i=0; i<FINDZERO; i++) {
         sendByteI2C(gyroAddress, (calAxis * 2) + 0x1D);
-        findZero[i] = readWordI2C(gyroAddress);
+        findZero[i] = readShortI2C(gyroAddress);
         delay(10);
       }
       if (calAxis == XAXIS) {

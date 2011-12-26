@@ -104,7 +104,7 @@ void calibrateGyro() {
   for (byte axis = 0; axis < 3; axis++) {
     for (int i=0; i<FINDZERO; i++) {
       sendByteI2C(gyroAddress, (axis * 2) + ITG3200_LOW_PASS_FILTER_VALUE);
-      findZero[i] = readWordI2C(gyroAddress);
+      findZero[i] = readShortI2C(gyroAddress);
       delay(10);
     }
     gyroZero[axis] = findMedianInt(findZero, FINDZERO);

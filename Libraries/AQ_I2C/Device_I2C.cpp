@@ -45,6 +45,12 @@ int readWordI2C() {
   return (Wire.read() << 8) | Wire.read();
 }
 
+int readShortI2C(int deviceAddress) {
+
+ Wire.requestFrom(deviceAddress, 2);
+ return readShortI2C();
+}
+
 int readShortI2C() {
 
   return (signed short)readWordI2C();
