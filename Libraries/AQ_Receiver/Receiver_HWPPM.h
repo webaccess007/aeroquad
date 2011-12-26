@@ -99,7 +99,6 @@ void initializeReceiver(int nbChannel) {
   OCR5A = TIMER5_PERIOD; 
 
   TIMSK5 |= (1<<ICIE5); //Timer interrupt mask
-  sei();
 }
 
 
@@ -111,7 +110,6 @@ int getRawChannelValue(byte channel) {
   int receiverRawValue = ((PWM_RAW[rcChannel[channel]]+800)/2);
 
   SREG = oldSREG;
-  sei(); // Re-enable interrupts   
   
   return receiverRawValue;
 }
