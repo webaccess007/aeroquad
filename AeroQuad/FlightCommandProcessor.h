@@ -115,7 +115,7 @@ void readPilotCommands() {
    else {
      isStoreAltitudeNeeded = true;
      altitudeHoldState = OFF;
-     vehicleState |= 0<<ALTITUDEHOLD_ENABLED;
+     vehicleState &= ~ALTITUDEHOLD_ENABLED;
    }
   #endif
 }
