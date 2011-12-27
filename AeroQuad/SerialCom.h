@@ -690,7 +690,7 @@ void fastTelemetry()
 }
 #endif // BinaryWrite
 
-void printVehicleState(char *sensorName, unsigned long state, char *message) {
+void printVehicleState(const char *sensorName, unsigned long state, const char *message) {
   SERIAL_PRINT(sensorName);
   SERIAL_PRINT(": ");
   if (!(vehicleState & state))
@@ -699,7 +699,7 @@ void printVehicleState(char *sensorName, unsigned long state, char *message) {
 }
 
 void reportVehicleState() {
-  // Tell Configuraotr how many vehicle state values to expect
+  // Tell Configurator how many vehicle state values to expect
   SERIAL_PRINTLN(14);
   SERIAL_PRINT("SW Version: ");
   SERIAL_PRINTLN(SOFTWARE_VERSION, 1);
@@ -728,6 +728,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("APM w/ CHR6DM");
   #elif defined(AeroQuad_Mini)
     SERIAL_PRINTLN("Mini");
+  #elif defined(AeroQuadSTM32)
+    SERIAL_PRINTLN("STM32");    
   #endif
   SERIAL_PRINT("Flight Config: ");
   #if defined(quadPlusConfig)
