@@ -74,7 +74,7 @@ void initializeMotors(NB_Motors numbers) {
     else if (numberOfMotors == SIX_Motors) {                  // for 6 
       DDRH = DDRH | B00111000;                                // Set ports to output PH3-5
     }
-    else if (numberOfMotors == HEIGHT_Motors) {               // for 8 motor
+    else if (numberOfMotors == EIGHT_Motors) {               // for 8 motor
       DDRH = DDRH | B00111000;                                // Set ports to output PH3-5
       DDRB = DDRB | B01100000;
     }
@@ -120,11 +120,11 @@ void writeMotors() {
     OCR3C = motorCommand[MOTOR2] * 2 ;
     OCR3A = motorCommand[MOTOR3] * 2 ;
     OCR4A = motorCommand[MOTOR4] * 2 ;
-    if (numberOfMotors == SIX_Motors || numberOfMotors == HEIGHT_Motors) {
+    if (numberOfMotors == SIX_Motors || numberOfMotors == EIGHT_Motors) {
       OCR4B = motorCommand[MOTOR5] * 2 ;
       OCR4C = motorCommand[MOTOR6] * 2 ;
     }
-	if (numberOfMotors == HEIGHT_Motors) {
+	if (numberOfMotors == EIGHT_Motors) {
 	  OCR1A = motorCommand[MOTOR7] * 2 ;
       OCR1B = motorCommand[MOTOR8] * 2 ;
 	}
@@ -142,11 +142,11 @@ void commandAllMotors(int command) {
     OCR3C = command * 2 ;
     OCR3A = command * 2 ;
     OCR4A = command * 2 ;
-  if (numberOfMotors == SIX_Motors || numberOfMotors == HEIGHT_Motors) {
+  if (numberOfMotors == SIX_Motors || numberOfMotors == EIGHT_Motors) {
     OCR4B = command * 2 ;
     OCR4C = command * 2 ;
   }
-  if (numberOfMotors == HEIGHT_Motors) {
+  if (numberOfMotors == EIGHT_Motors) {
     OCR1A = command * 2 ;
     OCR1B = command * 2 ;
   }

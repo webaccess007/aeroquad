@@ -22,7 +22,7 @@
 #define _AEROQUAD_CAMERA_STABILIZER_H_
 
 
-#if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) // used only on mega for now
+#if defined(CameraControl)
 
 // Written by CupOfTea:
 // http://aeroquad.com/showthread.php?1484-Camera-Stablisation

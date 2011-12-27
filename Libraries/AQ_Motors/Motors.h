@@ -38,7 +38,7 @@
 enum NB_Motors{
   FOUR_Motors = 4,
   SIX_Motors = 6,
-  HEIGHT_Motors = 8
+  EIGHT_Motors = 8
 };
 
 NB_Motors numberOfMotors = FOUR_Motors;
