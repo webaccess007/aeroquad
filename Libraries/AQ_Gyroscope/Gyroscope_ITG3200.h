@@ -71,7 +71,7 @@ void measureGyroSum() {
   Wire.requestFrom(gyroAddress, ITG3200_BUFFER_SIZE);
   
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-    gyroSample[axis] += readWordI2C();
+    gyroSample[axis] += readShortI2C();
   }
   gyroSampleCount++;
 }
