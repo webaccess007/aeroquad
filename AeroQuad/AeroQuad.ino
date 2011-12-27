@@ -58,8 +58,8 @@
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
-//#define octoX8Config
+//#define hexY6Config
+#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
 
@@ -1170,7 +1170,7 @@ void setup() {
   #elif defined(hexPlusConfig) || defined(hexXConfig) || defined (hexY6Config)
      initializeMotors(SIX_Motors);
   #elif defined (octoX8Config) || defined (octoXConfig) || defined (octoPlusConfig)
-     initializeMotors(HEIGHT_Motors);
+     initializeMotors(EIGHT_Motors);
   #endif
 
   // Setup receiver pins for pin change interrupts

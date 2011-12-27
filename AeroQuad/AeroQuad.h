@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include "Arduino.h."
+#include "Arduino.h"
 #include "pins_arduino.h"
 
 // Flight Software Version

@@ -54,6 +54,9 @@
 #ifndef _AQ_OSD_MAX7456_H_
 #define _AQ_OSD_MAX7456_H_
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #include "OSD.h"
 #include "GlobalDefined.h"
 

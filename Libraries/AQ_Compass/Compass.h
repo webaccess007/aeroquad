@@ -44,8 +44,11 @@ void initializeMagnetometer();
 void measureMagnetometer(float roll, float pitch);
 
 const float getHdgXY(byte axis) {
-  if (axis == XAXIS) return hdgX;
-  if (axis == YAXIS) return hdgY;
+  if (axis == XAXIS) {
+    return hdgX;
+  } else {
+    return hdgY;
+  }
 }
 
 const int getMagnetometerRawData(byte axis) {

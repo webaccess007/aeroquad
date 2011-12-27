@@ -120,7 +120,7 @@ void writeMotors() {
     #endif
   }
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    else if (numberOfMotors == HEIGHT_Motors) {
+    else if (numberOfMotors == EIGHT_Motors) {
       analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
       analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
       analogWrite(MOTORPIN6, motorCommand[MOTOR5] / 8);
@@ -147,7 +147,7 @@ void commandAllMotors(int command) {
 	  
   }
   #if defined (__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    else if (numberOfMotors == HEIGHT_Motors) {
+    else if (numberOfMotors == EIGHT_Motors) {
       analogWrite(MOTORPIN4, command / 8);
       analogWrite(MOTORPIN5, command / 8);
       analogWrite(MOTORPIN6, command / 8);
