@@ -187,9 +187,6 @@ typedef struct {
   float XMITFACTOR_ADR;
   float GYROSMOOTH_ADR;
   float ACCSMOOTH_ADR;
-  float ACCEL_XAXIS_ZERO_ADR;
-  float ACCEL_YAXIS_ZERO_ADR;
-  float ACCEL_ZAXIS_ZERO_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;

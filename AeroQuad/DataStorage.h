@@ -259,6 +259,8 @@ void writeEEPROM(){
     writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
+    writeFloat(90, ALTITUDE_BUMP_ADR);
+    writeFloat(250, ALTITUDE_PANIC_ADR);
   #endif
   writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   // Accel Cal
@@ -309,9 +311,6 @@ void initSensorsZeroFromEEPROM() {
  
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
-  accelZero[XAXIS] = readFloat(ACCEL_XAXIS_ZERO_ADR);
-  accelZero[YAXIS] = readFloat(ACCEL_YAXIS_ZERO_ADR);
-  accelZero[ZAXIS] = readFloat(ACCEL_ZAXIS_ZERO_ADR);
   accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
@@ -324,9 +323,6 @@ void storeSensorsZeroToEEPROM() {
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);
-  writeFloat(accelZero[XAXIS], ACCEL_XAXIS_ZERO_ADR);
-  writeFloat(accelZero[YAXIS], ACCEL_YAXIS_ZERO_ADR);
-  writeFloat(accelZero[ZAXIS], ACCEL_ZAXIS_ZERO_ADR);
   writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 }
 

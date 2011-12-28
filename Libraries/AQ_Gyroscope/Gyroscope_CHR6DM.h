@@ -21,11 +21,29 @@
 #ifndef _AEROQUAD_GYROSCOPE_CHR6DM_H_
 #define _AEROQUAD_GYROSCOPE_CHR6DM_H_
 
-#include <Gyroscope.h>
 #include <Platform_CHR6DM.h>
 #include <AQMath.h>
 #include <SensorsStatus.h>
 
+#define FINDZERO 49
+
+float gyroRate[3] = {0.0,0.0,0.0};
+float gyroZero[3] = {0,0,0};
+float gyroSample[3] = {0,0,0};
+float gyroSmoothFactor = 1.0;
+float gyroScaleFactor = 0.0;
+float gyroHeading = 0.0;
+unsigned long gyroLastMesuredTime = 0;
+
+void measureGyroSum();
+void evaluateGyroRate();
+
+byte gyroSampleCount = 0;
+
+  
+void initializeGyro();
+void measureGyro();
+void calibrateGyro();
 
 CHR6DM *gyroChr6dm;
   
