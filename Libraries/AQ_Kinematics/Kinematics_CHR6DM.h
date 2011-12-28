@@ -23,7 +23,7 @@
 
 #include "Kinematics.h"
 #include <Platform_CHR6DM.h>
-#include <Gyroscope.h>
+#include <Gyroscope_CHR6DM.h>
 
 float zeroRoll       = 0.0;
 float zeroPitch 	 = 0.0;

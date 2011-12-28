@@ -34,14 +34,14 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
-#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
+//#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
@@ -94,9 +94,9 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
+//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+//#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -150,26 +150,26 @@
 // D13 to D35 for yaw, connect servo to SERVO3
 // Please note that you will need to have battery connected to power on servos with v2.0 shield
 // *******************************************************************************************************************************
-#define CameraControl
+//#define CameraControl
 
 //
 // *******************************************************************************************************************************
 // On screen display implementation using MAX7456 chip. See MAX7456.h in libraries for more info and configuration.
 // For more information on how to setup OSD please refer to http://aeroquad.com/showwiki.php?title=On-Screen-Display
 // *******************************************************************************************************************************
-#define OSD
+//#define OSD
 //Choose your (default in case autodetect enabled) video standard: default=NTSC
 //#define PAL
-#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
-#define ShowReticle            // Displays a reticle in the centre of the screen.
-#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
-#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
-#define ShowCallSign           // Show AQ string 
-#define ShowRSSI               // Show Receiver RSSI
+//#define AUTODETECT_VIDEO_STANDARD // detect automatically, signal must be present at Arduino powerup!
+//#define ShowReticle            // Displays a reticle in the centre of the screen.
+//#define ShowFlightTimer        // Displays how long the motors have been armed for since the Arduino was last reset
+//#define ShowAttitudeIndicator  // Display the attitude indicator calculated by the AHRS
+//#define ShowCallSign           // Show AQ string 
+//#define ShowRSSI               // Show Receiver RSSI
 //#define feet                   //Comment this line out for altitude measured in metres, uncomment it for feet
 
 // Menu system, currently only usable with OSD
-#define OSD_SYSTEM_MENU
+//#define OSD_SYSTEM_MENU
 
 
 

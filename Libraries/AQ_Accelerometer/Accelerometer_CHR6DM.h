@@ -21,8 +21,26 @@
 #ifndef _AEROQUAD_ACCELEROMETER_CHR6DM_H_
 #define _AEROQUAD_ACCELEROMETER_CHR6DM_H_
 
-#include <Accelerometer.h>
+//#include <Accelerometer.h>
 #include <Platform_CHR6DM.h>
+
+#define SAMPLECOUNT 400.0
+
+float accelScaleFactor[3] = {0.0,0.0,0.0};
+float runTimeAccelBias[3] = {0, 0, 0};
+float accelSmoothFactor = 1.0; // can we remove if we go with 4th order filter?
+float accelOneG = 0.0;
+float meterPerSec[3] = {0.0,0.0,0.0};
+
+float accelSample[3] = {0,0,0};
+byte accelSampleCount = 0;
+  
+void initializeAccel();
+void measureAccel();
+void measureAccelSum();
+void evaluateMetersPerSec();
+void computeAccelBias();
+
 
 CHR6DM *accelChr6dm;
 
@@ -42,6 +60,7 @@ void measureAccelSum() {
   accelSample[XAXIS] += accelChr6dm->data.ax;
   accelSample[YAXIS] += accelChr6dm->data.ay;
   accelSample[ZAXIS] += accelChr6dm->data.az;
+  accelSampleCount++;
 }
 
 void evaluateMetersPerSec() {

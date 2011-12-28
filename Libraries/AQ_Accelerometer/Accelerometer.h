@@ -31,9 +31,8 @@ float runTimeAccelBias[3] = {0, 0, 0};
 float accelSmoothFactor = 1.0; // can we remove if we go with 4th order filter?
 float accelOneG = 0.0;
 float meterPerSec[3] = {0.0,0.0,0.0};
-int   accelZero[3] = {0.0,0.0,0.0}; // would like to remove this here and in DataStorage.h, do we need for other accels?
 
-float accelSample[3] = {0.0,0.0,0.0};
+long accelSample[3] = {0,0,0};
 byte accelSampleCount = 0;
   
 void initializeAccel();

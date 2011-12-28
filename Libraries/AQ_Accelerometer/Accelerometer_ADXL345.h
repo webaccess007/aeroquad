@@ -62,7 +62,7 @@ void evaluateMetersPerSec() {
 	
   for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
     meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
-	accelSample[axis] = 0.0;
+	accelSample[axis] = 0;
   }
   accelSampleCount = 0;		
 }

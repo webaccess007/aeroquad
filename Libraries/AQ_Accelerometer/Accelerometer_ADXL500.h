@@ -39,6 +39,7 @@ void measureAccelSum() {
   accelSample[XAXIS] += analogRead(1);
   accelSample[YAXIS] += analogRead(0);
   accelSample[ZAXIS] += analogRead(2);
+  accelSampleCount++;
 }
 
 void evaluateMetersPerSec() {
