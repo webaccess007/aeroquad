@@ -33,8 +33,8 @@
   #define MOTORPIN3    6
   #define MOTORPIN4    7
   #define MOTORPIN5    8
-  #define MOTORPIN6    9
-  #define MOTORPIN7    10
+  #define MOTORPIN6    11
+  #define MOTORPIN7    12
 #else
   #define MOTORPIN0    3
   #define MOTORPIN1    9
