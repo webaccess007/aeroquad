@@ -28,7 +28,7 @@
 
 void initializeAccel() {
 
-  if (readWhoI2C(ACCEL_ADDRESS) !=  0xE5) { 			// page 14 of datasheet
+  if (readWhoI2C(ACCEL_ADDRESS) ==  0xE5) { 			// page 14 of datasheet
     vehicleState |= ACCEL_DETECTED;
   }
 	
