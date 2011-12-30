@@ -123,8 +123,8 @@ void writeMotors() {
     else if (numberOfMotors == EIGHT_Motors) {
       analogWrite(MOTORPIN4, motorCommand[MOTOR5] / 8);
       analogWrite(MOTORPIN5, motorCommand[MOTOR6] / 8);
-      analogWrite(MOTORPIN6, motorCommand[MOTOR5] / 8);
-      analogWrite(MOTORPIN7, motorCommand[MOTOR6] / 8);
+      analogWrite(MOTORPIN6, motorCommand[MOTOR7] / 8);
+      analogWrite(MOTORPIN7, motorCommand[MOTOR8] / 8);
     }
   #endif
 }
