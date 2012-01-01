@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.4 - April 2011
+  AeroQuad v3.0 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -86,7 +86,7 @@ void readPilotCommands() {
   }
   
   #ifdef RateModeOnly
-    flightMode = ACRO;
+    flightMode = RATE_FLIGHT_MODE;
   #else
     // Check Mode switch for Acro or Stable
     if (receiverCommand[MODE] > 1500) {

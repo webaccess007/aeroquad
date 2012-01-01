@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -750,7 +750,8 @@ void reportVehicleState() {
     SERIAL_PRINTLN("Octo X8");
   #elif defined(octoXConfig)
     SERIAL_PRINTLN("Octo X");
-  #elif defined(octoXPlusConfig)
+  // *** For next rev, updat OctoPlus config name here and in Configurator
+  #elif defined(octoPlusConfig)
     SERIAL_PRINTLN("Octo X+");
   #endif
   SERIAL_PRINT("Receiver Ch's: ");
