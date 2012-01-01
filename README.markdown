@@ -3,11 +3,63 @@ AeroQuad Flight Software Source Code 3.0
 [http://www.AeroQuad.com](http://www.AeroQuad.com)
 
 Version 3.0 Release Notes (x/x/xxxx)
-
+----------------------------------------
   * under construction
   * new libraries
 
-Version 2.3 Release Notes (3/17/2011)
+Version 2.5.1 Release Notes (12/22/2011)
+----------------------------------------
+* Supports the new Arduino 1.0 IDE
+* Fixed magnetometer issue where mag output intermittently output zero's
+* Fixed calibration bug where X & Y axis were swapped
+* Added support for hexa configurations
+ * Look at the file Motors.h to view how to connect the motors
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+ * Please note support for > 4 motors not directly supported within v2.7.1 Configurator
+ * To view motor data, use Serial Monitor to send '=' command
+* Special thanks to Jihlein for producing this version and to ala42 for his bug fixes!
+
+Version 2.5 Release Notes (11/30/2011)
+----------------------------------------
+* Added support for the new v2.1 AeroQuad Shield with HMC5883L
+* Added support for mounting an HMC5883L upside down on v2.0 AeroQuad Shield
+* Added support for octo configurations (thanks Jihlein!)
+* This version is only compatible with the AeroQuad v2.7.1 Configurator
+
+ Version 2.5 Beta 1 Release Notes (7/31/2011)
+----------------------------------------
+ * Fixed various 8 channel transmitter channel bugs (special thanks to Ala42!)
+ * Added safety procedure for ESC calibration (prevent random full throttles during PID updates)
+   * Please keep common sense safety practices in place, remove props or remove battery power when necessary
+ * Optmized SerialCom.pde (removed unused commands)
+ 
+Version 2.4.3 Release Notes (7/24/2011)
+----------------------------------------
+ * Fixed duplicate altitude hold call in timing executive
+ * Added support for 8 channel receiver for Mega (thanks Moeffe)
+ * Added telemetry response to tell Configurator how many receiver channels and motor commands are available
+ 
+Version 2.4.2 Release Notes (6/29/2011)
+----------------------------------------
+ * Fixed EEPROM issue that affects altitude hold (thanks Aadamson)
+ * Greatly improved altitude hold algorithm (thanks Aadamson)
+ * Updated incorrect sign issue with v1.7 shield
+ * Fixed Issue 114:	Processor specific Motors_PWMtimer class is not surrounded by ifdef
+
+Version 2.4.1 Release Notes (6/5/2011)
+----------------------------------------
+ * Wii bug fixes (thanks aadamson/jihlein) - please note that the Wii sensor orientations now follow the MultiWii convention
+ * Video On Screen Display support (thanks Alamo)
+ * CHR6DM compilation bug fixes (thanks lokling)
+
+Version 2.4 Release Notes (4/2/2011)
+----------------------------------------
+ * Added ARG/MARG flight angle estimation routines
+ * Improved timing executive, reduced main flight loop to 100Hz
+ * Stable/Attitude Mode has highly improved auto level capability
+ * All these changes have been made by jihlein and aadamson, THANKS!
+ 
+ Version 2.3 Release Notes (3/17/2011)
 ----------------------------------------
  * Implemented common SI units for sensors
  * Implemented common DCM gains for all hardware platforms
@@ -18,7 +70,6 @@ Version 2.3 Release Notes (3/17/2011)
    * created a deadband in the throttle stick when in altitude hold of 250 step (configurable in aeroquad.h), this also is the extents of the PANIC alarm as noted below.
    * Added a PANIC mode, where if you move the throttle greater than 250 steps, it will automatically turn off Altitude hold and the throttle will function as it normally does, to turn back on altitude hold, you have to turn it off and back on again, allow for a get out of altitude hold without having to find the switch.  This PANIC can either be UP or DOWN throttle.
    * Added a bump up or down to altitude hold. Once you have Altitude hold enabled, and you are in the throttle dead band, you can nudge the altitude up or down, by moving the throttle slightly up or slightly down and then back to the middle.  Scaled the climb or descent to be really slow.  Throttle increase is based upon altitude increase and constrained to no more than +/- 50 units.
-
 
 Version 2.2 Release Notes (2/6/2011)
 ----------------------------------------
