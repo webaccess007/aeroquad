@@ -27,6 +27,7 @@
 #include "Arduino.h"
 
 #define COMPASS_ADDRESS 0x1E
+#define COMPASS_IDENTITY 0x70
 
 // See HMC58x3 datasheet for more information on these values
 #define NormalOperation             0x10
@@ -47,7 +48,7 @@ void initializeMagnetometer() {
   magCalibration[YAXIS] = 1.0;
   magCalibration[ZAXIS] = 1.0;
 
-  if (readWhoI2C(COMPASS_ADDRESS) != COMPASS_ADDRESS) {
+  if (readWhoI2C(COMPASS_ADDRESS) == COMPASS_IDENTITY) {
 	  vehicleState |= MAG_DETECTED;
   }    
 

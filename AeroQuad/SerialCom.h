@@ -82,10 +82,6 @@ void readSerialCommand() {
       heading = 0;
       relativeHeading = 0;
       headingHold = 0;
-      if (headingHoldConfig)
-        vehicleState |= HEADINGHOLD_ENABLED;
-      else
-        vehicleState &= ~HEADINGHOLD_ENABLED;
       break;
       
     case 'D': // Altitude hold PID

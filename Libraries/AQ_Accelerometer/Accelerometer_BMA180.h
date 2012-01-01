@@ -44,7 +44,7 @@ void initializeAccel() {
   
   //accelScale = G_2_MPS2(1.0/4096.0);  //  g per LSB @ +/- 2g range - checking with John if we can remove this
   
-  if (readWhoI2C(ACCEL_ADDRESS) != ACCEL_IDENTITY) {// page 52 of datasheet
+  if (readWhoI2C(ACCEL_ADDRESS) == ACCEL_IDENTITY) {// page 52 of datasheet
     vehicleState |= ACCEL_DETECTED;
   }
 	
