@@ -416,12 +416,12 @@ void sendSerialTelemetry() {
     
   case 'l': // Send raw accel values
     measureAccelSum();
-    PrintValueComma((float)(accelSample[XAXIS]/accelSampleCount));
-    accelSample[XAXIS] = 0.0;
-    PrintValueComma((float)(accelSample[YAXIS]/accelSampleCount));
-    accelSample[YAXIS] = 0.0;
-    SERIAL_PRINTLN ((float)(accelSample[ZAXIS]/accelSampleCount));
-    accelSample[ZAXIS] = 0.0;
+    PrintValueComma((int)(accelSample[XAXIS]/accelSampleCount));
+    accelSample[XAXIS] = 0;
+    PrintValueComma((int)(accelSample[YAXIS]/accelSampleCount));
+    accelSample[YAXIS] = 0;
+    SERIAL_PRINTLN ((int)(accelSample[ZAXIS]/accelSampleCount));
+    accelSample[ZAXIS] = 0;
     accelSampleCount = 0;
     break;
     

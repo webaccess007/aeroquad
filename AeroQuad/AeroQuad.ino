@@ -34,7 +34,7 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
@@ -43,10 +43,10 @@
 //#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
-#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
+//#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
-
+//#define AeroQuadSTM32       // STM32 board
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
@@ -87,7 +87,7 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
@@ -988,6 +988,10 @@
 //********************************************************
 //********************************************************
 
+#ifdef AeroQuadSTM32
+  #include "AeroQuad_STM32.h"
+#endif
+
 //********************************************************
 //****************** KINEMATICS DECLARATION **************
 //********************************************************
@@ -1021,6 +1025,8 @@
   #include <Receiver_MEGA.h>
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
+#elif defined RECEIVER_STM32
+  #include <Receiver_STM32.h>
 #endif
 
 
@@ -1037,6 +1043,8 @@
   #include <Motors_APM.h>
 #elif defined MOTOR_I2C
   #include <Motors_I2C.h>
+#elif defined MOTOR_STM32
+  #include <Motors_STM32.h>  
 #endif
 
 //********************************************************
