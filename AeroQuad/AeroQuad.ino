@@ -78,7 +78,7 @@
 // Also check the http://aeroquad.com/showwiki.php?title=Flight+Configurations for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
+//#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -87,7 +87,7 @@
 // Use FlightAngleARG if you do not have a magnetometer, use DCM if you have a magnetometer installed
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define FlightAngleMARG // EXPERIMENTAL!  Fly at your own risk! Use this if you have a magnetometer installed and enabled HeadingMagHold above
-//#define FlightAngleARG // Use this if you do not have a magnetometer installed
+#define FlightAngleARG // Use this if you do not have a magnetometer installed
 
 //
 // *******************************************************************************************************************************
@@ -1191,6 +1191,7 @@ void setup() {
 
   // Flight angle estimation
   #ifdef HeadingMagHold
+    vehicleState |= HEADINGHOLD_ENABLED;
     initializeMagnetometer();
     initializeKinematics(getHdgXY(XAXIS), getHdgXY(YAXIS));
   #else
@@ -1206,9 +1207,11 @@ void setup() {
   // Optional Sensors
   #ifdef AltitudeHoldBaro
     initializeBaro();
+    vehicleState |= ALTITUDEHOLD_ENABLED;
   #endif
   #ifdef AltitudeHoldRangeFinder
     inititalizeRangeFinder(ALTITUDE_RANGE_FINDER_INDEX);
+    vehicleState |= RANGE_ENABLED;
   #endif
 
 
