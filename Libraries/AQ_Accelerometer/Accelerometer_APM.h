@@ -49,7 +49,12 @@ void measureAccelSum() {
 }
 
 void evaluateMetersPerSec() {
-  // do nothing here
+  
+  for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
+    meterPerSec[axis] = (accelSample[axis] / accelSampleCount) * accelScaleFactor[axis] + runTimeAccelBias[axis];
+	accelSample[axis] = 0;
+  }
+  accelSampleCount = 0;
 }
 
 void computeAccelBias() {
