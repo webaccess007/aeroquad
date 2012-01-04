@@ -103,7 +103,7 @@ void readSerialCommand() {
       
     case 'E': // Receive sensor filtering values
       gyroSmoothFactor = readFloatSerial();
-      accelSmoothFactor = readFloatSerial();
+      readFloatSerial(); //accelSmoothFactor = readFloatSerial();
       readFloatSerial(); // timeConstant was not used anymore, removed! Mikro, clean this!
       aref = readFloatSerial();
       break;
@@ -160,7 +160,7 @@ void readSerialCommand() {
       computeAccelBias();
       #if defined(AeroQuadMega_CHR6DM) || defined(APM_OP_CHR6DM)
         calibrateKinematics();
-        accelOneG = meterPerSec[ZAXIS];
+        accelOneG = meterPerSecSec[ZAXIS];
       #endif
       storeSensorsZeroToEEPROM();
       break;
@@ -343,7 +343,7 @@ void sendSerialTelemetry() {
     
   case 'e': // Send sensor filtering values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(accelSmoothFactor);
+    PrintValueComma(0);  //PrintValueComma(accelSmoothFactor);
     PrintValueComma(0);
     SERIAL_PRINTLN(aref);
     queryType = 'X';
@@ -379,7 +379,7 @@ void sendSerialTelemetry() {
       PrintValueComma(gyroRate[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
-      PrintValueComma(meterPerSec[axis]);
+      PrintValueComma(meterPerSecSec[axis]);
     }
     for (byte axis = XAXIS; axis <= ZAXIS; axis++) {
       #if defined(HeadingMagHold)
