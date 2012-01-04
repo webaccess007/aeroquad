@@ -1,5 +1,5 @@
 /*
-  AeroQuad v3.0 - April 2011
+  AeroQuad v3.0 - December 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -34,33 +34,31 @@
 //#define AeroQuad_v1         // Arduino 2009 with AeroQuad Shield v1.7 and below
 //#define AeroQuad_v1_IDG     // Arduino 2009 with AeroQuad Shield v1.7 and below using IDG yaw gyro
 //#define AeroQuad_v18        // Arduino 2009 with AeroQuad Shield v1.8 or greater
-#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
+//#define AeroQuad_Mini       // Arduino Pro Mini with AeroQuad Mini Shield v1.0
 //#define AeroQuad_Wii        // Arduino 2009 with Wii Sensors and AeroQuad Shield v1.x
 //#define AeroQuad_Paris_v3   // Define along with either AeroQuad_Wii to include specific changes for MultiWiiCopter Paris v3.0 board
 
 // Mega platform
 //#define AeroQuadMega_v1     // Arduino Mega with AeroQuad Shield v1.7 and below
-//#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
+#define AeroQuadMega_v2     // Arduino Mega with AeroQuad Shield v2.0
 //#define AeroQuadMega_v21    // Arduino Mega with AeroQuad Shield v2.1
 //#define AeroQuadMega_Wii    // Arduino Mega with Wii Sensors and AeroQuad Shield v2.x
 //#define ArduCopter          // ArduPilot Mega (APM) with Oilpan Sensor Board
 //#define AeroQuadMega_CHR6DM // Clean Arduino Mega with CHR6DM as IMU/heading ref.
 //#define APM_OP_CHR6DM       // ArduPilot Mega with CHR6DM as IMU/heading ref., Oilpan for barometer (just uncomment AltitudeHold for baro), and voltage divider
 
-// STM32 Platform
-//#define AeroQuadSTM32       // STM32 board WORK IN PROGRESS, NOT SUPPORTED YET!
 
 /****************************************************************************
  *********************** Define Flight Configuration ************************
  ****************************************************************************/
 // Use only one of the following definitions
-//#define quadXConfig
+#define quadXConfig
 //#define quadPlusConfig
 //#define hexPlusConfig
 //#define hexXConfig      // EXPERIMENTAL: not completely re-tested
 //#define triConfig
 //#define quadY4Config
-#define hexY6Config
+//#define hexY6Config
 //#define octoX8Config
 //#define octoPlusConfig  // EXPERIMENTAL: not completely re-tested
 //#define octoXConfig     // EXPERIMENTAL: not completely re-tested
@@ -71,13 +69,13 @@
 // Define minimum speed for your motors to run.  this also defines minimum throttle during flips
 // Some motors or ESC setups may need more or less define here to start all the montors evenly.
 // ******************************************************************************************************************************
-#define MIN_ARMED_THROTTLE 1180
+#define MIN_ARMED_THROTTLE 1150
 
 //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // In the 3.0 code the motor numbering has changed to simplify motor configuration.
 // Please refer to the .h files in ..\Libraries\AQ_FlightControlProcessor to see the new numbering for your flight model
-// Also check the http://aeroquad.com/showwiki.php?title=Flight+Configurations for more detail on the 3.0 motor changes 
+// Also check the http://www.aeroquad.com/showwiki.php "Build Instructions" for more detail on the 3.0 motor changes 
 // the OLD_MOTOR_NUMBERING is compatible  with the 2.x versions of the AeroQuad code and will not need re-ordering to work
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //#define OLD_MOTOR_NUMBERING // Uncomment this for old motor numbering setup, FOR QUAD +/X MODE ONLY
@@ -96,9 +94,9 @@
 // Optional Sensors
 // Warning:  If you enable HeadingHold or AltitudeHold and do not have the correct sensors connected, the flight software may hang
 // *******************************************************************************************************************************
-//#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
-//#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
-//#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
+#define HeadingMagHold // Enables Magnetometer, gets automatically selected if CHR6DM is defined
+#define AltitudeHoldBaro // Enables BMP085 Barometer (experimental, use at your own risk)
+#define AltitudeHoldRangeFinder // EXPERIMENTAL : Enable altitude hold with range finder
 //#define RateModeOnly // Use this if you only have a gyro sensor, this will disable any attitude modes.
 
 //
@@ -480,7 +478,6 @@
   // heading mag hold declaration
   #ifdef HeadingMagHold
 //    #define SPARKFUN_5883L_BOB
-//    #define HMC5883L
     #define HMC5843
   #endif
 
@@ -549,8 +546,6 @@
   #define LED_Red 4
   #define LED_Yellow 31
 
-  #define SPARKFUN_9DOF
-  
   #include <Device_I2C.h>
 
   // Gyroscope declaration
@@ -567,7 +562,7 @@
 
   // heading mag hold declaration
   #ifdef HeadingMagHold
-    #define HMC5883L
+    #define SPARKFUN_9DOF_5883L
   #endif
 
   // Altitude declaration
@@ -674,6 +669,7 @@
   #undef CameraControl
   #undef OSD
 
+  
   /**
    * Put ArduCopter specific intialization need here
    */
@@ -1000,8 +996,6 @@
 #include "Kinematics.h"
 #if defined (AeroQuadMega_CHR6DM) || defined (APM_OP_CHR6DM)
   // CHR6DM have it's own kinematics, so, initialize in it's scope
-#elif defined FlightAngleNewARG
-  #include "Kinematics_NewMARG.h"
 #elif defined FlightAngleARG
   #include "Kinematics_ARG.h"
 #elif defined FlightAngleMARG
@@ -1028,7 +1022,7 @@
 #elif defined RECEIVER_APM
   #include <Receiver_APM.h>
 #elif defined RECEIVER_STM32
-  #include <Receiver_STM32.h>
+  #include <Receiver_STM32.h>  
 #endif
 
 
@@ -1046,7 +1040,7 @@
 #elif defined MOTOR_I2C
   #include <Motors_I2C.h>
 #elif defined MOTOR_STM32
-  #include <Motors_STM32.h>  
+  #include <Motors_STM32.h>    
 #endif
 
 //********************************************************
@@ -1054,7 +1048,7 @@
 //********************************************************
 #if defined (HMC5843)
   #include <Magnetometer_HMC5843.h>
-#elif defined (HMC5883L)  
+#elif defined (SPARKFUN_9DOF_5883L) || defined (SPARKFUN_5883L_BOB)
   #include <Magnetometer_HMC5883L.h>
 #elif defined (COMPASS_CHR6DM)
 #endif
