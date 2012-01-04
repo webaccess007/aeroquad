@@ -146,7 +146,6 @@ void initializeEEPROM() {
     
   receiverXmitFactor = 1.0;
   gyroSmoothFactor = 1.0;
-  accelSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
@@ -272,7 +271,6 @@ void writeEEPROM(){
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
   writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
@@ -305,7 +303,6 @@ void initSensorsZeroFromEEPROM() {
  
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
-  accelSmoothFactor = readFloat(ACCSMOOTH_ADR);
 }
 
 void storeSensorsZeroToEEPROM() {
@@ -317,7 +314,6 @@ void storeSensorsZeroToEEPROM() {
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);
-  writeFloat(accelSmoothFactor, ACCSMOOTH_ADR);
 }
 
 void initReceiverFromEEPROM() {
