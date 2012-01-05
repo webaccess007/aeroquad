@@ -103,8 +103,6 @@ void readSerialCommand() {
       
     case 'E': // Receive sensor filtering values
       gyroSmoothFactor = readFloatSerial();
-      readFloatSerial(); //accelSmoothFactor = readFloatSerial();
-      readFloatSerial(); // timeConstant was not used anymore, removed! Mikro, clean this!
       aref = readFloatSerial();
       break;
       
@@ -343,8 +341,6 @@ void sendSerialTelemetry() {
     
   case 'e': // Send sensor filtering values
     PrintValueComma(gyroSmoothFactor);
-    PrintValueComma(0);  //PrintValueComma(accelSmoothFactor);
-    PrintValueComma(0);
     SERIAL_PRINTLN(aref);
     queryType = 'X';
     break;
