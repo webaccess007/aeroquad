@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - May 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -46,13 +46,13 @@ const float getBaroAltitude() {
  
 void measureGroundBaro() {
   // measure initial ground pressure (multiple samples)
-  baroGroundAltitude = 0;
+  float altSum = 0.0;
   for (int i=0; i < 25; i++) {
     measureBaro();
-    delay(26);
-    baroGroundAltitude += baroRawAltitude;
+	altSum += baroRawAltitude;
+    delay(12);
   }
-  baroGroundAltitude = baroGroundAltitude / 25.0;
+  baroGroundAltitude = altSum / 25;
 }
 
 

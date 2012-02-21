@@ -1,7 +1,7 @@
 /*
-  AeroQuad v3.0 - December 2011
+  AeroQuad v3.0.1 - February 2012
   www.AeroQuad.com
-  Copyright (c) 2011 Ted Carancho.  All rights reserved.
+  Copyright (c) 2012 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
  
   This program is free software: you can redistribute it and/or modify 
@@ -115,15 +115,19 @@ void readSerialCommand() {
       break;
       
     case 'G': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverSlope[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverSlope[channel] = readFloatSerial();
+      //}
+      channelCal = (int)readFloatSerial();
+      receiverSlope[channelCal] = readFloatSerial();
       break;
       
     case 'H': // Receive transmitter calibration values
-      for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
-        receiverOffset[channel] = readFloatSerial();
-      }
+      //for(byte channel = XAXIS; channel<LASTCHANNEL; channel++) {
+      //  receiverOffset[channel] = readFloatSerial();
+      //}
+      channelCal = (int)readFloatSerial();
+      receiverOffset[channelCal] = readFloatSerial();
       break;
       
     case 'I': // Initialize EEPROM with default values
@@ -368,7 +372,8 @@ void sendSerialTelemetry() {
     
   case 'g': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverSlope[axis]);
+      Serial.print(receiverSlope[axis], 6);
+      Serial.print(',');
     }
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -376,7 +381,8 @@ void sendSerialTelemetry() {
     
   case 'h': // Send transmitter calibration data
     for (byte axis = XAXIS; axis < LASTCHANNEL; axis++) {
-      PrintValueComma(receiverOffset[axis]);
+      Serial.print(receiverOffset[axis], 6);
+      Serial.print(',');
     }
     SERIAL_PRINTLN();
     queryType = 'X';
@@ -525,7 +531,7 @@ void sendSerialTelemetry() {
       PrintValueComma(0); // zero out unused motor channels
     }
     #ifdef BattMonitor
-      PrintValueComma(batteryData[0].voltage);
+      PrintValueComma(batteryData[0].voltage/100.0);
     #else
       PrintValueComma(0);
     #endif
