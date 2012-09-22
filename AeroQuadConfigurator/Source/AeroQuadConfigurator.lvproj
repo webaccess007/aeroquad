@@ -71,6 +71,7 @@
 				<Item Name="Template" Type="Folder">
 					<Item Name="Template.vi" Type="VI" URL="../Support/SubPanel/Template/Template.vi"/>
 				</Item>
+				<Item Name="DebugLogger.vi" Type="VI" URL="../Support/DebugLogger.vi"/>
 			</Item>
 		</Item>
 		<Item Name="Utilities" Type="Folder">
@@ -85,6 +86,21 @@
 				<Item Name="PitchCalc.vi" Type="VI" URL="../Utilities/ArtificialHorizon/PitchCalc.vi"/>
 				<Item Name="RollCalc.vi" Type="VI" URL="../Utilities/ArtificialHorizon/RollCalc.vi"/>
 				<Item Name="ViewWindowCreate.vi" Type="VI" URL="../Utilities/ArtificialHorizon/ViewWindowCreate.vi"/>
+			</Item>
+			<Item Name="Modem" Type="Folder">
+				<Item Name="ModemTelemetryDecode.vi" Type="VI" URL="../Utilities/ModemTelemetryDecode.vi"/>
+				<Item Name="ModemTelemetryPacket.ctl" Type="VI" URL="../Utilities/ModemTelemetryPacket.ctl"/>
+				<Item Name="ModemTelemetryParser.vi" Type="VI" URL="../Utilities/ModemTelemetryParser.vi"/>
+			</Item>
+			<Item Name="RScode" Type="Folder">
+				<Item Name="CheckAQHeader.vi" Type="VI" URL="../Utilities/RScode/CheckAQHeader.vi"/>
+				<Item Name="CorrectErrors.vi" Type="VI" URL="../Utilities/RScode/CorrectErrors.vi"/>
+				<Item Name="DecodeData.vi" Type="VI" URL="../Utilities/RScode/DecodeData.vi"/>
+				<Item Name="EncodeData.vi" Type="VI" URL="../Utilities/RScode/EncodeData.vi"/>
+				<Item Name="InitializeECC.vi" Type="VI" URL="../Utilities/RScode/InitializeECC.vi"/>
+				<Item Name="msvcr100.dll" Type="Document" URL="../Utilities/RScode/msvcr100.dll"/>
+				<Item Name="RScode.dll" Type="Document" URL="../Utilities/RScode/RScode.dll"/>
+				<Item Name="TestErrorCorrection.vi" Type="VI" URL="../Utilities/RScode/TestErrorCorrection.vi"/>
 			</Item>
 			<Item Name="State" Type="Folder">
 				<Item Name="CloseState.vi" Type="VI" URL="../Utilities/State/CloseState.vi"/>
@@ -176,8 +192,20 @@
 				<Item Name="Upload.vi" Type="VI" URL="../Utilities/Uploader/Upload.vi"/>
 				<Item Name="VerifyUploadDialog.vi" Type="VI" URL="../Utilities/Uploader/VerifyUploadDialog.vi"/>
 			</Item>
+			<Item Name="Uploader32" Type="Folder">
+				<Item Name="AeroQuad32.mht" Type="Document" URL="../Utilities/Uploader32/AeroQuad32.mht"/>
+				<Item Name="AeroQuadUploader32.vi" Type="VI" URL="../Utilities/Uploader32/AeroQuadUploader32.vi"/>
+				<Item Name="DeFUSeUploader.vi" Type="VI" URL="../Utilities/Uploader32/DeFUSeUploader.vi"/>
+				<Item Name="dfu-util.exe" Type="Document" URL="../Utilities/Uploader32/dfu-util.exe"/>
+				<Item Name="Empty.mht" Type="Document" URL="../Utilities/Uploader32/Empty.mht"/>
+				<Item Name="LeaveDFUSeMode.vi" Type="VI" URL="../Utilities/Uploader32/LeaveDFUSeMode.vi"/>
+				<Item Name="SetupDFUSe.vi" Type="VI" URL="../Utilities/Uploader32/SetupDFUSe.vi"/>
+			</Item>
 			<Item Name="ConvertCmd2TlmArguments.vi" Type="VI" URL="../Utilities/ConvertCmd2TlmArguments.vi"/>
+			<Item Name="ConvertDD2DMS.vi" Type="VI" URL="../Utilities/ConvertDD2DMS.vi"/>
+			<Item Name="ConvertDMS2DD.vi" Type="VI" URL="../Utilities/ConvertDMS2DD.vi"/>
 			<Item Name="ConvertNumericString.vi" Type="VI" URL="../Utilities/ConvertNumericString.vi"/>
+			<Item Name="CreateWaypoint.vi" Type="VI" URL="../Utilities/CreateWaypoint.vi"/>
 			<Item Name="DecodeSensorBytes.vi" Type="VI" URL="../Utilities/DecodeSensorBytes.vi"/>
 			<Item Name="FindStartWord.vi" Type="VI" URL="../Utilities/FindStartWord.vi"/>
 			<Item Name="FindUserAppFolder.vi" Type="VI" URL="../Utilities/FindUserAppFolder.vi"/>
@@ -187,12 +215,16 @@
 			<Item Name="LookupCommands.vi" Type="VI" URL="../Utilities/LookupCommands.vi"/>
 			<Item Name="Mac2LinuxPath.vi" Type="VI" URL="../Utilities/Mac2LinuxPath.vi"/>
 			<Item Name="RemoveTrailingComma.vi" Type="VI" URL="../Utilities/RemoveTrailingComma.vi"/>
+			<Item Name="ScanPort.vi" Type="VI" URL="../Utilities/ScanPort.vi"/>
 			<Item Name="TDMS - AeroQuad File Viewer.vi" Type="VI" URL="../Utilities/TDMS - AeroQuad File Viewer.vi"/>
 			<Item Name="TestUsbSerialPort.vi" Type="VI" URL="../Utilities/TestUsbSerialPort.vi"/>
 			<Item Name="VerifyData.vi" Type="VI" URL="../Utilities/VerifyData.vi"/>
 			<Item Name="VerifyStartBytes.vi" Type="VI" URL="../Utilities/VerifyStartBytes.vi"/>
 			<Item Name="VerifyStartStopBytes.vi" Type="VI" URL="../Utilities/VerifyStartStopBytes.vi"/>
 			<Item Name="VerifyStopBytes.vi" Type="VI" URL="../Utilities/VerifyStopBytes.vi"/>
+			<Item Name="WaitForBrowser.vi" Type="VI" URL="../Utilities/WaitForBrowser.vi"/>
+			<Item Name="WaitForMapUpdate.vi" Type="VI" URL="../Utilities/WaitForMapUpdate.vi"/>
+			<Item Name="Waypoint.ctl" Type="VI" URL="../Utilities/Waypoint.ctl"/>
 			<Item Name="WriteEEPROM.vi" Type="VI" URL="../Utilities/WriteEEPROM.vi"/>
 		</Item>
 		<Item Name="AeroQuadConfigurator.ini" Type="Document" URL="../AeroQuadConfigurator.ini"/>
@@ -246,6 +278,7 @@
 				<Item Name="General Error Handler.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/General Error Handler.vi"/>
 				<Item Name="Get File Extension.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/libraryn.llb/Get File Extension.vi"/>
 				<Item Name="Get String Text Bounds.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Get String Text Bounds.vi"/>
+				<Item Name="Get System Directory.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/sysdir.llb/Get System Directory.vi"/>
 				<Item Name="Get Text Rect.vi" Type="VI" URL="/&lt;vilib&gt;/picture/picture.llb/Get Text Rect.vi"/>
 				<Item Name="Get Type of Variant.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/GetType.llb/Get Type of Variant.vi"/>
 				<Item Name="getChannelList.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tdmsutil.llb/getChannelList.vi"/>
@@ -254,6 +287,7 @@
 				<Item Name="GetRTHostConnectedProp.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/GetRTHostConnectedProp.vi"/>
 				<Item Name="imagedata.ctl" Type="VI" URL="/&lt;vilib&gt;/picture/picture.llb/imagedata.ctl"/>
 				<Item Name="initFileContentsTree.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tdmsutil.llb/initFileContentsTree.vi"/>
+				<Item Name="LabVIEWHTTPClient.lvlib" Type="Library" URL="/&lt;vilib&gt;/httpClient/LabVIEWHTTPClient.lvlib"/>
 				<Item Name="List Directory and LLBs.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/libraryn.llb/List Directory and LLBs.vi"/>
 				<Item Name="loadAndFormatValues.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tdmsutil.llb/loadAndFormatValues.vi"/>
 				<Item Name="Longest Line Length in Pixels.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Longest Line Length in Pixels.vi"/>
@@ -311,6 +345,7 @@
 				<Item Name="subElapsedTime.vi" Type="VI" URL="/&lt;vilib&gt;/express/express execution control/ElapsedTimeBlock.llb/subElapsedTime.vi"/>
 				<Item Name="subFile Dialog.vi" Type="VI" URL="/&lt;vilib&gt;/express/express input/FileDialogBlock.llb/subFile Dialog.vi"/>
 				<Item Name="subTimeDelay.vi" Type="VI" URL="/&lt;vilib&gt;/express/express execution control/TimeDelayBlock.llb/subTimeDelay.vi"/>
+				<Item Name="System Directory Type.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/sysdir.llb/System Directory Type.ctl"/>
 				<Item Name="System Exec.vi" Type="VI" URL="/&lt;vilib&gt;/Platform/system.llb/System Exec.vi"/>
 				<Item Name="TagReturnType.ctl" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/TagReturnType.ctl"/>
 				<Item Name="TDMSFileViewer_LaunchHelp.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/tdmsutil.llb/TDMSFileViewer_LaunchHelp.vi"/>
@@ -345,6 +380,9 @@
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
 			<Item Name="lvanlys.dll" Type="Document" URL="/C/Program Files/National Instruments/LabVIEW 2010/resource/lvanlys.dll"/>
+			<Item Name="ni_httpClient.dll" Type="Document" URL="ni_httpClient.dll">
+				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
+			</Item>
 		</Item>
 		<Item Name="Build Specifications" Type="Build">
 			<Item Name="Application" Type="EXE">
@@ -365,12 +403,18 @@
 				<Property Name="Destination[1].path" Type="Path">../builds/NI_AB_PROJECTNAME/Application/Support</Property>
 				<Property Name="DestinationCount" Type="Int">2</Property>
 				<Property Name="Exe_iconItemID" Type="Ref">/My Computer/Icon/AeroQuadMacIcon.ico</Property>
-				<Property Name="Source[0].itemID" Type="Str">{2A07F85B-D868-43A2-8384-9FA66B570E3C}</Property>
+				<Property Name="Source[0].itemID" Type="Str">{A4AB88A3-4DC1-499E-B227-4C94E8A58E56}</Property>
 				<Property Name="Source[0].type" Type="Str">Container</Property>
 				<Property Name="Source[1].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[1].itemID" Type="Ref">/My Computer/AeroQuadConfigurator.vi</Property>
 				<Property Name="Source[1].sourceInclusion" Type="Str">TopLevel</Property>
 				<Property Name="Source[1].type" Type="Str">VI</Property>
+				<Property Name="Source[10].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[10].itemID" Type="Ref">/My Computer/Utilities/Uploader32/dfu-util.exe</Property>
+				<Property Name="Source[10].sourceInclusion" Type="Str">Include</Property>
+				<Property Name="Source[11].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[11].itemID" Type="Ref">/My Computer/Utilities/Uploader32/Empty.mht</Property>
+				<Property Name="Source[11].sourceInclusion" Type="Str">Include</Property>
 				<Property Name="Source[2].destinationIndex" Type="Int">0</Property>
 				<Property Name="Source[2].itemID" Type="Ref">/My Computer/AeroQuadConfigurator.ini</Property>
 				<Property Name="Source[3].destinationIndex" Type="Int">0</Property>
@@ -390,13 +434,18 @@
 				<Property Name="Source[7].destinationIndex" Type="Int">1</Property>
 				<Property Name="Source[7].itemID" Type="Ref">/My Computer/Utilities/Uploader/Makefile</Property>
 				<Property Name="Source[7].sourceInclusion" Type="Str">Include</Property>
-				<Property Name="SourceCount" Type="Int">8</Property>
+				<Property Name="Source[8].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[8].itemID" Type="Ref">/My Computer/Utilities/RScode/msvcr100.dll</Property>
+				<Property Name="Source[9].destinationIndex" Type="Int">0</Property>
+				<Property Name="Source[9].itemID" Type="Ref">/My Computer/Utilities/Uploader32/AeroQuad32.mht</Property>
+				<Property Name="Source[9].sourceInclusion" Type="Str">Include</Property>
+				<Property Name="SourceCount" Type="Int">12</Property>
 				<Property Name="TgtF_companyName" Type="Str">Carancho Engineering</Property>
 				<Property Name="TgtF_fileDescription" Type="Str">Configuration tool for the AeroQuad MultiCopter</Property>
-				<Property Name="TgtF_fileVersion.build" Type="Int">8</Property>
 				<Property Name="TgtF_fileVersion.major" Type="Int">3</Property>
+				<Property Name="TgtF_fileVersion.minor" Type="Int">1</Property>
 				<Property Name="TgtF_internalName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="TgtF_legalCopyright" Type="Str">Copyright 2011 Carancho Engineering</Property>
+				<Property Name="TgtF_legalCopyright" Type="Str">Copyright 2012 Carancho Engineering</Property>
 				<Property Name="TgtF_productName" Type="Str">AeroQuad Configurator</Property>
 				<Property Name="TgtF_targetfileGUID" Type="Str">{284B0725-5483-41EE-ACFC-CE779783AA8D}</Property>
 				<Property Name="TgtF_targetfileName" Type="Str">AeroQuadConfigurator.exe</Property>
@@ -464,23 +513,8 @@
 				<Property Name="Destination[0].type" Type="Str">userFolder</Property>
 				<Property Name="DestinationCount" Type="Int">1</Property>
 				<Property Name="DistPart[0].flavorID" Type="Str">DefaultFull</Property>
-				<Property Name="DistPart[0].productID" Type="Str">{4C1F4C94-7160-4A79-8BE3-4BACCFDE93DF}</Property>
+				<Property Name="DistPart[0].productID" Type="Str">{1478F207-677B-443B-B305-E924A6289F1B}</Property>
 				<Property Name="DistPart[0].productName" Type="Str">NI LabVIEW Run-Time Engine 2010 SP1</Property>
-				<Property Name="DistPart[0].SoftDep[0].dependencyKey" Type="Str">CKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[0].productName" Type="Str">NI System Web Server 1.1</Property>
-				<Property Name="DistPart[0].SoftDep[1].dependencyKey" Type="Str">EKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[1].productName" Type="Str">NI_Logos_5.2.1</Property>
-				<Property Name="DistPart[0].SoftDep[2].dependencyKey" Type="Str">FKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[2].productName" Type="Str">NI TDM Streaming 2.2</Property>
-				<Property Name="DistPart[0].SoftDep[3].dependencyKey" Type="Str">GKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[3].productName" Type="Str">NI LabVIEW 2010 Run-Time Engine Web Server</Property>
-				<Property Name="DistPart[0].SoftDep[4].dependencyKey" Type="Str">HKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[4].productName" Type="Str">NI LabVIEW 2010 Real-Time NBFifo</Property>
-				<Property Name="DistPart[0].SoftDep[5].dependencyKey" Type="Str">JKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[5].productName" Type="Str">NI SSL Support</Property>
-				<Property Name="DistPart[0].SoftDep[6].dependencyKey" Type="Str">KKBAAA.9EF852AB_A55D_40BB_9800_F82E90432A9E</Property>
-				<Property Name="DistPart[0].SoftDep[6].productName" Type="Str">NI Web Application Server 1.1</Property>
-				<Property Name="DistPart[0].SoftDepCount" Type="Int">7</Property>
 				<Property Name="DistPart[0].upgradeCode" Type="Str">{9F6EADB1-707C-41AF-8F3D-FB856FA8BD1C}</Property>
 				<Property Name="DistPart[1].flavorID" Type="Str">_deployment_</Property>
 				<Property Name="DistPart[1].productID" Type="Str">{85BA3FCF-AA00-4151-B97D-84A221E8198A}</Property>
@@ -495,9 +529,9 @@
 				<Property Name="INST_defaultDir" Type="Str">{F9E9AD88-ABBF-40CE-BAD3-070BDAD57864}</Property>
 				<Property Name="INST_includeError" Type="Bool">false</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="INST_productVersion" Type="Str">3.0.33</Property>
+				<Property Name="INST_productVersion" Type="Str">3.0.55</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
-				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
+				<Property Name="InstSpecVersion" Type="Str">10018004</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
 				<Property Name="MSI_arpURL" Type="Str">www.AeroQuad.com</Property>
 				<Property Name="MSI_distID" Type="Str">{A07D00A7-DFF4-40CF-B7E4-EB348A35D9B7}</Property>
@@ -573,7 +607,11 @@
 				<Property Name="Source[0].name" Type="Str">Application</Property>
 				<Property Name="Source[0].tag" Type="Ref">/My Computer/Build Specifications/Application</Property>
 				<Property Name="Source[0].type" Type="Str">EXE</Property>
-				<Property Name="SourceCount" Type="Int">1</Property>
+				<Property Name="Source[1].dest" Type="Str">{D2272923-C63E-4A06-9729-85B1AD1CFB2A}</Property>
+				<Property Name="Source[1].name" Type="Str">msvcr100.dll</Property>
+				<Property Name="Source[1].tag" Type="Ref">/My Computer/Utilities/RScode/msvcr100.dll</Property>
+				<Property Name="Source[1].type" Type="Str">File</Property>
+				<Property Name="SourceCount" Type="Int">2</Property>
 			</Item>
 			<Item Name="Updater" Type="Installer">
 				<Property Name="Destination[0].name" Type="Str">AeroQuad Configurator</Property>
@@ -589,9 +627,9 @@
 				<Property Name="INST_defaultDir" Type="Str">{F9E9AD88-ABBF-40CE-BAD3-070BDAD57864}</Property>
 				<Property Name="INST_includeError" Type="Bool">false</Property>
 				<Property Name="INST_productName" Type="Str">AeroQuad Configurator</Property>
-				<Property Name="INST_productVersion" Type="Str">3.0.62</Property>
+				<Property Name="INST_productVersion" Type="Str">3.0.63</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
-				<Property Name="InstSpecVersion" Type="Str">10018002</Property>
+				<Property Name="InstSpecVersion" Type="Str">10018004</Property>
 				<Property Name="MSI_arpCompany" Type="Str">Carancho Engineering LLC</Property>
 				<Property Name="MSI_arpURL" Type="Str">www.AeroQuad.com</Property>
 				<Property Name="MSI_distID" Type="Str">{1FC2427F-269D-4D3E-B167-9B9C426D06D6}</Property>
