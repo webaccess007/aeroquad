@@ -61,7 +61,14 @@ static inline uint32 micros(void) {
     do {
         ms = millis();
         cycle_cnt = systick_get_count();
+        asm volatile("nop"); //allow interrupt to fire
+        asm volatile("nop");
     } while (ms != millis());
+
+    if(systick_check_underflow()) {
+    	ms++;
+    	cycle_cnt = systick_get_count();
+    }
 
     /* SYSTICK_RELOAD_VAL is 1 less than the number of cycles it
        actually takes to complete a SysTick reload */

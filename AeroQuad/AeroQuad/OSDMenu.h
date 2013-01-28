@@ -18,7 +18,7 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Menu system implementation, usable with OSD */
+/* Menu system implementation, usable with OSD or SerialLCD */
 
 #ifndef _AQ_OSD_MENU_
 #define _AQ_OSD_MENU_
@@ -81,7 +81,9 @@ void menuHandleSimple(byte mode, byte action) {
   if (action == MENU_INIT) {
     switch (mode) {
     case 0:
+#ifdef OSD
       armedTime = 0;
+#endif
       break;
 #ifdef BattMonitor
     case 1:
@@ -96,6 +98,9 @@ void menuHandleSimple(byte mode, byte action) {
     case 2:
       homePosition.latitude   = GPS_INVALID_ANGLE;
       homePosition.longitude  = GPS_INVALID_ANGLE;
+#if defined AltitudeHoldBaro
+      initializeBaro();
+#endif
       break;
 #endif
 /* TEMPLATE CODE FOR NEW ACTION:
@@ -442,7 +447,7 @@ void menuHandlePidTune(byte mode, byte action) {
 
 
 // this define is used to convert a float into (char) sign, (int) integerpart, (int) per100parts
-#define PRFLOAT(x) ((x<0.0)?'-':' '),((int)abs(x)),(abs((int)(100*x))%100)
+#define PRFLOAT(x) (((x)<0.0)?'-':' '),((int)abs(x)),(abs((int)(100*(x)))%100)
 
 void menuSensorInfo(byte mode, byte action){
   switch (action) {
@@ -497,7 +502,7 @@ void menuHideOSD(byte mode, byte action){
 short savedCenterYaw, savedCenterPitch, savedCenterRoll;
 byte  savedCameraMode;
 
-#define POWERSAVE 10 // enable to shut off servos after idle
+// #define POWERSAVE 10 // enable to shut off servos after idle
 #if defined (POWERSAVE)
   byte idleCounter = POWERSAVE;
 #endif

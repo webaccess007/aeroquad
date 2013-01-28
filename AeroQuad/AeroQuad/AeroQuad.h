@@ -31,13 +31,67 @@
 #include "Receiver.h"
 
 // Flight Software Version
-#define SOFTWARE_VERSION 3.1
+#define SOFTWARE_VERSION 3.2
 
-#if defined WirelessTelemetry
-  #define BAUD 111111 // use this to be compatible with USB and XBee connections
+#if defined CONFIG_BAUDRATE
+  #define BAUD CONFIG_BAUDRATE
 #else
-  #define BAUD 115200
+  #if defined WirelessTelemetry && !defined MavLink
+    #define BAUD 111111 // use this to be compatible with USB and XBee connections
+  #else
+    #define BAUD 115200
+  #endif
 #endif  
+
+/**
+ * ESC calibration process global declaration
+ */
+byte calibrateESC = 0;
+int testCommand = 1000;
+//////////////////////////////////////////////////////
+
+/**
+ * Flight control global declaration
+ */
+#define RATE_FLIGHT_MODE 0
+#define ATTITUDE_FLIGHT_MODE 1
+byte previousFlightMode = ATTITUDE_FLIGHT_MODE;
+#define TASK_100HZ 1
+#define TASK_50HZ 2
+#define TASK_10HZ 10
+#define TASK_1HZ 100
+#define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
+
+byte flightMode = RATE_FLIGHT_MODE;
+unsigned long frameCounter = 0; // main loop executive frame counter
+int minArmedThrottle; // initial value configured by user
+
+float G_Dt = 0.002; 
+int throttle = 1000;
+byte motorArmed = OFF;
+byte safetyCheck = OFF;
+byte maxLimit = OFF;
+byte minLimit = OFF;
+float filteredAccel[3] = {0.0,0.0,0.0};
+boolean inFlight = false; // true when motor are armed and that the user pass one time the min throttle
+float rotationSpeedFactor = 1.0;
+
+// main loop time variable
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
+unsigned long deltaTime = 0;
+// sub loop time variable
+unsigned long oneHZpreviousTime = 0;
+unsigned long tenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime = 0;
+unsigned long lowPriorityTenHZpreviousTime2 = 0;
+unsigned long fiftyHZpreviousTime = 0;
+unsigned long hundredHZpreviousTime = 0;
+
+
+
+//////////////////////////////////////////////////////
+
 
 // Analog Reference Value
 // This value provided from Configurator
@@ -58,152 +112,7 @@ float headingHold         = 0; // calculated adjustment for quad to go to headin
 float heading             = 0; // measured heading from yaw gyro (process variable)
 float relativeHeading     = 0; // current heading the quad is set to (set point)
 byte  headingHoldState    = OFF;
-//////////////////////////////////////////////////////
-
-/**
- * battery monitor and battery monitor throttle correction global declaration section
- */
-
-#if defined (BattMonitor)
-  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
-  float batteryMonitorAlarmVoltage = 10.0;
-  int batteryMonitorStartThrottle = 0;
-  int batteryMonitorThrottleTarget = 1450;
-  unsigned long batteryMonitorStartTime = 0;
-  unsigned long batteryMonitorGoinDownTime = 60000; 
-
-  
-  #if defined BattMonitorAutoDescent
-    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
-    
-    int batteryMonitorAlarmCounter = 0;
-    int batteyMonitorThrottleCorrection = 0;
-  #endif
-#endif
-//////////////////////////////////////////////////////
-
-/**
- * ESC calibration process global declaration
- */
-byte calibrateESC = 0;
-int testCommand = 1000;
-//////////////////////////////////////////////////////
-
-/**
- * Flight control global declaration
- */
-#define RATE_FLIGHT_MODE 0
-#define ATTITUDE_FLIGHT_MODE 1
-
-#define TASK_100HZ 1
-#define TASK_50HZ 2
-#define TASK_10HZ 10
-#define TASK_1HZ 100
-#define THROTTLE_ADJUST_TASK_SPEED TASK_50HZ
-
-byte flightMode = RATE_FLIGHT_MODE;
-unsigned long frameCounter = 0; // main loop executive frame counter
-int minArmedThrottle; // initial value configured by user
-
-float G_Dt = 0.002; 
-int throttle = 1000;
-byte motorArmed = OFF;
-byte safetyCheck = OFF;
-byte maxLimit = OFF;
-byte minLimit = OFF;
-float filteredAccel[3] = {0.0,0.0,0.0};
-
-// main loop time variable
-unsigned long previousTime = 0;
-unsigned long currentTime = 0;
-unsigned long deltaTime = 0;
-// sub loop time variable
-unsigned long tenHZpreviousTime = 0;
-unsigned long lowPriorityTenHZpreviousTime = 0;
-unsigned long lowPriorityTenHZpreviousTime2 = 0;
-unsigned long fiftyHZpreviousTime = 0;
-unsigned long hundredHZpreviousTime = 0;
-
-void processHeading();
-//////////////////////////////////////////////////////
-
-/**
- * Altitude control global declaration
- */
-#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
- // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
-  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
-  int altitudeHoldBump = 90;
-  int altitudeHoldPanicStickMovement = 250;
-  int minThrottleAdjust = -50;
-  int maxThrottleAdjust = 50;
-  int altitudeHoldThrottle = 1000;
-  boolean isStoreAltitudeNeeded = false;
-  
-//  float estimatedXVelocity = 0;
-//  float estimatedYVelocity = 0;
-//  int estimatedZVelocity = 0;
-//  float previousSensorAltitude = 0.0;
-
-  #if defined AltitudeHoldBaro
-    float baroAltitudeToHoldTarget = 0.0;
-  #endif  
-  #if defined AltitudeHoldRangeFinder
-    float sonarAltitudeToHoldTarget = 0.0;
-  #endif
-#endif
-//////////////////////////////////////////////////////
-
-/**
- * Auto landing feature variables
- */
-#if defined (AutoLanding)
-  #define BARO_AUTO_DESCENT_STATE 2
-  #define SONAR_AUTO_DESCENT_STATE 3
-  #define MOTOR_AUTO_DESCENT_STATE 4
-  
-  byte autoLandingState = OFF;
-  boolean isStoreAltitudeForAutoLanfingNeeded = false;
-  int autoLandingThrottleCorrection = 0;
-#endif
-
-/**
- * GPS navigation global declaration
- */
-#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
-#if defined (UseGPS)
-
-  #include <GpsAdapter.h>
-  
-  #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
-  GeodeticPosition homePosition = GPS_INVALID_POSITION; 
-  GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
-
-  #if defined UseGPSNavigator
-    byte navigationState = OFF;  // ON, OFF or ALTPANIC
-    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
-
-    int missionNbPoint = 0;
-    int gpsRollAxisCorrection = 0;
-    int gpsPitchAxisCorrection = 0;
-    int gpsYawAxisCorrection = 0;
-    boolean isStorePositionNeeded = false;
-    boolean isInitNavigationNeeded = false;
-
-    int waypointIndex = -1;    
-    float gpsDistanceToDestination = 99999999.0;
-    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
-      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
-      
-    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
-    
-    void evaluateMissionPositionToReach();
-    void processGpsNavigation();
-  #endif
-#endif
+void  processHeading();
 //////////////////////////////////////////////////////
 
 
@@ -231,7 +140,113 @@ void comma();
 void reportVehicleState();
 //////////////////////////////////////////////////////
 
+/**
+ * battery monitor and battery monitor throttle correction global declaration section
+ */
+#if defined (BattMonitor)
+  #define BattMonitorAlarmVoltage 10.0  // required by battery monitor macro, this is overriden by readEEPROM()
+  float batteryMonitorAlarmVoltage = 10.0;
+  int batteryMonitorStartThrottle = 0;
+  int batteryMonitorThrottleTarget = 1450;
+  unsigned long batteryMonitorStartTime = 0;
+  unsigned long batteryMonitorGoingDownTime = 60000; 
 
+  
+  #if defined BattMonitorAutoDescent
+    #define BATTERY_MONITOR_MAX_ALARM_COUNT 50
+    
+    int batteryMonitorAlarmCounter = 0;
+    int batteyMonitorThrottleCorrection = 0;
+  #endif
+#endif
+//////////////////////////////////////////////////////
+
+
+
+
+/**
+ * Altitude control global declaration
+ */
+#if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+ // special state that allows immediate turn off of Altitude hold if large throttle changesa are made at the TX
+  byte altitudeHoldState = OFF;  // ON, OFF or ALTPANIC
+  int altitudeHoldBump = 90;
+  int altitudeHoldPanicStickMovement = 250;
+  int minThrottleAdjust = -50;
+  int maxThrottleAdjust = 50;
+  int altitudeHoldThrottle = 1000;
+  boolean isAltitudeHoldInitialized = false;
+  
+  
+  float velocityCompFilter1 = 1.0 / (1.0 + 0.3);
+  float velocityCompFilter2 = 1 - velocityCompFilter1;
+
+  boolean runtimaZBiasInitialized = false;  
+  float zVelocity = 0.0;
+  float estimatedZVelocity = 0.0;
+  float runtimeZBias = 0.0; 
+  float zDampeningThrottleCorrection = 0.0;
+
+  #if defined AltitudeHoldBaro
+    float baroAltitudeToHoldTarget = 0.0;
+  #endif  
+  #if defined AltitudeHoldRangeFinder
+    float sonarAltitudeToHoldTarget = 0.0;
+  #endif
+#endif
+//////////////////////////////////////////////////////
+
+/**
+ * Auto landing feature variables
+ */
+#if defined (AutoLanding)
+  #define BARO_AUTO_DESCENT_STATE 2
+  #define SONAR_AUTO_DESCENT_STATE 3
+  #define MOTOR_AUTO_DESCENT_STATE 4
+  
+  byte autoLandingState = OFF;
+  boolean isAutoLandingInitialized = false;
+  int autoLandingThrottleCorrection = 0;
+#endif
+
+/**
+ * GPS navigation global declaration
+ */
+#define MAX_WAYPOINTS 16  // needed for EEPROM adr offset declarations
+#if defined (UseGPS)
+
+  #include <GpsAdapter.h>
+  
+  #define DEFAULT_HOME_ALTITUDE 5  // default home base altitude is equal to 5 meter
+  GeodeticPosition homePosition = GPS_INVALID_POSITION; 
+  GeodeticPosition missionPositionToReach = GPS_INVALID_POSITION;  // in case of no GPS navigator, indicate the home position into the OSD
+
+  #if defined UseGPSNavigator
+    byte navigationState = OFF;  // ON, OFF or ALTPANIC
+    byte positionHoldState = OFF;  // ON, OFF or ALTPANIC
+
+    int missionNbPoint = 0;
+    int gpsRollAxisCorrection = 0;
+    int gpsPitchAxisCorrection = 0;
+    int gpsYawAxisCorrection = 0;
+    boolean isPositionHoldInitialized = false;
+    boolean isGpsNavigationInitialized = false;
+
+    int waypointIndex = -1;    
+    float distanceToDestination = 99999999.0;
+    GeodeticPosition waypoint[MAX_WAYPOINTS] = {
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION,
+      GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION, GPS_INVALID_POSITION};
+      
+    GeodeticPosition positionHoldPointToReach = GPS_INVALID_POSITION;
+    
+    void evaluateMissionPositionToReach();
+    void processGpsNavigation();
+  #endif
+#endif
+//////////////////////////////////////////////////////
 
 /**
  * EEPROM global section
@@ -268,7 +283,6 @@ typedef struct {
   float WINDUPGUARD_ADR;
   float XMITFACTOR_ADR;
   float MINARMEDTHROTTLE_ADR;
-  float GYROSMOOTH_ADR;
   float AREF_ADR;
   float FLIGHTMODE_ADR;
   float HEADINGHOLD_ADR;
@@ -280,15 +294,7 @@ typedef struct {
   float ALTITUDE_BUMP_ADR;
   float ALTITUDE_PANIC_ADR;
   // Gyro calibration
-  float GYRO_ROLL_ZERO_ADR;
-  float GYRO_PITCH_ZERO_ADR;
-  float GYRO_YAW_ZERO_ADR;
-  float GYRO_ROLL_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_PITCH_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_YAW_TEMP_BIAS_SLOPE_ADR;
-  float GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR;
-  float GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR;
-  float GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR;
+  float ROTATION_SPEED_FACTOR_ARD;
   // Accel Calibration
   float XAXIS_ACCEL_BIAS_ADR;
   float XAXIS_ACCEL_SCALE_FACTOR_ADR;
@@ -298,11 +304,8 @@ typedef struct {
   float ZAXIS_ACCEL_SCALE_FACTOR_ADR;
   // Mag Calibration
   float XAXIS_MAG_BIAS_ADR;
-  float XAXIS_MAG_SCALE_FACTOR_ADR;
   float YAXIS_MAG_BIAS_ADR;
-  float YAXIS_MAG_SCALE_FACTOR_ADR;
   float ZAXIS_MAG_BIAS_ADR;
-  float ZAXIS_MAG_SCALE_FACTOR_ADR;
   // Battery Monitor
   float BATT_ALARM_VOLTAGE_ADR;
   float BATT_THROTTLE_TARGET_ADR;
@@ -324,6 +327,7 @@ typedef struct {
   float SERVOMAXPITCH_ADR;
   float SERVOMAXROLL_ADR;
   float SERVOMAXYAW_ADR;
+  float SERVOTXCHANNELS_ADR;
   // GPS mission storing
   float GPS_MISSION_NB_POINT_ADR;
   GeodeticPosition WAYPOINT_ADR[MAX_WAYPOINTS];
@@ -349,7 +353,6 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom);
 #define writeLong(value, addr) nvrWriteLong(value, GET_NVR_OFFSET(addr))
 #define readPID(IDPid, addr) nvrReadPID(IDPid, GET_NVR_OFFSET(addr))
 #define writePID(IDPid, addr) nvrWritePID(IDPid, GET_NVR_OFFSET(addr))
-
 
 /**
  * Debug utility global declaration

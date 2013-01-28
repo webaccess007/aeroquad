@@ -109,7 +109,7 @@ void nvrReadPID(unsigned char IDPid, unsigned int IDEeprom) {
   pid->P = nvrReadFloat(IDEeprom);
   pid->I = nvrReadFloat(IDEeprom+4);
   pid->D = nvrReadFloat(IDEeprom+8);
-  pid->lastPosition = 0;
+  pid->lastError = 0;
   pid->integratedError = 0;
 }
 
@@ -123,15 +123,15 @@ void nvrWritePID(unsigned char IDPid, unsigned int IDEeprom) {
 // contains all default values when re-writing EEPROM
 void initializeEEPROM() {
   PID[RATE_XAXIS_PID_IDX].P = 100.0;
-  PID[RATE_XAXIS_PID_IDX].I = 0.0;
-  PID[RATE_XAXIS_PID_IDX].D = -300.0;
+  PID[RATE_XAXIS_PID_IDX].I = 150.0;
+  PID[RATE_XAXIS_PID_IDX].D = -350.0;
   PID[RATE_YAXIS_PID_IDX].P = 100.0;
-  PID[RATE_YAXIS_PID_IDX].I = 0.0;
-  PID[RATE_YAXIS_PID_IDX].D = -300.0;
-  PID[ATTITUDE_XAXIS_PID_IDX].P = 4.0;
+  PID[RATE_YAXIS_PID_IDX].I = 150.0;
+  PID[RATE_YAXIS_PID_IDX].D = -350.0;
+  PID[ATTITUDE_XAXIS_PID_IDX].P = 3.5;
   PID[ATTITUDE_XAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_XAXIS_PID_IDX].D = 0.0;
-  PID[ATTITUDE_YAXIS_PID_IDX].P = 4.0;
+  PID[ATTITUDE_YAXIS_PID_IDX].P = 3.5;
   PID[ATTITUDE_YAXIS_PID_IDX].I = 0.0;
   PID[ATTITUDE_YAXIS_PID_IDX].D = 0.0;
   PID[ZAXIS_PID_IDX].P = 200.0;
@@ -143,23 +143,28 @@ void initializeEEPROM() {
   // AKA PID experiements
   PID[ATTITUDE_GYRO_XAXIS_PID_IDX].P = 100.0;
   PID[ATTITUDE_GYRO_XAXIS_PID_IDX].I = 0.0;
-  PID[ATTITUDE_GYRO_XAXIS_PID_IDX].D = -300.0;
+  PID[ATTITUDE_GYRO_XAXIS_PID_IDX].D = -350.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].P = 100.0;
   PID[ATTITUDE_GYRO_YAXIS_PID_IDX].I = 0.0;
-  PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -300.0;
+  PID[ATTITUDE_GYRO_YAXIS_PID_IDX].D = -350.0;
+  rotationSpeedFactor = 1.0;
 
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = 0.6;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = 0.0;
-  PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  #if defined (AltitudeHoldBaro)
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].P = 25.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].I = 0.6;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].D = 0.0;
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+    PID[ZDAMPENING_PID_IDX].P = 0.0;
+    PID[ZDAMPENING_PID_IDX].I = 0.0;
+    PID[ZDAMPENING_PID_IDX].D = 0.0;
+  #endif
+  #if defined (AltitudeHoldRangeFinder)
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].P = 50.0;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].I = 0.6;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].D = 0.0;
+    PID[SONAR_ALTITUDE_HOLD_PID_IDX].windupGuard = 25.0; //this prevents the 0.1 I term to rise too far
+  #endif
 
-  PID[ZDAMPENING_PID_IDX].P = 0.0;
-  PID[ZDAMPENING_PID_IDX].I = 0.0;
-  PID[ZDAMPENING_PID_IDX].D = 0.0;
   
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     minThrottleAdjust = -50.0;
@@ -171,46 +176,23 @@ void initializeEEPROM() {
     altitudeHoldPanicStickMovement = 250;
   #endif
   
-  // Gyro Cal
-  gyroZero[XAXIS] = 0.0;
-  gyroZero[YAXIS] = 0.0;
-  gyroZero[ZAXIS] = 0.0;
-  gyroSmoothFactor = 0.0;
-  gyroTempBiasSlope[XAXIS] = 0.0;
-  gyroTempBiasSlope[YAXIS] = 0.0;
-  gyroTempBiasSlope[ZAXIS] = 0.0;
-  gyroTempBiasIntercept[XAXIS] = 0.0;
-  gyroTempBiasIntercept[YAXIS] = 0.0;
-  gyroTempBiasIntercept[ZAXIS] = 0.0;
-  
-  // Accel Cal
-  accelScaleFactor[XAXIS] = 1.0;
-  runTimeAccelBias[XAXIS] = 0.0;
-  accelScaleFactor[YAXIS] = 1.0;
-  runTimeAccelBias[YAXIS] = 0.0;
-  accelScaleFactor[ZAXIS] = 1.0;
-  runTimeAccelBias[ZAXIS] = 0.0;
+  initializePlatformSpecificAccelCalibration();
 
-  #ifdef HeadingMagHold
-    magScale[XAXIS] = 1.0;
-    magBias[XAXIS] = 0.0;
-    magScale[YAXIS] = 1.0;
-    magBias[YAXIS] = 0.0;
-    magScale[ZAXIS] = 1.0;
-    magBias[ZAXIS] = 0.0;
-  #endif
   windupGuard = 1000.0;
 
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the eeprom
-  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
-    if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
+    #if defined AltitudeHoldBaro
+      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+        PID[i].windupGuard = windupGuard;
+      }
+    #else
       PID[i].windupGuard = windupGuard;
-    }
+    #endif
   }
     
   receiverXmitFactor = 1.0;
   minArmedThrottle = 1150;
-  gyroSmoothFactor = 1.0;
   // AKA - old setOneG not in SI - accel->setOneG(500);
   accelOneG = -9.80665; // AKA set one G to 9.8 m/s^2
   for (byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
@@ -228,7 +210,7 @@ void initializeEEPROM() {
   #ifdef BattMonitor
     batteryMonitorAlarmVoltage = 3.33;
     batteryMonitorThrottleTarget = 1450;
-    batteryMonitorGoinDownTime = 60000;
+    batteryMonitorGoingDownTime = 60000;
   #endif
 
   // Range Finder
@@ -271,6 +253,9 @@ void initializeEEPROM() {
     servoMaxPitch = 2000;
     servoMaxRoll = 2000;
     servoMaxYaw = 2000;
+    #ifdef CameraTXControl
+      servoTXChannels = 1;
+    #endif
   #endif
 }
 
@@ -284,11 +269,13 @@ void readEEPROM() {
   readPID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   readPID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
 
+  rotationSpeedFactor = readFloat(ROTATION_SPEED_FACTOR_ARD);
+  
   // Leaving separate PID reads as commented for now
   // Previously had issue where EEPROM was not reading right data
-  readPID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-  PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
+    readPID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+    PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard = readFloat(ALTITUDE_WINDUP_ADR);
     #if defined AltitudeHoldBaro
       baroSmoothFactor = readFloat(ALTITUDE_SMOOTH_ADR);
     #endif  
@@ -296,32 +283,33 @@ void readEEPROM() {
     altitudeHoldPanicStickMovement = readFloat(ALTITUDE_PANIC_ADR);
     minThrottleAdjust = readFloat(ALTITUDE_MIN_THROTTLE_ADR);
     maxThrottleAdjust = readFloat(ALTITUDE_MAX_THROTTLE_ADR);
+    readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #endif
-  readPID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
 
   // Mag calibration
   #ifdef HeadingMagHold
     magBias[XAXIS]  = readFloat(XAXIS_MAG_BIAS_ADR);
-    magScale[XAXIS] = readFloat(XAXIS_MAG_SCALE_FACTOR_ADR);
     magBias[YAXIS]  = readFloat(YAXIS_MAG_BIAS_ADR);
-    magScale[YAXIS] = readFloat(YAXIS_MAG_SCALE_FACTOR_ADR);
     magBias[ZAXIS]  = readFloat(ZAXIS_MAG_BIAS_ADR);
-    magScale[ZAXIS] = readFloat(ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   
   // Battery Monitor
   #ifdef BattMonitor
     batteryMonitorAlarmVoltage = readFloat(BATT_ALARM_VOLTAGE_ADR);
     batteryMonitorThrottleTarget = readFloat(BATT_THROTTLE_TARGET_ADR);
-    batteryMonitorGoinDownTime = readFloat(BATT_DOWN_TIME_ADR);
+    batteryMonitorGoingDownTime = readFloat(BATT_DOWN_TIME_ADR);
   #endif
   
   windupGuard = readFloat(WINDUPGUARD_ADR);
   // AKA - added so that each PID has its own windupGuard, will need to be removed once each PID's range is established and put in the EEPROM
-  for (byte i = XAXIS; i <= ZDAMPENING_PID_IDX; i++ ) {
-    if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+  for (byte i = XAXIS; i < LAST_PID_IDX; i++ ) {
+    #if defined AltitudeHoldBaro
+      if (i != BARO_ALTITUDE_HOLD_PID_IDX) {
+        PID[i].windupGuard = windupGuard;
+      }
+    #else
       PID[i].windupGuard = windupGuard;
-    }
+    #endif      
   }
     
   minArmedThrottle = readFloat(MINARMEDTHROTTLE_ADR);
@@ -330,12 +318,6 @@ void readEEPROM() {
   accelOneG = readFloat(ACCEL_1G_ADR);
   headingHoldConfig = readFloat(HEADINGHOLD_ADR);
 
-  // Range Finder
-  #if defined (AltitudeHoldRangeFinder)
-//    maxRangeFinderRange = readFloat(RANGE_FINDER_MAX_ADR);  // @Kenny @todo, remove this!
-//    minRangeFinderRange = readFloat(RANGE_FINDER_MIN_ADR);
-  #endif     
-  
   #if defined (UseGPSNavigator)
     missionNbPoint = readFloat(GPS_MISSION_NB_POINT_ADR);
     readPID(GPSROLL_PID_IDX, GPSROLL_PID_GAIN_ADR);
@@ -364,6 +346,10 @@ void readEEPROM() {
     servoMaxPitch = readFloat(SERVOMAXPITCH_ADR);
     servoMaxRoll = readFloat(SERVOMAXROLL_ADR);
     servoMaxYaw = readFloat(SERVOMAXYAW_ADR);
+    #ifdef CameraTXControl
+      servoTXChannels = readFloat(SERVOTXCHANNELS_ADR);
+      servoActualCenter = readFloat(SERVOCENTERPITCH_ADR);
+    #endif
   #endif   
 }
 
@@ -377,8 +363,13 @@ void writeEEPROM(){
   writePID(HEADING_HOLD_PID_IDX, HEADING_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_XAXIS_PID_IDX, LEVEL_GYRO_ROLL_PID_GAIN_ADR);
   writePID(ATTITUDE_GYRO_YAXIS_PID_IDX, LEVEL_GYRO_PITCH_PID_GAIN_ADR);
-  writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
-  writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
+  
+  writeFloat(rotationSpeedFactor,ROTATION_SPEED_FACTOR_ARD);
+  
+  #if defined AltitudeHoldBaro
+    writePID(BARO_ALTITUDE_HOLD_PID_IDX, ALTITUDE_PID_GAIN_ADR);
+    writeFloat(PID[BARO_ALTITUDE_HOLD_PID_IDX].windupGuard, ALTITUDE_WINDUP_ADR);
+  #endif
 
   #if defined AltitudeHoldBaro || defined AltitudeHoldRangeFinder
     #if defined AltitudeHoldBaro
@@ -390,6 +381,7 @@ void writeEEPROM(){
     writeFloat(altitudeHoldPanicStickMovement, ALTITUDE_PANIC_ADR);
     writeFloat(minThrottleAdjust, ALTITUDE_MIN_THROTTLE_ADR);
     writeFloat(maxThrottleAdjust, ALTITUDE_MAX_THROTTLE_ADR);
+    writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
   #else
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
     writeFloat(90, ALTITUDE_BUMP_ADR);
@@ -398,18 +390,14 @@ void writeEEPROM(){
     writeFloat(50, ALTITUDE_MAX_THROTTLE_ADR);
     writeFloat(0.1, ALTITUDE_SMOOTH_ADR);
   #endif
-  writePID(ZDAMPENING_PID_IDX, ZDAMP_PID_GAIN_ADR);
+  
   #ifdef HeadingMagHold
     writeFloat(magBias[XAXIS], XAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[XAXIS], XAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[YAXIS], YAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[YAXIS], YAXIS_MAG_SCALE_FACTOR_ADR);
     writeFloat(magBias[ZAXIS], ZAXIS_MAG_BIAS_ADR);
-    writeFloat(magScale[ZAXIS], ZAXIS_MAG_SCALE_FACTOR_ADR);
   #endif
   writeFloat(windupGuard, WINDUPGUARD_ADR);
   writeFloat(receiverXmitFactor, XMITFACTOR_ADR);
-  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
 
   for(byte channel = XAXIS; channel < LASTCHANNEL; channel++) {
     writeFloat(receiverSlope[channel],  RECEIVER_DATA[channel].slope);
@@ -428,7 +416,7 @@ void writeEEPROM(){
   #ifdef BattMonitor
     writeFloat(batteryMonitorAlarmVoltage, BATT_ALARM_VOLTAGE_ADR);
     writeFloat(batteryMonitorThrottleTarget, BATT_THROTTLE_TARGET_ADR);
-    writeFloat(batteryMonitorGoinDownTime, BATT_DOWN_TIME_ADR);
+    writeFloat(batteryMonitorGoingDownTime, BATT_DOWN_TIME_ADR);
   #endif
 
   // Range Finder
@@ -468,23 +456,15 @@ void writeEEPROM(){
     writeFloat(servoMaxPitch, SERVOMAXPITCH_ADR);
     writeFloat(servoMaxRoll, SERVOMAXROLL_ADR);
     writeFloat(servoMaxYaw, SERVOMAXYAW_ADR);
+    #ifdef CameraTXControl
+      writeFloat(servoTXChannels, SERVOTXCHANNELS_ADR);
+    #endif
   #endif 
   sei(); // Restart interrupts
 }
 
 void initSensorsZeroFromEEPROM() {
-  // Gyro initialization from EEPROM
-  gyroZero[XAXIS] = readFloat(GYRO_ROLL_ZERO_ADR);
-  gyroZero[YAXIS] = readFloat(GYRO_PITCH_ZERO_ADR);
-  gyroZero[ZAXIS] = readFloat(GYRO_YAW_ZERO_ADR);
-  gyroSmoothFactor = readFloat(GYROSMOOTH_ADR);
-//  gyroTempBiasSlope[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasSlope[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasSlope[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
-//  gyroTempBiasIntercept[XAXIS] = readFloat(GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR);
-//  gyroTempBiasIntercept[YAXIS] = readFloat(GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
-//  gyroTempBiasIntercept[ZAXIS] = readFloat(GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
- 
+
   // Accel initialization from EEPROM
   accelOneG = readFloat(ACCEL_1G_ADR);
   // Accel calibration
@@ -497,18 +477,6 @@ void initSensorsZeroFromEEPROM() {
 }
 
 void storeSensorsZeroToEEPROM() {
-  // Store gyro data to EEPROM
-  writeFloat(gyroZero[XAXIS], GYRO_ROLL_ZERO_ADR);
-  writeFloat(gyroZero[YAXIS], GYRO_PITCH_ZERO_ADR);
-  writeFloat(gyroZero[ZAXIS], GYRO_YAW_ZERO_ADR);
-  writeFloat(gyroSmoothFactor, GYROSMOOTH_ADR);
-  
-  writeFloat(gyroTempBiasSlope[XAXIS], GYRO_ROLL_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasSlope[YAXIS], GYRO_PITCH_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasSlope[ZAXIS], GYRO_YAW_TEMP_BIAS_SLOPE_ADR);
-  writeFloat(gyroTempBiasIntercept[XAXIS], GYRO_ROLL_TEMP_BIAS_INTERCEPT_ADR);
-  writeFloat(gyroTempBiasIntercept[YAXIS], GYRO_PITCH_TEMP_BIAS_INTERCEPT_ADR);
-  writeFloat(gyroTempBiasIntercept[ZAXIS], GYRO_YAW_TEMP_BIAS_INTERCEPT_ADR);
   
   // Store accel data to EEPROM
   writeFloat(accelOneG, ACCEL_1G_ADR);
